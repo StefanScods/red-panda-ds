@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.10)
+
+set(INCLUDE_DIRS
+   ${INCLUDE_DIRS}
+   ${CMAKE_CURRENT_SOURCE_DIR}/utils
+   PARENT_SCOPE
+)
+
+set(SOURCE
+   ${SOURCE}
+   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+   PARENT_SCOPE
+)
+

@@ -1,0 +1,165 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "./scripts/clean.py",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "label": "reformat source files",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "./scripts/formatter.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "label": "build (Ninja Release)",
+            "type": "shell",
+            "command": "python",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "args": [
+                "./scripts/build.py",
+                "Ninja",
+                "Release"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "build (Ninja Debug)",
+            "type": "shell",
+            "command": "python",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "args": [
+                "./scripts/build.py",
+                "Ninja",
+                "Debug"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "build (MSVC Release)",
+            "type": "shell",
+            "command": "python",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "args": [
+                "./scripts/build.py",
+                "MSVC",
+                "Release"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "build (MSVC Debug)",
+            "type": "shell",
+            "command": "python",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "args": [
+                "./scripts/build.py",
+                "MSVC",
+                "Debug"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "run (Release)",
+            "type": "shell",
+            "command": "./build/Release/redPandaDS.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "dependsOn": [
+                "build (Ninja Release)"
+            ]
+        },
+        {
+            "label": "run (Debug)",
+            "type": "shell",
+            "command": "./build/Debug/redPandaDS.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "dependsOn": [
+                "build (Ninja Debug)"
+            ]
+        },
+    ]
+}
