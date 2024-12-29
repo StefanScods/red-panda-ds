@@ -143,9 +143,55 @@
             ]
         },
         {
+            "label": "test (Release)",
+            "type": "shell",
+            "command": "./build/Release/runTests.exe",
+            "args": [
+                "--gtest_color=yes",
+                "--gtest_output=xml:./test/reports/release.xml"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "dependsOn": [
+                "build (Ninja Release)"
+            ]
+        },
+        {
             "label": "run (Debug)",
             "type": "shell",
             "command": "./build/Debug/redPandaDS.exe",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "dependsOn": [
+                "build (Ninja Debug)"
+            ]
+        },
+        {
+            "label": "test (Debug)",
+            "type": "shell",
+            "command": "./build/Debug/runTests.exe",
+            "args": [
+                "--gtest_color=yes",
+                "--gtest_output=xml:./test/reports/debug.xml"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },

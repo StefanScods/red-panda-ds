@@ -14,6 +14,9 @@
  * - NO_LOG_OVERRIDE -
  * When defined will override the LOG_LEVEL to 0.
  *
+ * - LOG_LEVEL_OVERRIDE
+ * When defined will override the LOG_LEVEL to to its level.
+ *
  * - How To Use -
  * Add to the start of a cpp file:
  * #define LOG_LEVEL 3
@@ -21,8 +24,14 @@
  * ================================================================================================
  */
 #include <iostream>
+// Sets the log level to LOG_LEVEL_OVERRIDE for all files.
+#ifdef LOG_LEVEL_OVERRIDE
+#undef LOG_LEVEL
+#define LOG_LEVEL LOG_LEVEL_OVERRIDE
+#endif
 // Sets the log level to 0 for all files.
 #ifdef NO_LOG_OVERRIDE
+#undef LOG_LEVEL
 #define LOG_LEVEL 0
 #endif
 
