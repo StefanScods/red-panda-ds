@@ -72,7 +72,7 @@ if(${BUILD_TEST})
     )
 
     # Force Debug statements to be printed while running tests.
-    add_definitions(-DLOG_LEVEL_OVERRIDE=3)
+    # add_definitions(-DLOG_LEVEL_OVERRIDE=3)
 
     # Print out all the test source files to be compiled.
     string (REPLACE ";" "\n" SRC_FORMAT "${SOURCES}")

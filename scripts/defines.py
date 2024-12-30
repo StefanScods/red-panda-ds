@@ -11,7 +11,7 @@ BUILD_DIR = Path("build")
 # The name of the generated binary.
 OUTPUT_BINARY = "redPandaDS.exe"
 # Directories which contain source files
-SRC_DIRS = ["src/"]
+SRC_DIRS = ["src/", "test/"]
 # File extensions of C/C++ source files
 SRC_FILE_EXTENSIONS = [".cpp", ".h", ".hpp"]
 # Supported build types.

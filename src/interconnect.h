@@ -22,6 +22,11 @@ public:
     ~Interconnect();
 
     /**
+     * @brief Set up the component.
+     */
+    void init();
+
+    /**
      * @brief Add the ARM7 cpu to the interconnect.
      *
      * @param cpu The ARM7 cpu to add
