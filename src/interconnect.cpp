@@ -35,12 +35,12 @@ void Interconnect::bindARM7(ARM* cpu) {
 }
 
 uint32_t Interconnect::read32ARM7(uint32_t addr) {
-    // Byte align mem accesses.
+    // Word align mem accesses.
     addr &= ~0x3;
     // Memory map.
-    uint8_t memRegion = (addr & 0xFF000000) >> 24;
+    uint8_t memRegion = addr >> 24;
     switch (memRegion) {
-        case (MAIN_RAM_MEM_REGION_NUM): {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
             uint32_t val = *reinterpret_cast<uint32_t*>(mainRAM + (addr & MAIN_RAM_MASK));
             LogDebug("Main RAM - 32 bit read at " << hexString(addr) << ": " << hexString(val));
             return val;
@@ -55,12 +55,12 @@ uint32_t Interconnect::read32ARM7(uint32_t addr) {
 }
 
 uint16_t Interconnect::read16ARM7(uint32_t addr) {
-    // Byte align mem accesses.
+    // Half word align mem accesses.
     addr &= ~0x1;
     // Memory map.
-    uint8_t memRegion = (addr & 0xFF000000) >> 24;
+    uint8_t memRegion = addr >> 24;
     switch (memRegion) {
-        case (MAIN_RAM_MEM_REGION_NUM): {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
             uint16_t val = *reinterpret_cast<uint16_t*>(mainRAM + (addr & MAIN_RAM_MASK));
             LogDebug("Main RAM - 16 bit read at " << hexString(addr) << ": " << hexString(val));
             return val;
@@ -78,9 +78,9 @@ void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
     // Byte align mem accesses.
     addr &= ~0x3;
     // Memory map.
-    uint8_t memRegion = (addr & 0xFF000000) >> 24;
+    uint8_t memRegion = addr >> 24;
     switch (memRegion) {
-        case (MAIN_RAM_MEM_REGION_NUM): {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
             *reinterpret_cast<uint32_t*>(mainRAM + (addr & MAIN_RAM_MASK)) = data;
             LogDebug("Main RAM - 32 bit write at " << hexString(addr) << ": " << hexString(data));
             break;
@@ -96,9 +96,9 @@ void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
     // Byte align mem accesses.
     addr &= ~0x1;
     // Memory map.
-    uint8_t memRegion = (addr & 0xFF000000) >> 24;
+    uint8_t memRegion = addr >> 24;
     switch (memRegion) {
-        case (MAIN_RAM_MEM_REGION_NUM): {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
             *reinterpret_cast<uint16_t*>(mainRAM + (addr & MAIN_RAM_MASK)) = data;
             LogDebug("Main RAM - 16 bit write at " << hexString(addr) << ": " << hexString(data));
             break;

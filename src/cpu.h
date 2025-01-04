@@ -49,9 +49,21 @@ protected:
     cycles currentCycle = 0;
     cycles targetCycle = 0;
 
-    bool shouldFetchInst = false;
+    // Used to keep track of sequencial vs non sequencial accesss.
+    uint32_t previousCodeAddr = 0;
+    uint32_t previousDataAddr = 0;
 
     uint32_t instuctionPipeLine[INSTUCTION_PIPELINE_LENGTH];
+
+    // Cycle timing map.
+    cycles code_sequencial32BitAccessTimings[0xA] = {0};
+    cycles code_nonSequencial32BitAccessTimings[0xA] = {0};
+    cycles code_sequencial16BitAccessTimings[0xA] = {0};
+    cycles code_nonSequencial16BitAccessTimings[0xA] = {0};
+    cycles data_sequencial32BitAccessTimings[0xA] = {0};
+    cycles data_nonSequencial32BitAccessTimings[0xA] = {0};
+    cycles data_sequencial16BitAccessTimings[0xA] = {0};
+    cycles data_nonSequencial16BitAccessTimings[0xA] = {0};
 
     /**
      * @brief adds the current value of `cyclesElapsed` to the `currentCycle` and reduces fetch
@@ -75,13 +87,42 @@ public:
     void reset();
 
     /**
-     * @brief
+     * @brief Execute the instruction at instuctionPipeLine[0]. This clears instuctionPipeLine[0].
+     *  Returns the number of cycles the execution took.
      *
      * @return cycles
      */
     virtual cycles execute();
+    /**
+     * @brief Fetch the next instuction. This increments PC and fills
+     * instuctionPipeLine[2]. Returns the number of cycles the fetching took.
+     *
+     * @return cycles
+     */
     virtual cycles fetch();
     virtual cycles cycle();
+
+    /**
+     * @brief Read the bus.
+     *
+     * @param address Address to read. Address should be word-aligned for 32bit reads or
+     * halfword-aligned for 16 bit reads.
+     * @param size Size of data to fetch in bits (32, 16, or 8). Default is 32 bits.
+     * @param codeRead Whether this read is apart of an opcode fetch. Effects cycle time.
+     * @return busPayload
+     */
+    virtual inline busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false);
+
+    /**
+     * @brief Write to the bus.
+     *
+     * @param address Address to write. Address should be word-aligned for 32bit writes or
+     * halfword-aligned for 16 bit writes.
+     * @param data The data to write.
+     * @param size Size of data to write in bits (32, 16, or 8). Default is 32 bits.
+     * @return busPayload
+     */
+    virtual inline busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32);
 
     /**
      * @brief Sets the `bus` property to the supplied argument. This function must be called
@@ -97,36 +138,6 @@ public:
      * @param target Target number of cycles to set this component too.
      */
     void setTargetCycle(cycles target) { targetCycle = target; }
-
-    /**
-     * @brief Reads 16 bits from the specified address.
-     *
-     * @param addr Address to read
-     * @return uint16_t
-     */
-    virtual uint16_t read16Bits(uint32_t addr);
-    /**
-     * @brief Reads 32 bits from the specified address.
-     *
-     * @param addr Address to read
-     * @return uint32_t
-     */
-    virtual uint32_t read32Bits(uint32_t addr);
-
-    /**
-     * @brief Writes 16 bits to the specified address.
-     *
-     * @param addr Address to write
-     * @param data Data to write
-     */
-    virtual void write16Bits(uint32_t addr, uint16_t data);
-    /**
-     * @brief Writes 32 bits to the specified address.
-     *
-     * @param addr Address to write
-     * @param data Data to write
-     */
-    virtual void write32Bits(uint32_t addr, uint32_t data);
 };
 
 /**
@@ -143,10 +154,10 @@ public:
     cycles execute() override;
     cycles fetch() override;
     cycles cycle() override;
-    uint16_t read16Bits(uint32_t addr) override;
-    uint32_t read32Bits(uint32_t addr) override;
-    void write16Bits(uint32_t addr, uint16_t data) override;
-    void write32Bits(uint32_t addr, uint32_t data) override;
+    inline busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
+    inline busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
+
+    cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
 };
 
 /**

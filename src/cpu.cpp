@@ -68,12 +68,14 @@ void ARM::reset() {
     currentCycle = 0;
     cyclesElapsed = 0;
     targetCycle = 0;
-    shouldFetchInst = false;
 
     // CPU instruction Pipeline.
     instuctionPipeLine[0] = NO_INSTRUCT;
     instuctionPipeLine[1] = NO_INSTRUCT;
     instuctionPipeLine[2] = NO_INSTRUCT;
+
+    previousCodeAddr = 0;
+    previousDataAddr = 0;
 }
 
 cycles ARM::execute() {
@@ -91,19 +93,14 @@ cycles ARM::cycle() {
     return 0;
 }
 
-uint16_t ARM::read16Bits(uint32_t addr) {
-    LogError("Unimplemented read16Bits()");
-    return 0;
+busPayload inline ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {
+    LogError("Unimplemented readBus()");
+    return {0, 0, 0};
 }
-uint32_t ARM::read32Bits(uint32_t addr) {
-    LogError("Unimplemented read32Bits()");
-    return 0;
-}
-void ARM::write16Bits(uint32_t addr, uint16_t data) {
-    LogError("Unimplemented write16Bits()");
-}
-void ARM::write32Bits(uint32_t addr, uint32_t data) {
-    LogError("Unimplemented write32Bits()");
+
+inline busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
+    LogError("Unimplemented writeBus()");
+    return {0, 0, 0};
 }
 
 ARM946ES::ARM946ES() {

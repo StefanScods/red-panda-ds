@@ -11,6 +11,7 @@ set(EMU_CORE_SOURCES
    ${EMU_CORE_SOURCES}
    ${CMAKE_CURRENT_SOURCE_DIR}/cpu.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arm7.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/arm7Instructions.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/interconnect.cpp
    PARENT_SCOPE
 )

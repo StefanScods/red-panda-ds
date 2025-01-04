@@ -8,4 +8,17 @@
 
 typedef uint64_t cycles;
 
+/**
+ * @brief return type of bus reads / writes
+ *
+ * @param data The value of data read / written
+ * @param numCycles The number of cycles this action took
+ * @param uint32_t The size of the data in bits (32, 16 or 8)
+ */
+struct busPayload {
+    uint32_t data;
+    cycles numCycles;
+    uint32_t size;
+};
+
 #endif

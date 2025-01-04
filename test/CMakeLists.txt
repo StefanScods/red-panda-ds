@@ -7,5 +7,6 @@ include_directories(
 set(TEST_SOURCES
    ${TEST_SOURCES}
    ${CMAKE_CURRENT_SOURCE_DIR}/testInterconnect.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/testUtils.cpp
    PARENT_SCOPE
 )

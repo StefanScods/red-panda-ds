@@ -9,31 +9,130 @@
 #define LOG_LEVEL 1
 #include "logger.h"
 
-uint16_t ARM7TDMI::read16Bits(uint32_t addr) {
-    return bus->read16ARM7(addr);
-}
-uint32_t ARM7TDMI::read32Bits(uint32_t addr) {
-    return bus->read32ARM7(addr);
-}
-void ARM7TDMI::write16Bits(uint32_t addr, uint16_t data) {
-    bus->write16ARM7(addr, data);
-}
-void ARM7TDMI::write32Bits(uint32_t addr, uint32_t data) {
-    bus->write32ARM7(addr, data);
-}
-
 ARM7TDMI::ARM7TDMI() {
+    // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
+    // TODO!!! finish this.
+    // Main RAM.
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 9;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 2;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 8;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 1;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 10;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 2;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 9;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 1;
 }
 
 ARM7TDMI::~ARM7TDMI() {
 }
 
+busPayload inline ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
+    uint32_t& previousAddr = codeRead ? previousCodeAddr : previousDataAddr;
+    /**
+     * A sequential cycle requests a transfer to or from an address which is either the
+     * same, one word, or one halfword greater than the address used in the preceding
+     * cycle
+     */
+    bool sequencial =
+        address == previousAddr || address == previousAddr + 4 || address == previousAddr + 2;
+    uint8_t memRegion = (address) >> 24;
+
+    // Preform the read and determine the cycle map to read.
+    cycles* cycleMapSequential = nullptr;
+    cycles* cycleMapNonSequential = nullptr;
+    uint32_t data;
+    switch (size) {
+        case (32):  // 32 Bit read.
+            data = bus->read32ARM7(address);
+            cycleMapSequential =
+                codeRead ? code_sequencial32BitAccessTimings : data_sequencial32BitAccessTimings;
+            cycleMapNonSequential = codeRead ? code_nonSequencial32BitAccessTimings
+                                             : data_nonSequencial32BitAccessTimings;
+            break;
+        case (16):  // 16 Bit read.
+            data = bus->read16ARM7(address);
+            cycleMapSequential =
+                codeRead ? code_sequencial16BitAccessTimings : data_sequencial16BitAccessTimings;
+            cycleMapNonSequential = codeRead ? code_nonSequencial16BitAccessTimings
+                                             : data_nonSequencial16BitAccessTimings;
+            break;
+        case (8):
+        default:
+            LogError(size << " bit reads are currently unsupported");
+            return {0, 0, 0};
+    }
+
+    // Update the previous address to this read to keep track of sequencial accesses.
+    previousAddr = address;
+    return {data, sequencial ? cycleMapSequential[memRegion] : cycleMapNonSequential[memRegion],
+            size};
+}
+
+inline busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
+    // Writes always relate to the previous data.
+    uint32_t& previousAddr = previousDataAddr;
+    /**
+     * A sequential cycle requests a transfer to or from an address which is either the
+     * same, one word, or one halfword greater than the address used in the preceding
+     * cycle
+     */
+    bool sequencial =
+        address == previousAddr || address == previousAddr + 4 || address == previousAddr + 2;
+    uint8_t memRegion = (address) >> 24;
+
+    // Preform the read and determine the cycle map to read.
+    cycles* cycleMapSequential = nullptr;
+    cycles* cycleMapNonSequential = nullptr;
+    switch (size) {
+        case (32):  // 32 Bit write.
+            bus->write32ARM7(address, data);
+            cycleMapSequential = data_sequencial32BitAccessTimings;
+            cycleMapNonSequential = data_nonSequencial32BitAccessTimings;
+            break;
+        case (16):  // 16 Bit write.
+            bus->write16ARM7(address, data);
+            cycleMapSequential = data_sequencial16BitAccessTimings;
+            cycleMapNonSequential = data_nonSequencial16BitAccessTimings;
+            break;
+        case (8):
+        default:
+            LogError(size << " bit writes are currently unsupported");
+            return {0, 0, 0};
+    }
+
+    // Update the previous address to this write to keep track of sequencial accesses.
+    previousAddr = address;
+    return {data, sequencial ? cycleMapSequential[memRegion] : cycleMapNonSequential[memRegion],
+            size};
+}
+
 cycles ARM7TDMI::execute() {
-    return 0;
+    // Make space in the pipeline.
+    uint32_t nextInstruction = instuctionPipeLine[0];
+    instuctionPipeLine[0] = NO_INSTRUCT;
+    // Decode and execute the instuction.
+    uint8_t opCode = readBits(nextInstruction, 25, 27);
+    uint8_t condition = readBits(nextInstruction, 28, 31);
+    // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/ARM-instruction-set-encoding?lang=en
+    switch (opCode) {
+        // Load/store word and unsigned byte.
+        case 0b010:
+        case 0b011:
+            return loadStoreDecodeAndExecute(nextInstruction, condition);
+        default:
+            LogError("Unsupported OpCode: " << opCode
+                                            << "! Full instuction data: " << nextInstruction);
+            return 1;
+    }
 }
 
 cycles ARM7TDMI::fetch() {
-    return 0;
+    // Fetch the next 32 bits and increment PC.
+    busPayload readResult = readBus(pc, 32, true);
+    instuctionPipeLine[2] = readResult.data;
+    pc += 4;
+    // Get the fetch cooldown.
+    return readResult.numCycles;
 }
 
 cycles ARM7TDMI::cycle() {
@@ -56,16 +155,15 @@ cycles ARM7TDMI::cycle() {
             }
         }
 
+        // Determine how much to progress the CPU's cycle counter.
         if (fetchCooldown > 0)
             cyclesElapsed = std::min(fetchCooldown, executeCooldown);
         else
             cyclesElapsed = executeCooldown;
-
-        // TODO!!! is this possible???
+        // Catch cycles where no work is done -> filling pipeline.
         if (cyclesElapsed == 0) {
             cyclesElapsed = 1;
         }
-
         // Increment the cpu's current cycles based on the number of cycles elapsed.
         cyclesRan += cyclesElapsed;
         addCyclesElapsed();
