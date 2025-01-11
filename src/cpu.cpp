@@ -93,12 +93,12 @@ cycles ARM::cycle() {
     return 0;
 }
 
-busPayload inline ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {
+busPayload ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {
     LogError("Unimplemented readBus()");
     return {0, 0, 0};
 }
 
-inline busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
+busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     LogError("Unimplemented writeBus()");
     return {0, 0, 0};
 }

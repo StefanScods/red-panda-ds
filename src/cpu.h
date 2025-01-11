@@ -39,6 +39,12 @@ protected:
     uint32_t regIRQ[NUM_OF_IRQ_REGISTERS];
     uint32_t regUND[NUM_OF_UND_REGISTERS];
 
+    // TODO!!! Handle swaping regs.
+    uint32_t* activeRegs[NUM_OF_STANDARD_REGISTERS] = {
+        &(reg[0]),  &(reg[1]),  &(reg[2]),  &(reg[3]), &(reg[4]),  &(reg[5]),
+        &(reg[6]),  &(reg[7]),  &(reg[8]),  &(reg[9]), &(reg[10]), &(reg[11]),
+        &(reg[12]), &(reg[13]), &(reg[14]), &(reg[15])};
+
     // Program counter maps to the 15th standard register in all modes.
     uint32_t& pc = reg[PC_REGISTER_NUM];
 
@@ -111,7 +117,7 @@ public:
      * @param codeRead Whether this read is apart of an opcode fetch. Effects cycle time.
      * @return busPayload
      */
-    virtual inline busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false);
+    virtual busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false);
 
     /**
      * @brief Write to the bus.
@@ -122,7 +128,7 @@ public:
      * @param size Size of data to write in bits (32, 16, or 8). Default is 32 bits.
      * @return busPayload
      */
-    virtual inline busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32);
+    virtual busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32);
 
     /**
      * @brief Sets the `bus` property to the supplied argument. This function must be called
@@ -138,6 +144,15 @@ public:
      * @param target Target number of cycles to set this component too.
      */
     void setTargetCycle(cycles target) { targetCycle = target; }
+
+    /**
+     * @brief Instruction set.
+     */
+    cycles dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    cycles mov32bit(uint32_t des, uint32_t src);
+    cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    cycles branchDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instuct, uint8_t cond);
 };
 
 /**
@@ -154,10 +169,8 @@ public:
     cycles execute() override;
     cycles fetch() override;
     cycles cycle() override;
-    inline busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
-    inline busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
-
-    cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
+    busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };
 
 /**

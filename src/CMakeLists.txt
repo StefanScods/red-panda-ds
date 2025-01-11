@@ -9,10 +9,14 @@ set(EMU_CORE_INCLUDES
 
 set(EMU_CORE_SOURCES
    ${EMU_CORE_SOURCES}
-   ${CMAKE_CURRENT_SOURCE_DIR}/cpu.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/utils/armEncode.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arm7.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/arm7Instructions.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_branch.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_data.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_loadStore.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/interconnect.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpu.cpp
    PARENT_SCOPE
 )
 

@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include "types.h"
 
 /**
  * @brief A helper function to perform a subtraction while removing potential underflows.
@@ -44,7 +45,7 @@ std::string hexString(T val, int size = 8) {
  * @param data The data to read bit from.
  * @param pos The index of the bit to read (0 indexed).
  */
-inline bool readBit(uint32_t data, uint16_t pos) {
+inline bool readBit(uint32_t data, uint8_t pos) {
     return (data >> pos) & 0b1;
 }
 /**
@@ -54,7 +55,7 @@ inline bool readBit(uint32_t data, uint16_t pos) {
  * @param value The value to write.
  * @param pos The index of the bit to write to (0 indexed).
  */
-inline void writeBit(uint32_t &data, bool value, uint16_t pos) {
+inline void writeBit(uint32_t &data, bool value, uint8_t pos) {
     data = ((data) & ~(0b1 << pos)) | (((uint32_t)value) << pos);
 }
 /**
@@ -64,7 +65,7 @@ inline void writeBit(uint32_t &data, bool value, uint16_t pos) {
  * @param rangeStart The first bit to begin reading from (inclusive).
  * @param rangeEnd The last bit to end reading from (inclusive).
  */
-inline uint32_t readBits(uint32_t data, uint16_t rangeStart, uint16_t rangeEnd) {
+inline uint32_t readBits(uint32_t data, uint8_t rangeStart, uint8_t rangeEnd) {
     uint8_t size = rangeEnd - rangeStart + 1;
     return (data >> rangeStart) & (uint32_t)((uint64_t)(1 << size) - 1);
 }
@@ -76,10 +77,45 @@ inline uint32_t readBits(uint32_t data, uint16_t rangeStart, uint16_t rangeEnd) 
  * @param rangeStart The first bit to begin writing to (inclusive).
  * @param rangeEnd The last bit to end reading writing to (inclusive).
  */
-inline void writeBits(uint32_t &data, uint32_t value, uint16_t rangeStart, uint16_t rangeEnd) {
+inline void writeBits(uint32_t &data, uint32_t value, uint8_t rangeStart, uint8_t rangeEnd) {
     uint8_t size = rangeEnd - rangeStart + 1;
     data =
         ((data) & ~(((uint32_t)((uint64_t)(1 << size) - 1)) << rangeStart)) | (value << rangeStart);
+}
+
+/**
+ * @brief Calculate the ROR (Rotate Right) of a value.
+ * Note: Function does not safety check that shift <= 32.
+ * 
+ * @param value Value to rotate.
+ * @param shift Number of bits to rotate by 0-32.
+ * @return u32AndBool.data_u32 - The rotated value. 
+ *
+ * u32AndBool.data_bool - Carry out flag. 
+ */
+inline u32AndBool ROR(uint32_t value, uint8_t shift){
+    uint32_t numBits = sizeof(value)*8;
+    uint32_t rotatedValue = (value >> shift) | (value << (numBits - shift));
+    bool carryOut = (value >> (shift - 1)) & 0b1;
+    return {rotatedValue, carryOut};
+}
+
+/**
+ * @brief Implements ARMExpandImm_C - used to extract an 32 bit immediate from a 12 bit encoding.
+ * https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Modified-immediate-constants-in-ARM-instructions
+ * 
+ * @param imm12 Raw binary encoding of the encoding.
+ * @param carryIn Carry in flag.
+ * 
+ * @return u32AndBool.data_u32 - The decoded immediate value. 
+ *
+ * u32AndBool.data_bool - Carry out flag.  
+ */
+inline u32AndBool ARMExpandImm_C(uint32_t imm12, bool carryIn){
+    uint32_t amount = readBits(imm12, 8, 11) * 2;
+    uint32_t imm8 = readBits(imm12, 0, 7);
+    if(!amount) return {imm8, carryIn};
+    return ROR(imm8, amount);
 }
 
 #endif

@@ -21,4 +21,9 @@ struct busPayload {
     uint32_t size;
 };
 
+struct u32AndBool {
+    uint32_t data_u32;
+    bool data_bool;
+};
+
 #endif

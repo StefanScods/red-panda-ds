@@ -6,7 +6,6 @@
 #include "interconnect.h"
 
 // Control print statements.
-#define LOG_LEVEL 1
 #include "logger.h"
 
 ARM7TDMI::ARM7TDMI() {
@@ -26,7 +25,7 @@ ARM7TDMI::ARM7TDMI() {
 ARM7TDMI::~ARM7TDMI() {
 }
 
-busPayload inline ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
+busPayload ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
     uint32_t& previousAddr = codeRead ? previousCodeAddr : previousDataAddr;
     /**
      * A sequential cycle requests a transfer to or from an address which is either the
@@ -68,7 +67,7 @@ busPayload inline ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRe
             size};
 }
 
-inline busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
+busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     // Writes always relate to the previous data.
     uint32_t& previousAddr = previousDataAddr;
     /**
@@ -115,13 +114,16 @@ cycles ARM7TDMI::execute() {
     uint8_t condition = readBits(nextInstruction, 28, 31);
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/ARM-instruction-set-encoding?lang=en
     switch (opCode) {
+        case 0b000:
+        case 0b001:
+            return ARM::dataProcessingDecodeAndExecute(nextInstruction, condition);
         // Load/store word and unsigned byte.
         case 0b010:
         case 0b011:
-            return loadStoreDecodeAndExecute(nextInstruction, condition);
+            return  ARM::loadStoreDecodeAndExecute(nextInstruction, condition);
         default:
             LogError("Unsupported OpCode: " << opCode
-                                            << "! Full instuction data: " << nextInstruction);
+                                            << "! Full instruction data: " << nextInstruction);
             return 1;
     }
 }
