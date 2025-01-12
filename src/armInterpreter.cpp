@@ -2,9 +2,10 @@
  * @file armInterpreter.cpp
  * @brief Implements arm instuction set decoding
  */
+#include <cstdint>
+
 #include "cpu.h"
 #include "interconnect.h"
-#include <cstdint>
 
 // Control print statements.
 #define LOG_LEVEL 1
@@ -27,7 +28,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Data-processing--immediate-?lang=en
     if (readBit(instuct, 25)) {  // Bit 25 = 1;
         uint32_t imm12 = readBits(instuct, 0, 11);
-        u32AndBool immDecoded = ARMExpandImm_C(imm12,  0);
+        u32AndBool immDecoded = ARMExpandImm_C(imm12, 0);
         switch (op) {
             // MOV (immediate).
             case 0b11010:

@@ -120,7 +120,7 @@ cycles ARM7TDMI::execute() {
         // Load/store word and unsigned byte.
         case 0b010:
         case 0b011:
-            return  ARM::loadStoreDecodeAndExecute(nextInstruction, condition);
+            return ARM::loadStoreDecodeAndExecute(nextInstruction, condition);
         default:
             LogError("Unsupported OpCode: " << opCode
                                             << "! Full instruction data: " << nextInstruction);

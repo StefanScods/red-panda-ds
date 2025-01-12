@@ -106,7 +106,35 @@ public:
      * @return cycles
      */
     virtual cycles fetch();
+
     virtual cycles cycle();
+
+    /**
+     * @brief Keep cycling until the next instuction is executed. Cycle behaviour may not be
+     * correct so use for testing.
+     *
+     * @return cycles
+     */
+    cycles fetchAndExecute();
+    /**
+     * @brief Keep cycling until the the instuction pipeline is full (perform fetches without
+     * execution)
+     *
+     * @return cycles
+     */
+    cycles fillInstuctionPipeline();
+
+    /**
+     * @brief Debug function to force PC to a value.
+     * @param value
+     */
+    void setPC(uint32_t value) { pc = value; }
+
+    /**
+     * @brief Debug function to read a register value.
+     * @param regNum (0-15)
+     */
+    uint32_t readReg(uint32_t regNum) { return *activeRegs[regNum]; }
 
     /**
      * @brief Read the bus.

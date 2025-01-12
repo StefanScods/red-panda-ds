@@ -93,6 +93,24 @@ cycles ARM::cycle() {
     return 0;
 }
 
+cycles ARM::fetchAndExecute() {
+    cycles cycleCount = 0;
+    cycleCount += fillInstuctionPipeline();
+    cycleCount += execute();
+    return cycleCount;
+}
+
+cycles ARM::fillInstuctionPipeline() {
+    cycles cycleCount = 0;
+    // Fill pipeline.
+    while (instuctionPipeLine[0] == NO_INSTRUCT) {
+        instuctionPipeLine[0] = instuctionPipeLine[1];
+        instuctionPipeLine[1] = instuctionPipeLine[2];
+        cycleCount += fetch();
+    }
+    return cycleCount;
+}
+
 busPayload ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {
     LogError("Unimplemented readBus()");
     return {0, 0, 0};

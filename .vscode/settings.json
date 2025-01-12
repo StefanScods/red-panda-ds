@@ -69,7 +69,17 @@
         "thread": "cpp",
         "mutex": "cpp",
         "stop_token": "cpp",
-        "condition_variable": "cpp"
+        "condition_variable": "cpp",
+        "any": "cpp",
+        "csignal": "cpp",
+        "deque": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "span": "cpp",
+        "unordered_set": "cpp",
+        "variant": "cpp",
+        "xtree": "cpp",
+        "regex": "cpp"
     },
     "cSpell.words": [
         "renderable",

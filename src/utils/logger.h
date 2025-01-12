@@ -35,53 +35,59 @@
 #define LOG_LEVEL 0
 #endif
 
-// ========= Debug
-// ================================================================================
+// ========= Debug ================================================================================
 #if LOG_LEVEL >= 3
 // Logs a debug message to standard cout. Need LOG_LEVEL >= 3.
+#define LogDebugPrefixed(x, prefix) std::cout << "Debug - " << prefix << ": " << x << std::endl
 #define LogDebug(x) std::cout << "Debug: " << x << std::endl
 #else
 // Logs a debug message to standard cout. Need LOG_LEVEL >= 3.
+#define LogDebugPrefixed(x, prefix)
 #define LogDebug(x)
 #endif
 
-// ========= Info
-// =================================================================================
+// ========= Info =================================================================================
 #if LOG_LEVEL >= 2
 // Logs an info message to standard cout. Need LOG_LEVEL >= 2.
+#define LogInfoPrefixed(x, prefix) std::cout << "Info - " << prefix << ": " << x << std::endl
 #define LogInfo(x) std::cout << "Info: " << x << std::endl
 #else
 // Logs an info message to standard cout. Need LOG_LEVEL >= 2.
+#define LogInfoPrefixed(x, prefix)
 #define LogInfo(x)
 #endif
 
-// ========= Warning
-// ==============================================================================
+// ========= Warning ==============================================================================
 #if LOG_LEVEL >= 2
 // Logs a warning message to standard cout. Need LOG_LEVEL >= 2.
+#define LogWarningPrefixed(x, prefix) std::cout << "Warning - " << prefix << ": " << x << std::endl
 #define LogWarning(x) std::cout << "Warning: " << x << std::endl
 #else
 // Logs a warning message to standard cout. Need LOG_LEVEL >= 2.
+#define LogWarningPrefixed(x, prefix)
 #define LogWarning(x)
 #endif
 
-// ========= Error
-// ================================================================================
+// ========= Error ================================================================================
 #if LOG_LEVEL >= 1
 // Logs an error message to standard cerr. Need LOG_LEVEL >= 1.
+#define LogErrorPrefixed(x, prefix) std::cout << "Error - " << prefix << ": " << x << std::endl
 #define LogError(x) std::cerr << "Error: " << x << std::endl
 #else
 // Logs an error message to standard cerr. Need LOG_LEVEL >= 1.
+#define LogErrorPrefixed(x, prefix)
 #define LogError(x)
 #endif
 
-// ========= Msg
-// ==================================================================================
+// ========= Msg ==================================================================================
 #if LOG_LEVEL >= 1
 // Logs a message to standard cout with no prefix. Need LOG_LEVEL >= 1.
+#define LogMsgPrefixed(x, prefix) std::cout << prefix << ": " << x << std::endl
 #define LogMsg(x) std::cout << x << std::endl
 #else
 // Logs a message to standard cout with no prefix. Need LOG_LEVEL >= 1.
+#define LogMsgPrefixed(x, prefix)
 #define LogMsg(x)
 #endif
+
 #endif

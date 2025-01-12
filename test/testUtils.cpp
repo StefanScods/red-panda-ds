@@ -68,3 +68,51 @@ TEST_F(TestUtils, WriteBits) {
     writeBits(data, 0b0000, 28, 31);
     ASSERT_EQ(data, 0b00000000111100001111000011110000);
 }
+
+TEST_F(TestUtils, ROR) {
+    uint32_t data = 0b00000000000000000000000000000011;
+
+    u32AndBool returnValue = ROR(data, 0);
+    ASSERT_EQ(returnValue.data_u32, 0b0000000000000000000000000000011);
+    ASSERT_EQ(returnValue.data_bool, 0);
+
+    returnValue = ROR(data, 1);
+    ASSERT_EQ(returnValue.data_u32, 0b10000000000000000000000000000001);
+    ASSERT_EQ(returnValue.data_bool, 1);
+
+    returnValue = ROR(data, 2);
+    ASSERT_EQ(returnValue.data_u32, 0b11000000000000000000000000000000);
+    ASSERT_EQ(returnValue.data_bool, 1);
+
+    returnValue = ROR(data, 3);
+    ASSERT_EQ(returnValue.data_u32, 0b01100000000000000000000000000000);
+    ASSERT_EQ(returnValue.data_bool, 0);
+
+    returnValue = ROR(data, 32);
+    ASSERT_EQ(returnValue.data_u32, 0b00000000000000000000000000000011);
+    ASSERT_EQ(returnValue.data_bool, 0);
+}
+
+TEST_F(TestUtils, ROL) {
+    uint32_t data = 0b00000000000000000000000000000011;
+
+    u32AndBool returnValue = ROL(data, 0);
+    ASSERT_EQ(returnValue.data_u32, 0b0000000000000000000000000000011);
+    ASSERT_EQ(returnValue.data_bool, 0);
+
+    returnValue = ROL(data, 1);
+    ASSERT_EQ(returnValue.data_u32, 0b00000000000000000000000000000110);
+    ASSERT_EQ(returnValue.data_bool, 0);
+
+    returnValue = ROL(data, 2);
+    ASSERT_EQ(returnValue.data_u32, 0b00000000000000000000000000001100);
+    ASSERT_EQ(returnValue.data_bool, 0);
+
+    returnValue = ROL(data, 31);
+    ASSERT_EQ(returnValue.data_u32, 0b10000000000000000000000000000001);
+    ASSERT_EQ(returnValue.data_bool, 1);
+
+    returnValue = ROL(data, 32);
+    ASSERT_EQ(returnValue.data_u32, 0b00000000000000000000000000000011);
+    ASSERT_EQ(returnValue.data_bool, 1);
+}

@@ -8,4 +8,3 @@
 // Control print statements.
 #define LOG_LEVEL 1
 #include "logger.h"
-
