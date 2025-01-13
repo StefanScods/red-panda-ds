@@ -22,6 +22,9 @@ class Interconnect;
 #define INSTUCTION_PIPELINE_LENGTH 3
 
 #define PC_REGISTER_NUM 15
+
+extern std::vector<std::string> g_regNames;
+
 /**
  * @brief The base CPU object to implement common logic shared between the NDS's
  * two CPUs.
@@ -135,6 +138,13 @@ public:
      * @param regNum (0-15)
      */
     uint32_t readReg(uint32_t regNum) { return *activeRegs[regNum]; }
+
+    /**
+     * @brief Debug function to write to a register.
+     * @param regNum (0-15)
+     * @param data Data to write
+     */
+    void writeReg(uint32_t regNum, uint32_t data) { *activeRegs[regNum] = data; }
 
     /**
      * @brief Read the bus.

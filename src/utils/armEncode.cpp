@@ -71,31 +71,26 @@ uint32_t encodeImmValue(std::string immExpr, uint32_t size) {
             // Trival case - value fits in 8 bits - no shift needed.
             if ((value & 0xFF) == value) return value;
 
+            // Determine the rotation needed to store the immediate.
             LogDebugPrefixed("encodeImmValue - 12 bit - rotation needed to encode", LOGGER_PREFIX);
-            // Get the MSB and align it to the 2-step.
-            int msb = getMSB(value);
-            if (msb % 2 == 0) msb += 1;
-            // Get the LSB and align it to the 2-step.
-            int lsb = getLSB(value);
-            if (lsb % 2 == 1) lsb -= 1;
-
-            // Shrink the value to fit in 8 bits.
-            uint32_t data = (value >> (msb - 7)) & 0xFF;
-            // Determine the rotation needed and account for the 2-step.
-            uint32_t rotationNeeded = sizeof(uint32_t) * 8 - msb + 7;
-            rotationNeeded = rotationNeeded >> 1;
-            LogDebugPrefixed("encodeImmValue - 12 bit - data: " << data, LOGGER_PREFIX);
-            LogDebugPrefixed("encodeImmValue - 12 bit - rotationNeeded: " << rotationNeeded,
-                             LOGGER_PREFIX);
-            // If there is data loss, print a warning.
-            if (msb - lsb >= 8) {
-                LogWarningPrefixed("Cannot fully encode immediate value. Returned lossy value - "
-                                       << ROR(data, rotationNeeded << 1).data_u32,
-                                   LOGGER_PREFIX);
+            // Try values 2-30 in steps of 2.
+            for (int i = 2; i < 32; i += 2) {
+                uint32_t rotatedEncoding = (ROL(value, i).data_u32) & 0xFF;
+                if (ROR(rotatedEncoding, i).data_u32 != value) continue;
+                LogDebugPrefixed("encodeImmValue - 12 bit - data: " << rotatedEncoding,
+                                 LOGGER_PREFIX);
+                LogDebugPrefixed("encodeImmValue - 12 bit - rotationNeeded: " << i, LOGGER_PREFIX);
+                // Encode the 12 bits.
+                writeBits(rotatedEncoding, i >> 1, 8, 11);
+                return rotatedEncoding;
             }
-            // Encode the 12 bits.
-            writeBits(data, rotationNeeded, 8, 11);
-            return data;
+
+            // If there is data loss, print a warning.
+            uint32_t lossyValue = value & 0xFF;
+            LogWarningPrefixed(
+                "Cannot fully encode immediate value. Returned lossy value - " << lossyValue,
+                LOGGER_PREFIX);
+            return lossyValue;
         }
     }
     LogErrorPrefixed("Unsupported immediate encoding size!", LOGGER_PREFIX);
@@ -127,12 +122,14 @@ uint32_t encodeDataInstuction(std::string instruction, std::string Rn, std::stri
     } else {
     }
 
+    LogDebugPrefixed("Successfully encoded data instruction: " << encoding, LOGGER_PREFIX);
     return encoding;
 }
 
 // ========= Encoder Main =========================================================================
 
 uint32_t armEncodeASM(std::string instruction) {
+    LogDebugPrefixed("Encoding " << instruction, LOGGER_PREFIX);
     // Standardize the input.
     toLowerCase(instruction);
     std::istringstream instructionStream(instruction);
