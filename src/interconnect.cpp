@@ -74,6 +74,24 @@ uint16_t Interconnect::read16ARM7(uint32_t addr) {
     return INVALID_MEM_16BIT;
 }
 
+uint8_t Interconnect::read8ARM7(uint32_t addr) {
+    // Memory map.
+    uint8_t memRegion = addr >> 24;
+    switch (memRegion) {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
+            uint8_t val = *(mainRAM + (addr & MAIN_RAM_MASK));
+            LogDebug("Main RAM - 8 bit read at " << hexString(addr) << ": " << hexString(val));
+            return val;
+        }
+
+        default:
+            LogError("Unsupported memory access at " << hexString(addr));
+            return INVALID_MEM_8BIT;
+    }
+    // Unreachable.
+    return INVALID_MEM_8BIT;
+}
+
 void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
     // Byte align mem accesses.
     addr &= ~0x3;
@@ -101,6 +119,22 @@ void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
         case (ARM7MemoryRegionNum::MAIN_RAM): {
             *reinterpret_cast<uint16_t*>(mainRAM + (addr & MAIN_RAM_MASK)) = data;
             LogDebug("Main RAM - 16 bit write at " << hexString(addr) << ": " << hexString(data));
+            break;
+        }
+
+        default:
+            LogError("Unsupported memory access at " << hexString(addr));
+            break;
+    }
+}
+
+void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
+    // Memory map.
+    uint8_t memRegion = addr >> 24;
+    switch (memRegion) {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
+            *(mainRAM + (addr & MAIN_RAM_MASK)) = data;
+            LogDebug("Main RAM - 8 bit write at " << hexString(addr) << ": " << hexString(data));
             break;
         }
 

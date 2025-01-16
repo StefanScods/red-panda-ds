@@ -89,36 +89,104 @@ inline void writeBits(uint32_t& data, uint32_t value, uint8_t rangeStart, uint8_
 
 /**
  * @brief Calculate the ROR (Rotate Right) of a value.
- * Note: Function does not safety check that shift <= 32.
+ * Note: Function does not safety check that shift <= 31.
  *
  * @param value Value to rotate.
- * @param shift Number of bits to rotate by 0-32.
+ * @param shift Number of bits to rotate by 0-31.
  * @return u32AndBool.data_u32 - The rotated value.
  *
  * u32AndBool.data_bool - Carry out flag.
  */
-inline u32AndBool ROR(uint32_t value, uint8_t shift) {
-    uint32_t numBits = sizeof(value) * 8;
-    uint32_t rotatedValue = (value >> shift) | (value << (numBits - shift));
+inline u32AndBool ROR(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
+    uint32_t rotatedValue = (value >> shift) | (value << (bitWidth - shift));
     bool carryOut = (value >> (shift - 1)) & 0b1;
     return {rotatedValue, carryOut};
 }
 
 /**
  * @brief Calculate the ROL (Rotate Left) of a value.
- * Note: Function does not safety check that shift <= 32.
+ * Note: Function does not safety check that shift <= 31.
  *
  * @param value Value to rotate.
- * @param shift Number of bits to rotate by 0-32.
+ * @param shift Number of bits to rotate by 0-31.
+ * @param bitWidth The bit width of the value.
  * @return u32AndBool.data_u32 - The rotated value.
  *
  * u32AndBool.data_bool - Carry out flag.
  */
-inline u32AndBool ROL(uint32_t value, uint8_t shift) {
-    uint32_t numBits = sizeof(value) * 8;
-    uint32_t rotatedValue = (value << shift) | (value >> (numBits - shift));
-    bool carryOut = (value >> (numBits - shift)) & 0b1;
+inline u32AndBool ROL(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
+    uint32_t rotatedValue = (value << shift) | (value >> (bitWidth - shift));
+    bool carryOut = (value >> (bitWidth - shift)) & 0b1;
     return {rotatedValue, carryOut};
+}
+
+/**
+ * @brief Calculate the ASR (Arithmetic shift right) of a value.
+ * Note: Function does not safety check that shift <= 31.
+ *
+ * @param value Value to rotate.
+ * @param shift Number of bits to shift by 0-31.
+ * @param bitWidth The bit width of the value.
+ * @return u32AndBool.data_u32 - The shifted value.
+ *
+ * u32AndBool.data_bool - Carry out flag.
+ */
+inline u32AndBool ASR(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
+    bool signExtend = readBit(value, bitWidth - 1);
+    bool carryOut = readBit(value, shift - 1);
+    value = value >> shift;
+    if (signExtend) {
+        value = ((0 - 1) << bitWidth - shift) | value;
+    }
+    return {value, carryOut};
+}
+
+// Types of ARM shifts
+#define ARM_SHIFT_LSL 0b00
+#define ARM_SHIFT_LSR 0b01
+#define ARM_SHIFT_ASR 0b10
+#define ARM_SHIFT_ROR 0b11
+
+/**
+ * @brief Implements ARM shift() function.
+ * https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Instruction-Details/Shifts-applied-to-a-register/Pseudocode-details-of-instruction-specified-shifts-and-rotates?lang=en
+ *
+ * @param type Type of shift to apply.
+ * @param value Value to shift.
+ * @param shift The amount to shift by.
+ * @param carryIn The current carry in value.
+ * @param bitWidth The bit width of the value.
+ * @return u32AndBool.data_u32 - The shifted value.
+ *
+ * u32AndBool.data_bool - Carry out flag.
+ */
+inline u32AndBool ARMShift(uint8_t type, uint32_t value, uint8_t shift, bool carryIn,
+                           uint32_t bitWidth = 32) {
+    if (!shift) return {value, carryIn};
+    switch (type) {
+        // Logical shift left.
+        case ARM_SHIFT_LSL: {
+            bool carryOut = readBit(value, bitWidth - shift);
+            value = value << shift;
+            return {value, carryOut};
+        }
+        // Logical shift right.
+        case ARM_SHIFT_LSR: {
+            bool carryOut = readBit(value, shift - 1);
+            value = value >> shift;
+            return {value, carryOut};
+        }
+        // Arithmetic shift right.
+        case ARM_SHIFT_ASR: {
+            return ASR(value, shift, bitWidth);
+        }
+        // Rotate Right.
+        case ARM_SHIFT_ROR: {
+            return ROR(value, shift, bitWidth);
+        }
+    }
+    // Unknown shift type
+    return {value, carryIn};
 }
 
 /**
@@ -135,7 +203,6 @@ inline u32AndBool ROL(uint32_t value, uint8_t shift) {
 inline u32AndBool ARMExpandImm_C(uint32_t imm12, bool carryIn) {
     uint32_t amount = readBits(imm12, 8, 11) * 2;
     uint32_t imm8 = readBits(imm12, 0, 7);
-    if (!amount) return {imm8, carryIn};
     return ROR(imm8, amount);
 }
 

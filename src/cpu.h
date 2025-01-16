@@ -31,6 +31,7 @@ extern std::vector<std::string> g_regNames;
  */
 class ARM {
 protected:
+    bool arm9 = false;
     Interconnect* bus = nullptr;
 
     uint32_t reg[NUM_OF_STANDARD_REGISTERS];
@@ -187,8 +188,20 @@ public:
      * @brief Instruction set.
      */
     cycles dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond);
-    cycles mov32bit(uint32_t des, uint32_t src);
+    cycles ARM_MOV(uint32_t desReg, uint32_t srcValue);
     cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                   bool wback);
+    cycles ARM_STRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add);
+    cycles ARM_STRB(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                    bool wback);
+    cycles ARM_STRBT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add);
+    cycles ARM_LDR(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                   bool wback);
+    cycles ARM_LDRT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
+    cycles ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                    bool wback);
+    cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
     cycles branchDecodeAndExecute(uint32_t instuct, uint8_t cond);
     cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instuct, uint8_t cond);
 };

@@ -9,6 +9,7 @@
 #include "logger.h"
 
 ARM7TDMI::ARM7TDMI() {
+    arm9 = false;
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
     // TODO!!! finish this.
     // Main RAM.
@@ -55,7 +56,13 @@ busPayload ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
             cycleMapNonSequential = codeRead ? code_nonSequencial16BitAccessTimings
                                              : data_nonSequencial16BitAccessTimings;
             break;
-        case (8):
+        case (8):  // 8 Bit read.
+            data = bus->read8ARM7(address);
+            //  8bit data accesses have the same timings as 16bit data.
+            // There are no code 8 bit accesses.
+            cycleMapSequential = data_sequencial16BitAccessTimings;
+            cycleMapNonSequential = data_nonSequencial16BitAccessTimings;
+            break;
         default:
             LogError(size << " bit reads are currently unsupported");
             return {0, 0, 0};
@@ -89,11 +96,16 @@ busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
             cycleMapNonSequential = data_nonSequencial32BitAccessTimings;
             break;
         case (16):  // 16 Bit write.
-            bus->write16ARM7(address, data);
+            bus->write16ARM7(address, data & 0xFFFF);
             cycleMapSequential = data_sequencial16BitAccessTimings;
             cycleMapNonSequential = data_nonSequencial16BitAccessTimings;
             break;
         case (8):
+            bus->write8ARM7(address, data & 0xFF);
+            //  8bit data accesses have the same timings as 16bit data.
+            cycleMapSequential = data_sequencial16BitAccessTimings;
+            cycleMapNonSequential = data_nonSequencial16BitAccessTimings;
+            break;
         default:
             LogError(size << " bit writes are currently unsupported");
             return {0, 0, 0};
@@ -110,17 +122,19 @@ cycles ARM7TDMI::execute() {
     uint32_t nextInstruction = instuctionPipeLine[0];
     instuctionPipeLine[0] = NO_INSTRUCT;
     // Decode and execute the instuction.
-    uint8_t opCode = readBits(nextInstruction, 25, 27);
+    uint8_t opCode = readBits(nextInstruction, 26, 27);
     uint8_t condition = readBits(nextInstruction, 28, 31);
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/ARM-instruction-set-encoding?lang=en
     switch (opCode) {
-        case 0b000:
-        case 0b001:
+        // Data-processing and miscellaneous instructions.
+        case 0b00:
             return ARM::dataProcessingDecodeAndExecute(nextInstruction, condition);
         // Load/store word and unsigned byte.
-        case 0b010:
-        case 0b011:
+        case 0b01:
             return ARM::loadStoreDecodeAndExecute(nextInstruction, condition);
+        // 	Branch, branch with link, and block data transfer.
+        case 0b10:
+            return ARM::branchDecodeAndExecute(nextInstruction, condition);
         default:
             LogError("Unsupported OpCode: " << opCode
                                             << "! Full instruction data: " << nextInstruction);

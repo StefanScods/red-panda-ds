@@ -49,6 +49,14 @@ public:
      * @return uint16_t
      */
     uint16_t read16ARM7(uint32_t addr);
+    /**
+     * @brief Read 8 bits from the specified address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint8_t
+     */
+    uint8_t read8ARM7(uint32_t addr);
 
     /**
      * @brief Write 32 bits to the specified address.
@@ -64,5 +72,12 @@ public:
      * @param data Data to write
      */
     void write16ARM7(uint32_t addr, uint16_t data);
+    /**
+     * @brief Write 8 bits to the specified address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write8ARM7(uint32_t addr, uint8_t data);
 };
 #endif

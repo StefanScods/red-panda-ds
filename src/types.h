@@ -3,8 +3,9 @@
 
 #include <cstdint>
 
-#define INVALID_MEM_32BIT 0xFFFFFFFF;
-#define INVALID_MEM_16BIT 0xFFFF;
+#define INVALID_MEM_32BIT 0xFFFFFFFF
+#define INVALID_MEM_16BIT 0xFFFF
+#define INVALID_MEM_8BIT 0xFF
 
 typedef uint64_t cycles;
 

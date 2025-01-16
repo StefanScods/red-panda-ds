@@ -9,8 +9,8 @@
 #define LOG_LEVEL 1
 #include "logger.h"
 
-cycles ARM::mov32bit(uint32_t desReg, uint32_t src) {
+cycles ARM::ARM_MOV(uint32_t desReg, uint32_t srcValue) {
     // Move the value into the destination register.
-    *activeRegs[desReg] = src;
+    *activeRegs[desReg] = srcValue;
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
