@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     bus.bindARM7(&arm7);
 
     arm7.setPC(MAIN_RAM_START);
-    bus.write32ARM7(MAIN_RAM_START, armEncodeASM("MOV r8, #2147483648"));
+    bus.write32ARM7(MAIN_RAM_START, armEncodeASM("MOV r8, #2147483648")[0]);
     arm7.fetchAndExecute();
     LogMsg("Contents of r8: " << arm7.readReg(8));
 

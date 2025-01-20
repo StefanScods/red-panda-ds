@@ -50,7 +50,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
 
             // Write the instuction and execute it.
             std::string instructionStr = "MOV " + g_regNames[i] + ", #" + std::to_string(testValue);
-            bus.write32ARM7(MAIN_RAM_START, armEncodeASM(instructionStr));
+            bus.write32ARM7(MAIN_RAM_START, armEncodeASM(instructionStr)[0]);
             arm7.setPC(MAIN_RAM_START);
             arm7.fetchAndExecute();
 
@@ -73,7 +73,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
 
             // Write the instuction and execute it.
             std::string instructionStr = "MOV " + g_regNames[i] + ", #" + std::to_string(testValue);
-            bus.write32ARM7(MAIN_RAM_START, armEncodeASM(instructionStr));
+            bus.write32ARM7(MAIN_RAM_START, armEncodeASM(instructionStr)[0]);
             arm7.setPC(MAIN_RAM_START);
             arm7.fetchAndExecute();
 
