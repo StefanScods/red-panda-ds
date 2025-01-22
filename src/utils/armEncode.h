@@ -78,7 +78,7 @@ std::vector<uint32_t> armEncodeASM(std::string instructions) {
             foundText = true;
         } else if (foundText) {
             // Find "num: encoding    instuction"
-            substring = "   " + std::to_string(count) + ":	";
+            substring = ":	";
             size_t pos = line.find(substring);
             // Ran out of instructions.
             if (pos == std::string::npos) break;

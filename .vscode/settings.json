@@ -79,7 +79,8 @@
         "unordered_set": "cpp",
         "variant": "cpp",
         "xtree": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "cassert": "cpp"
     },
     "cSpell.words": [
         "renderable",

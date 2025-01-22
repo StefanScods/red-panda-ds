@@ -4,6 +4,7 @@
 #include "../src/interconnect.h"
 #include "../src/memoryDefines.h"
 #include "../src/utils/armEncode.h"
+#include "commonTest.h"
 
 /**
  * @brief Test fixture for the CPU's instructions in the data category.
@@ -38,46 +39,52 @@ protected:
  * are defined as able to be encoded in 8 bits.
  */
 TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
+    // Generate test cases.
     std::vector<uint32_t> immValuesToTest = {0, 1, 2, 8, 16, 42, 113, 173, 255};
-    // Loop over all possible regs.
-    for (uint32_t i = 0; i < g_regNames.size(); i++) {
-        // Test a bunch of different values.
-        for (uint32_t j = 0; j < immValuesToTest.size(); j++) {
-            int testValue = immValuesToTest[j];
-            // Set a default value to the reg.
-            arm7.reset();
-            arm7.writeReg(i, testValue ? 0 : 1);
+    std::vector<std::string> instructions = {
+        "MOV " + BASE_REG_TOKEN + ", #0",   "MOV " + BASE_REG_TOKEN + ", #1",
+        "MOV " + BASE_REG_TOKEN + ", #2",   "MOV " + BASE_REG_TOKEN + ", #8",
+        "MOV " + BASE_REG_TOKEN + ", #16",  "MOV " + BASE_REG_TOKEN + ", #42",
+        "MOV " + BASE_REG_TOKEN + ", #113", "MOV " + BASE_REG_TOKEN + ", #173",
+        "MOV " + BASE_REG_TOKEN + ", #255"};
+    std::vector<InstructionTestCase> testCases =
+        genInstuctionTestCase(instructions, immValuesToTest, false);
 
-            // Write the instuction and execute it.
-            std::string instructionStr = "MOV " + g_regNames[i] + ", #" + std::to_string(testValue);
-            bus.write32ARM7(MAIN_RAM_START, armEncodeASM(instructionStr)[0]);
-            arm7.setPC(MAIN_RAM_START);
-            arm7.fetchAndExecute();
-
-            ASSERT_EQ(arm7.readReg(i), testValue);
-        }
+    // Loop over all test cases.
+    for (uint32_t i = 0; i < testCases.size(); i++) {
+        int testValue = testCases[i].expectedVal;
+        // Set a default value to the reg.
+        arm7.reset();
+        arm7.writeReg(testCases[i].regNum, testValue ? 0 : 1);
+        bus.write32ARM7(MAIN_RAM_START, testCases[i].instuction);
+        arm7.setPC(MAIN_RAM_START);
+        arm7.fetchAndExecute();
+        ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
     }
 }
 
 TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
-    std::vector<uint32_t> immValuesToTest = {0xFF00,    0xFF00,     0xFF000,   0xFF0000,
+    // Generate test cases.
+    std::vector<uint32_t> immValuesToTest = {0xFF0,     0xFF00,     0xFF000,   0xFF0000,
                                              0xFF00000, 0xFF000000, 0xF000000F};
-    // Loop over all possible regs.
-    for (uint32_t i = 0; i < g_regNames.size(); i++) {
-        // Test a bunch of different values.
-        for (uint32_t j = 0; j < immValuesToTest.size(); j++) {
-            int testValue = immValuesToTest[j];
-            // Set a default value to the reg.
-            arm7.reset();
-            arm7.writeReg(i, testValue ? 0 : 1);
+    std::vector<std::string> instructions = {
+        "MOV " + BASE_REG_TOKEN + ", #0xFF0",      "MOV " + BASE_REG_TOKEN + ", #0xFF00",
+        "MOV " + BASE_REG_TOKEN + ", #0xFF000",    "MOV " + BASE_REG_TOKEN + ", #0xFF0000",
+        "MOV " + BASE_REG_TOKEN + ", #0xFF00000",  "MOV " + BASE_REG_TOKEN + ", #0xFF000000",
+        "MOV " + BASE_REG_TOKEN + ", #0xF000000F",
+    };
+    std::vector<InstructionTestCase> testCases =
+        genInstuctionTestCase(instructions, immValuesToTest, false);
 
-            // Write the instuction and execute it.
-            std::string instructionStr = "MOV " + g_regNames[i] + ", #" + std::to_string(testValue);
-            bus.write32ARM7(MAIN_RAM_START, armEncodeASM(instructionStr)[0]);
-            arm7.setPC(MAIN_RAM_START);
-            arm7.fetchAndExecute();
-
-            ASSERT_EQ(arm7.readReg(i), testValue);
-        }
+    // Loop over all test cases.
+    for (uint32_t i = 0; i < testCases.size(); i++) {
+        int testValue = testCases[i].expectedVal;
+        // Set a default value to the reg.
+        arm7.reset();
+        arm7.writeReg(testCases[i].regNum, testValue ? 0 : 1);
+        bus.write32ARM7(MAIN_RAM_START, testCases[i].instuction);
+        arm7.setPC(MAIN_RAM_START);
+        arm7.fetchAndExecute();
+        ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
     }
 }
