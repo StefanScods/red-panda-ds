@@ -117,9 +117,11 @@ public:
      * @brief Keep cycling until the next instuction is executed. Cycle behaviour may not be
      * correct so use for testing.
      *
+     * @param numExecutions The number of time to fetch and execute
+     *
      * @return cycles
      */
-    cycles fetchAndExecute();
+    cycles fetchAndExecute(int numExecutions = 1);
     /**
      * @brief Keep cycling until the the instuction pipeline is full (perform fetches without
      * execution)

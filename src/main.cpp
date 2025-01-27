@@ -4,7 +4,7 @@
 #include "utils.h"
 
 // Control print statements.
-#define LOG_LEVEL 1
+#define LOG_LEVEL 2
 #include "logger.h"
 
 int main(int argc, char **argv) {

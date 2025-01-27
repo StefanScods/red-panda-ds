@@ -6,6 +6,7 @@
 #include <regex>
 
 #include "../src/cpu.h"
+#include "../src/interconnect.h"
 #include "../src/utils/armEncode.h"
 #include "../src/utils/utils.h"
 
@@ -16,6 +17,17 @@ struct InstructionTestCase {
     uint8_t regNum;
     uint32_t expectedVal;
 } typedef InstructionTestCase;
+
+/**
+ * @brief Assembles and writes the passed program into emulator's memory.
+ *
+ * @param program Assembly code to assemble and write.
+ * @param startAddress The address to begin writing to.
+ * @param bus The bus to write to
+ * @param arm7 Boolean indicating which ARM memory map to use. True uses ARM7 and false uses the
+ * ARM9.
+ */
+void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus, bool arm7);
 
 /**
  * @brief Creates a bunch of test cases with only one call to the assembler.
@@ -32,28 +44,5 @@ struct InstructionTestCase {
  */
 std::vector<InstructionTestCase> genInstuctionTestCase(std::vector<std::string> instruction,
                                                        std::vector<uint32_t> expectedVals,
-                                                       bool skipPC) {
-    std::vector<InstructionTestCase> returnValue;
-    std::vector<uint32_t> instuctionEncodings;
-    std::string instructionStr = "";
-    assert(instruction.size() == expectedVals.size());
-    for (int i = 0; i < g_regNames.size() - skipPC; i++) {
-        for (int j = 0; j < instruction.size(); j++) {
-            instructionStr += std::regex_replace(instruction[j], std::regex("\\" + BASE_REG_TOKEN),
-                                                 g_regNames[i]) +
-                              "\n";
-        }
-    }
-    instuctionEncodings = armEncodeASM(instructionStr);
-    int count = 0;
-    for (uint8_t i = 0; i < g_regNames.size() - skipPC; i++) {
-        for (int j = 0; j < instruction.size(); j++) {
-            returnValue.push_back({instuctionEncodings[count], i, expectedVals[j]});
-            count++;
-        }
-    }
-
-    return returnValue;
-}
-
+                                                       bool skipPC);
 #endif

@@ -9,6 +9,9 @@ set(TEST_BINARY_NAME runTests)
 # Uncomment this line to remove all print statements within the program.
 # add_definitions(-DNO_LOG_OVERRIDE)
 
+# Uncomment this line to enable all debug print statements within the program.
+# add_definitions(-DLOG_LEVEL_OVERRIDE=3)
+
 # Build the testing suite.
 set(BUILD_TEST True)
 

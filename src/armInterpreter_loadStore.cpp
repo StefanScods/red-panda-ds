@@ -16,6 +16,7 @@
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STR--immediate--ARM-?lang=en
 cycles ARM::ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                     bool wback) {
+    LogDebug("Executing STR");
     uint32_t address = *activeRegs[baseReg];
     uint32_t offset_address = add ? address + offset : address - offset;
     uint32_t targetAddress = pre ? offset_address : address;
@@ -28,6 +29,7 @@ cycles ARM::ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre
 
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRT?lang=en
 cycles ARM::ARM_STRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add) {
+    LogDebug("Executing STRT");
     LogWarning("Memory access privilege currently unchecked.");
     return ARM_STR(srcReg, baseReg, offset, false, add, true);
 }
@@ -36,6 +38,7 @@ cycles ARM::ARM_STRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool ad
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRB--register-?lang=en
 cycles ARM::ARM_STRB(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                      bool wback) {
+    LogDebug("Executing STRB");
     uint32_t address = *activeRegs[baseReg];
     uint32_t offset_address = add ? address + offset : address - offset;
     uint32_t targetAddress = pre ? offset_address : address;
@@ -48,6 +51,7 @@ cycles ARM::ARM_STRB(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pr
 
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRBT?lang=en
 cycles ARM::ARM_STRBT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add) {
+    LogDebug("Executing STRBT");
     LogWarning("Memory access privilege currently unchecked.");
     return ARM_STRB(srcReg, baseReg, offset, false, add, true);
 }
@@ -57,6 +61,7 @@ cycles ARM::ARM_STRBT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool a
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDR--register--ARM-?lang=en
 cycles ARM::ARM_LDR(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                     bool wback) {
+    LogDebug("Executing LDR");
     uint32_t address = *activeRegs[baseReg];
     uint32_t offset_address = add ? address + offset : address - offset;
     uint32_t targetAddress = pre ? offset_address : address;
@@ -70,6 +75,7 @@ cycles ARM::ARM_LDR(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre
 
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRT?lang=en
 cycles ARM::ARM_LDRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add) {
+    LogDebug("Executing LDRT");
     LogWarning("Memory access privilege currently unchecked.");
     return ARM_LDR(srcReg, baseReg, offset, false, add, true);
 }
@@ -79,6 +85,7 @@ cycles ARM::ARM_LDRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool ad
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRB--register-?lang=en
 cycles ARM::ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                      bool wback) {
+    LogDebug("Executing LDRB");
     uint32_t address = *activeRegs[baseReg];
     uint32_t offset_address = add ? address + offset : address - offset;
     uint32_t targetAddress = pre ? offset_address : address;
@@ -92,6 +99,7 @@ cycles ARM::ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pr
 
 // hhttps://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRBT?lang=en
 cycles ARM::ARM_LDRBT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add) {
+    LogDebug("Executing LDRBT");
     LogWarning("Memory access privilege currently unchecked.");
     return ARM_LDRB(srcReg, baseReg, offset, false, add, true);
 }

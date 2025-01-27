@@ -3,7 +3,7 @@
 #include "interconnect.h"
 
 // Control print statements.
-#define LOG_LEVEL 1
+#define LOG_LEVEL 2
 #include "logger.h"
 
 std::vector<std::string> g_regNames = {"r0", "r1", "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
@@ -96,10 +96,13 @@ cycles ARM::cycle() {
     return 0;
 }
 
-cycles ARM::fetchAndExecute() {
+cycles ARM::fetchAndExecute(int numExecutions) {
     cycles cycleCount = 0;
-    cycleCount += fillInstuctionPipeline();
-    cycleCount += execute();
+    while (numExecutions) {
+        cycleCount += fillInstuctionPipeline();
+        cycleCount += execute();
+        numExecutions--;
+    }
     return cycleCount;
 }
 
