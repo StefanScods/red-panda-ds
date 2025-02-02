@@ -57,15 +57,15 @@ TEST_F(TestUtils, WriteBit) {
 TEST_F(TestUtils, WriteBits) {
     // Write different portions of the data.
     uint32_t data = 0b11110000111100001111000011110000;
-    writeBits(data, 0b00001111000011110000111100001011, 0, 31);
+    writeBits<uint32_t>(data, 0b00001111000011110000111100001011, 0, 31);
     ASSERT_EQ(data, 0b00001111000011110000111100001011);
 
     data = 0b11110000111100001111000011110000;
-    writeBits(data, 0b1111, 0, 3);
+    writeBits<uint32_t>(data, 0b1111, 0, 3);
     ASSERT_EQ(data, 0b11110000111100001111000011111111);
 
     data = 0b11110000111100001111000011110000;
-    writeBits(data, 0b0000, 28, 31);
+    writeBits<uint32_t>(data, 0b0000, 28, 31);
     ASSERT_EQ(data, 0b00000000111100001111000011110000);
 }
 

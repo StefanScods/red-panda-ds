@@ -88,3 +88,23 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
         ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
     }
 }
+
+class TestCPUDataInstructions_ADD : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_ADD() {}
+    ~TestCPUDataInstructions_ADD() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+
+TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE) {
+    writeProgramToMemory(
+        "MOV R1, #100\n"
+        "ADD R0, R1, #10\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 110);
+}

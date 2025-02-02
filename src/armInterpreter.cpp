@@ -22,7 +22,7 @@
 cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
     // Extract useful parts of the instruction in order to decode.
     // OpCode.
-    uint8_t op = readBits(instuct, 20, 24);
+    uint8_t op = readBits(instuct, 21, 24);
     // S - Set Condition Codes
     bool S = readBit(instuct, 20);
     // 1st Operand Register.
@@ -34,10 +34,59 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
         uint32_t imm12 = readBits(instuct, 0, 11);
         u32AndBool immDecoded = ARMExpandImm_C(imm12, CARRY_IN_TEMP);
         switch (op) {
+            // AND (immediate).
+            case 0b0000:
+                return ARM_AND(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // EOR (immediate).
+            case 0b0001:
+                return ARM_EOR(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // SUB (immediate).
+            case 0b0010:
+                return ARM_SUB(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // RSB (immediate).
+            case 0b0011:
+                return ARM_RSB(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // ADD (immediate).
+            case 0b0100:
+                return ARM_ADD(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // ADC (immediate).
+            case 0b0101:
+                return ARM_ADC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // SBC (immediate).
+            case 0b0110:
+                return ARM_SBC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // RSC (immediate).
+            case 0b0111:
+                return ARM_RSC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // TST (immediate).
+            case 0b1000:
+                assert(Rd == 0);
+                return ARM_TST(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // TEQ (immediate).
+            case 0b1001:
+                assert(Rd == 0);
+                return ARM_TEQ(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // CMP (immediate).
+            case 0b1010:
+                assert(Rd == 0);
+                return ARM_CMP(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // CMN (immediate).
+            case 0b1011:
+                assert(Rd == 0);
+                return ARM_CMN(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // ORR (immediate).
+            case 0b1100:
+                return ARM_ORR(Rd, *activeRegs[Rn], immDecoded.data_u32);
             // MOV (immediate).
-            case 0b11010:
-            case 0b11011:
+            case 0b1101:
+                assert(Rn == 0);
                 return ARM_MOV(Rd, immDecoded.data_u32);
+            // BIC (immediate).
+            case 0b1110:
+                return ARM_BIC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+            // MVN (immediate).
+            case 0b1111:
+                return ARM_MVN(Rd, *activeRegs[Rn], immDecoded.data_u32);
         }
 
     } else {  // Bit 25 = 0;

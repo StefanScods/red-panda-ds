@@ -46,42 +46,54 @@ inline std::string hexString(T val, int size = 8) {
 /**
  * @brief Read a bit in the passed data.
  *
+ * @tparam T An unsigned type
+ *
  * @param data The data to read bit from.
  * @param pos The index of the bit to read (0 indexed).
  */
-inline bool readBit(uint32_t data, uint8_t pos) {
+template <typename T = uint32_t>
+inline bool readBit(T data, uint8_t pos) {
     return (data >> pos) & 0b1;
 }
 /**
  * @brief Write a bit to the passed data.
  *
+ * @tparam T An unsigned type
+ *
  * @param data The data to write to.
  * @param value The value to write.
  * @param pos The index of the bit to write to (0 indexed).
  */
-inline void writeBit(uint32_t& data, bool value, uint8_t pos) {
+template <typename T = uint32_t>
+inline void writeBit(T& data, bool value, uint8_t pos) {
     data = ((data) & ~(0b1 << pos)) | (((uint32_t)value) << pos);
 }
 /**
  * @brief Read a section of bits from data.
  *
+ * @tparam T An unsigned type
+ *
  * @param data The data to read bits from.
  * @param rangeStart The first bit to begin reading from (inclusive).
  * @param rangeEnd The last bit to end reading from (inclusive).
  */
-inline uint32_t readBits(uint32_t data, uint8_t rangeStart, uint8_t rangeEnd) {
+template <typename T = uint32_t>
+inline uint32_t readBits(T data, uint8_t rangeStart, uint8_t rangeEnd) {
     uint8_t size = rangeEnd - rangeStart + 1;
     return (data >> rangeStart) & (uint32_t)((uint64_t)(1 << size) - 1);
 }
 /**
  * @brief Write a section of bits to data.
  *
+ * @tparam T An unsigned type
+ *
  * @param data The data to write to.
  * @param value The value to write.
  * @param rangeStart The first bit to begin writing to (inclusive).
  * @param rangeEnd The last bit to end reading writing to (inclusive).
  */
-inline void writeBits(uint32_t& data, uint32_t value, uint8_t rangeStart, uint8_t rangeEnd) {
+template <typename T = uint32_t>
+inline void writeBits(T& data, T value, uint8_t rangeStart, uint8_t rangeEnd) {
     uint8_t size = rangeEnd - rangeStart + 1;
     data =
         ((data) & ~(((uint32_t)((uint64_t)(1 << size) - 1)) << rangeStart)) | (value << rangeStart);
