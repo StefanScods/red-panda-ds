@@ -21,6 +21,17 @@ class Interconnect;
 
 #define INSTUCTION_PIPELINE_LENGTH 3
 
+// Negative Condition Flag.
+#define N_FLAG 31
+// Zero Condition Flag
+#define Z_FLAG 30
+// Carry Condition Flag
+#define C_FLAG 29
+// Overflow Condition Flag
+#define V_FLAG 28
+// Cumulative saturation Flag
+#define Q_FLAG 27
+
 #define PC_REGISTER_NUM 15
 
 extern std::vector<std::string> g_regNames;
@@ -143,6 +154,12 @@ public:
     uint32_t readReg(uint32_t regNum) { return *activeRegs[regNum]; }
 
     /**
+     * @brief Debug function to read a cpu flag value.
+     * @param flagBit
+     */
+    bool readFlag(uint32_t flagBit) { return readBit(cpsr, flagBit); }
+
+    /**
      * @brief Debug function to write to a register.
      * @param regNum (0-15)
      * @param data Data to write
@@ -203,7 +220,7 @@ public:
     cycles ARM_CMP(uint32_t desReg, uint32_t opp1, uint32_t opp2);
     cycles ARM_CMN(uint32_t desReg, uint32_t opp1, uint32_t opp2);
     cycles ARM_ORR(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_MOV(uint32_t desReg, uint32_t srcValue);
+    cycles ARM_MOV(uint32_t desReg, uint32_t srcValue, bool carry);
     cycles ARM_BIC(uint32_t desReg, uint32_t opp1, uint32_t opp2);
     cycles ARM_MVN(uint32_t desReg, uint32_t opp1, uint32_t opp2);
     cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);

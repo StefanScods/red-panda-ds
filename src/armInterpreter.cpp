@@ -12,10 +12,6 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
-#define CARRY_IN_TEMP 0
-
-// !!!TODO Handle carry in.
-// !!!TODO Handle when commands update flags.
 // !!!TODO Handle when commands target PC.
 
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions?lang=en
@@ -32,7 +28,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Data-processing--immediate-?lang=en
     if (readBit(instuct, 25)) {  // Bit 25 = 1;
         uint32_t imm12 = readBits(instuct, 0, 11);
-        u32AndBool immDecoded = ARMExpandImm_C(imm12, CARRY_IN_TEMP);
+        u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
         switch (op) {
             // AND (immediate).
             case 0b0000:
@@ -80,7 +76,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
             // MOV (immediate).
             case 0b1101:
                 assert(Rn == 0);
-                return ARM_MOV(Rd, immDecoded.data_u32);
+                return ARM_MOV(Rd, immDecoded.data_u32, immDecoded.data_bool);
             // BIC (immediate).
             case 0b1110:
                 return ARM_BIC(Rd, *activeRegs[Rn], immDecoded.data_u32);
@@ -128,7 +124,7 @@ cycles ARM::loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond) {
         assert(Rm != 15);
         // Shift amount.
         uint8_t shiftAmount = readBits(instuct, 7, 11);
-        offset = ARMShift(type, *activeRegs[Rm], shiftAmount, CARRY_IN_TEMP).data_u32;
+        offset = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG)).data_u32;
     } else {  // 0=Immediate.
         offset = readBits(instuct, 0, 11);
     }
