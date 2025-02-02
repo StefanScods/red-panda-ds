@@ -91,7 +91,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
 
 TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
-    writeProgramToMemory("MOV R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory("MOVs R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readReg(0), 0xFF000000);
@@ -99,16 +99,24 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
 
     // N = false
     arm7.reset();
-    writeProgramToMemory("MOV R0, #1\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readReg(0), 1);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+
+    // Don't update flag.
+    arm7.reset();
+    writeProgramToMemory("MOV R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
 }
 
 TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
     // Z = true
-    writeProgramToMemory("MOV R0, #0\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory("MOVs R0, #0\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readReg(0), 0);
@@ -116,7 +124,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
 
     // Z = false
     arm7.reset();
-    writeProgramToMemory("MOV R0, #1\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readReg(0), 1);
@@ -125,7 +133,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
 
 TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
     // C = true
-    writeProgramToMemory("MOV R0, #0xF0000001\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory("MOVs R0, #0xF0000001\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readReg(0), 0xF0000001);
@@ -133,7 +141,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
 
     // C = false
     arm7.reset();
-    writeProgramToMemory("MOV R0, #1\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readReg(0), 1);
@@ -164,7 +172,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xFF000000\n"
-        "ADD R0, R1, #0xFF\n",
+        "ADDs R0, R1, #0xFF\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(2);
@@ -175,11 +183,22 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
     arm7.reset();
     writeProgramToMemory(
         "MOV R1, #0x0FF00000\n"
-        "ADD R0, R1, #0xFF\n",
+        "ADDs R0, R1, #0xFF\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(2);
     ASSERT_EQ(arm7.readReg(0), 0x0FF000FF);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+
+    // Don't update flag.
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0xFF000000\n"
+        "ADD R0, R1, #0xFF\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xFF0000FF);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
 }
 
@@ -187,7 +206,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R9, #0\n"
-        "ADD R10, R9, #0\n",
+        "ADDs R10, R9, #0\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(2);
@@ -198,7 +217,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
     arm7.reset();
     writeProgramToMemory(
         "MOV R5, #1\n"
-        "ADD R4, R5, #7\n",
+        "ADDs R4, R5, #7\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(2);
@@ -213,7 +232,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
         "ADD R1, R1, #0xFF00\n"
         "ADD R1, R1, #0xFF0000\n"
         "ADD R1, R1, #0xFF000000\n"
-        "ADD R1, R1, #1\n",
+        "ADDs R1, R1, #1\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(5);
@@ -224,7 +243,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
     arm7.reset();
     writeProgramToMemory(
         "MOV R1, #0xFF\n"
-        "ADD R1, R1, #0xFF00\n",
+        "ADDs R1, R1, #0xFF00\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(2);
@@ -239,7 +258,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
         "ADD R1, R1, #0xFF00\n"
         "ADD R1, R1, #0xFF0000\n"
         "ADD R1, R1, #0x7F000000\n"
-        "ADD R1, R1, #1\n",
+        "ADDs R1, R1, #1\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(5);
@@ -250,7 +269,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
     arm7.reset();
     writeProgramToMemory(
         "MOV R9, #1\n"
-        "ADD R7, R9, #7\n",
+        "ADDs R7, R9, #7\n",
         MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(2);

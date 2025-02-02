@@ -32,57 +32,58 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
         switch (op) {
             // AND (immediate).
             case 0b0000:
-                return ARM_AND(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_AND(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // EOR (immediate).
             case 0b0001:
-                return ARM_EOR(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_EOR(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // SUB (immediate).
             case 0b0010:
-                return ARM_SUB(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_SUB(Rd, *activeRegs[Rn], immDecoded.data_u32, S);
             // RSB (immediate).
             case 0b0011:
-                return ARM_RSB(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_RSB(Rd, *activeRegs[Rn], immDecoded.data_u32, S);
             // ADD (immediate).
             case 0b0100:
-                return ARM_ADD(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_ADD(Rd, *activeRegs[Rn], immDecoded.data_u32, S);
             // ADC (immediate).
             case 0b0101:
-                return ARM_ADC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_ADC(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // SBC (immediate).
             case 0b0110:
-                return ARM_SBC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_SBC(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // RSC (immediate).
             case 0b0111:
-                return ARM_RSC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_RSC(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // TST (immediate).
             case 0b1000:
                 assert(Rd == 0);
-                return ARM_TST(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_TST(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
             // TEQ (immediate).
             case 0b1001:
                 assert(Rd == 0);
-                return ARM_TEQ(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_TEQ(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
             // CMP (immediate).
             case 0b1010:
                 assert(Rd == 0);
-                return ARM_CMP(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_CMP(*activeRegs[Rn], immDecoded.data_u32);
             // CMN (immediate).
             case 0b1011:
                 assert(Rd == 0);
-                return ARM_CMN(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_CMN(*activeRegs[Rn], immDecoded.data_u32);
             // ORR (immediate).
             case 0b1100:
-                return ARM_ORR(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_ORR(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // MOV (immediate).
             case 0b1101:
                 assert(Rn == 0);
-                return ARM_MOV(Rd, immDecoded.data_u32, immDecoded.data_bool);
+                return ARM_MOV(Rd, immDecoded.data_u32, immDecoded.data_bool, S);
             // BIC (immediate).
             case 0b1110:
-                return ARM_BIC(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                return ARM_BIC(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
             // MVN (immediate).
             case 0b1111:
-                return ARM_MVN(Rd, *activeRegs[Rn], immDecoded.data_u32);
+                assert(Rn == 0);
+                return ARM_MVN(Rd, immDecoded.data_u32, immDecoded.data_bool, S);
         }
 
     } else {  // Bit 25 = 0;

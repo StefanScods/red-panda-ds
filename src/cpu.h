@@ -207,22 +207,22 @@ public:
      * @brief Instruction set.
      */
     cycles dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond);
-    cycles ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_EOR(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_SUB(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_RSB(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_ADD(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_ADC(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_SBC(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_RSC(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_TST(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_TEQ(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_CMP(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_CMN(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_ORR(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_MOV(uint32_t desReg, uint32_t srcValue, bool carry);
-    cycles ARM_BIC(uint32_t desReg, uint32_t opp1, uint32_t opp2);
-    cycles ARM_MVN(uint32_t desReg, uint32_t opp1, uint32_t opp2);
+    cycles ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_EOR(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_SUB(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool setFlags);
+    cycles ARM_RSB(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool setFlags);
+    cycles ARM_ADD(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool setFlags);
+    cycles ARM_ADC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_SBC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_RSC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_TST(uint32_t opp1, uint32_t opp2, bool carry);
+    cycles ARM_TEQ(uint32_t opp1, uint32_t opp2, bool carry);
+    cycles ARM_CMP(uint32_t opp1, uint32_t opp2);
+    cycles ARM_CMN(uint32_t opp1, uint32_t opp2);
+    cycles ARM_ORR(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_MOV(uint32_t desReg, uint32_t srcValue, bool carry, bool setFlags);
+    cycles ARM_BIC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
+    cycles ARM_MVN(uint32_t desReg, uint32_t opp1, bool carry, bool setFlags);
     cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
     cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                    bool wback);
