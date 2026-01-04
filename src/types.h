@@ -26,5 +26,10 @@ struct u32AndBool {
     uint32_t data_u32;
     bool data_bool;
 };
+struct u32WithCarryAndOverflow {
+    uint32_t data_u32;
+    bool carry;
+    bool overflow;
+};
 
 #endif

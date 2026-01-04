@@ -167,6 +167,12 @@ public:
     void writeReg(uint32_t regNum, uint32_t data) { *activeRegs[regNum] = data; }
 
     /**
+     * @brief Debug function to write to a cpu flag value.
+     * @param flagBit
+     */
+    void setFlag(uint32_t flagBit, bool data) { writeBit(cpsr, data, flagBit); }
+
+    /**
      * @brief Read the bus.
      *
      * @param address Address to read. Address should be word-aligned for 32bit reads or

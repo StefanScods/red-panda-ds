@@ -1,6 +1,6 @@
 /**
  * @file armEncode.cpp
- * @brief Covert written instructions into their encoded binary equivelent.
+ * @brief Covert written instructions into their encoded binary equivalent.
  */
 
 #include "armEncode.h"

@@ -24,140 +24,486 @@ protected:
     void TearDown() override {}
 };
 
-class TestCPUDataInstructions_MOV : public TestCPUDataInstructions {
+// ==================================================================================================
+// AND
+// ==================================================================================================
+class TestCPUDataInstructions_AND : public TestCPUDataInstructions {
 protected:
-    TestCPUDataInstructions_MOV() {}
-    ~TestCPUDataInstructions_MOV() {}
+    TestCPUDataInstructions_AND() {}
+    ~TestCPUDataInstructions_AND() {}
 
     void SetUp() override { TestCPUDataInstructions::SetUp(); }
-
     void TearDown() override { TestCPUDataInstructions::TearDown(); }
 };
-
 /**
- * @brief Test moving imm values into all possible regs. Small imm values
- * are defined as able to be encoded in 8 bits.
+ * @brief Tests an AND operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
-    // Generate test cases.
-    std::vector<uint32_t> immValuesToTest = {0, 1, 2, 8, 16, 42, 113, 173, 255};
-    std::vector<std::string> instructions = {
-        "MOV " + BASE_REG_TOKEN + ", #0",   "MOV " + BASE_REG_TOKEN + ", #1",
-        "MOV " + BASE_REG_TOKEN + ", #2",   "MOV " + BASE_REG_TOKEN + ", #8",
-        "MOV " + BASE_REG_TOKEN + ", #16",  "MOV " + BASE_REG_TOKEN + ", #42",
-        "MOV " + BASE_REG_TOKEN + ", #113", "MOV " + BASE_REG_TOKEN + ", #173",
-        "MOV " + BASE_REG_TOKEN + ", #255"};
-    std::vector<InstructionTestCase> testCases =
-        genInstuctionTestCase(instructions, immValuesToTest, false);
-
-    // Loop over all test cases.
-    for (uint32_t i = 0; i < testCases.size(); i++) {
-        int testValue = testCases[i].expectedVal;
-        // Set a default value to the reg.
-        arm7.reset();
-        arm7.writeReg(testCases[i].regNum, testValue ? 0 : 1);
-        bus.write32ARM7(MAIN_RAM_START, testCases[i].instuction);
-        arm7.setPC(MAIN_RAM_START);
-        arm7.fetchAndExecute();
-        ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
-    }
-}
-
-TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
-    // Generate test cases.
-    std::vector<uint32_t> immValuesToTest = {0xFF0,     0xFF00,     0xFF000,   0xFF0000,
-                                             0xFF00000, 0xFF000000, 0xF000000F};
-    std::vector<std::string> instructions = {
-        "MOV " + BASE_REG_TOKEN + ", #0xFF0",      "MOV " + BASE_REG_TOKEN + ", #0xFF00",
-        "MOV " + BASE_REG_TOKEN + ", #0xFF000",    "MOV " + BASE_REG_TOKEN + ", #0xFF0000",
-        "MOV " + BASE_REG_TOKEN + ", #0xFF00000",  "MOV " + BASE_REG_TOKEN + ", #0xFF000000",
-        "MOV " + BASE_REG_TOKEN + ", #0xF000000F",
-    };
-    std::vector<InstructionTestCase> testCases =
-        genInstuctionTestCase(instructions, immValuesToTest, false);
-
-    // Loop over all test cases.
-    for (uint32_t i = 0; i < testCases.size(); i++) {
-        int testValue = testCases[i].expectedVal;
-        // Set a default value to the reg.
-        arm7.reset();
-        arm7.writeReg(testCases[i].regNum, testValue ? 0 : 1);
-        bus.write32ARM7(MAIN_RAM_START, testCases[i].instuction);
-        arm7.setPC(MAIN_RAM_START);
-        arm7.fetchAndExecute();
-        ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
-    }
-}
-
-TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
-    // N = true
-    writeProgramToMemory("MOVs R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
+TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE) {
+    writeProgramToMemory(
+        "MOV R1, #0b110011\n"
+        "AND R0, R1, #0b110000\n",
+        MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(1);
-    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0b110000);
+}
+/**
+ * @brief Tests an AND operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0xFF000000\n"
+        "ANDs R0, R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000000);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
 
     // N = false
     arm7.reset();
-    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory(
+        "MOV R1, #0x0F000000\n"
+        "ANDs R0, R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(1);
-    ASSERT_EQ(arm7.readReg(0), 1);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x00000000);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
 
     // Don't update flag.
     arm7.reset();
-    writeProgramToMemory("MOV R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory(
+        "MOV R1, #0xFF000000\n"
+        "AND R0, R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(1);
-    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000000);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
 }
-
-TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
+/**
+ * @brief Tests an AND operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_ZERO_FLAG) {
     // Z = true
-    writeProgramToMemory("MOVs R0, #0\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory(
+        "MOV R1, #0x0F000000\n"
+        "ANDs R0, R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x00000000);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0xFF000000\n"
+        "ANDs R0, R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000000);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an AND operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory("ANDs r0, r0, #0x80000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory("ANDs r0, r0, #0x40000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests an AND operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    writeProgramToMemory("ANDs r1, r0, #0x0\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.setFlag(V_FLAG, 1);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+}
+
+// ==================================================================================================
+// EOR
+// ==================================================================================================
+class TestCPUDataInstructions_EOR : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_EOR() {}
+    ~TestCPUDataInstructions_EOR() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an EOR operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE) {
+    writeProgramToMemory(
+        "MOV R1, #0b110011\n"
+        "EOR R0, R1, #0b101010\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0b011001);
+}
+/**
+ * @brief Tests an EOR operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0xF0000000\n"
+        "EORs R0, R1, #0x00000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000000);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x0F000000\n"
+        "EORs R0, R1, #0x00000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x0F000000);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+
+    // Don't update flag.
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0xF0000000\n"
+        "EOR R0, R1, #0x00000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000000);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an EOR operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0xF0000000\n"
+        "EORs R0, R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x00000000);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0xF0000000\n"
+        "EORs R0, R1, #0x00000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000000);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an EOR operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory("EORs r0, r0, #0x80000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory("EORs r0, r0, #0x40000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests an EOR operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    writeProgramToMemory("EORs r1, r0, #0x0\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.setFlag(V_FLAG, 1);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+}
+
+// ==================================================================================================
+// SUB
+// ==================================================================================================
+class TestCPUDataInstructions_SUB : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_SUB() {}
+    ~TestCPUDataInstructions_SUB() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a SUB operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE) {
+    writeProgramToMemory(
+        "MOV R1, #10\n"
+        "SUB R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 7);
+}
+/**
+ * @brief Tests a SUB operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "SUBs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFF);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SUBs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 4);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a SUB operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SUBs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
     ASSERT_EQ(arm7.readReg(0), 0);
     ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
 
     // Z = false
     arm7.reset();
-    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SUBs R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(1);
-    ASSERT_EQ(arm7.readReg(0), 1);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 2);
     ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
 }
-
-TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
+/**
+ * @brief Tests a SUB operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_CARRY_FLAG) {
     // C = true
-    writeProgramToMemory("MOVs R0, #0xF0000001\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory(
+        "MOV r0, #1\n"
+        "SUBs r0, r0, #1\n",
+        MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(1);
-    ASSERT_EQ(arm7.readReg(0), 0xF0000001);
+    arm7.fetchAndExecute(2);
     ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
 
     // C = false
     arm7.reset();
-    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
+    writeProgramToMemory(
+        "MOV r0, #0\n"
+        "SUBs r0, r0, #1\n",
+        MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(1);
-    ASSERT_EQ(arm7.readReg(0), 1);
+    arm7.fetchAndExecute(2);
     ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
 }
+/**
+ * @brief Tests a SUB operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    writeProgramToMemory(
+        "MOV r1, #0x80000000\n"
+        "SUBs r0, r1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
 
+    // V = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV r1, #100\n"
+        "SUBs r0, r1, #50\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+
+// ==================================================================================================
+// RSB
+// ==================================================================================================
+class TestCPUDataInstructions_RSB : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_RSB() {}
+    ~TestCPUDataInstructions_RSB() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an RSB operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE) {
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSB R0, R1, #10\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 7);
+}
+/**
+ * @brief Tests an RSB operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #10\n"
+        "RSBs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), -5);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSBs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an RSB operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "RSBs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSBs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an RSB operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV r0, #1\n"
+        "RSBs r0, r0, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV r0, #10\n"
+        "RSBs r0, r0, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests an RSB operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    writeProgramToMemory(
+        "MOV r1, #0x7FFFFFFF\n"
+        "RSBs r0, r1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+
+    // V = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV r1, #50\n"
+        "RSBs r0, r1, #100\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+
+// ==================================================================================================
+// ADD
+// ==================================================================================================
 class TestCPUDataInstructions_ADD : public TestCPUDataInstructions {
 protected:
     TestCPUDataInstructions_ADD() {}
     ~TestCPUDataInstructions_ADD() {}
 
     void SetUp() override { TestCPUDataInstructions::SetUp(); }
-
     void TearDown() override { TestCPUDataInstructions::TearDown(); }
 };
-
+/**
+ * @brief Tests an ADD operation using an immediate as the second operand.
+ */
 TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #100\n"
@@ -167,7 +513,9 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE) {
     arm7.fetchAndExecute(2);
     ASSERT_EQ(arm7.readReg(0), 110);
 }
-
+/**
+ * @brief Tests an ADD operation's negative flag behaviour using an immediate as the second operand.
+ */
 TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
@@ -201,7 +549,9 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
     ASSERT_EQ(arm7.readReg(0), 0xFF0000FF);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
 }
-
+/**
+ * @brief Tests an ADD operation's zero flag behaviour using an immediate as the second operand.
+ */
 TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
@@ -224,7 +574,9 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
     ASSERT_EQ(arm7.readReg(4), 8);
     ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
 }
-
+/**
+ * @brief Tests an ADD operation's carry flag behaviour using an immediate as the second operand.
+ */
 TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
@@ -250,7 +602,9 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
     ASSERT_EQ(arm7.readReg(1), 0xFFFF);
     ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
 }
-
+/**
+ * @brief Tests an ADD operation's overflow flag behaviour using an immediate as the second operand.
+ */
 TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory(
@@ -275,4 +629,1135 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
     arm7.fetchAndExecute(2);
     ASSERT_EQ(arm7.readReg(7), 8);
     ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+// ==================================================================================================
+// ADC
+// ==================================================================================================
+class TestCPUDataInstructions_ADC : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_ADC() {}
+    ~TestCPUDataInstructions_ADC() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an ADC operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE) {
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "ADC R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 9);
+}
+/**
+ * @brief Tests an ADC operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFE\n"
+        "ADCs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "ADCs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an ADC operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "ADCs R0, R1, #0\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 1);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "ADCs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an ADC operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "ADCs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "ADCs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests an ADC operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "ADCs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+
+    // V = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #10\n"
+        "ADCs R0, R1, #20\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+
+// ==================================================================================================
+// SBC
+// ==================================================================================================
+class TestCPUDataInstructions_SBC : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_SBC() {}
+    ~TestCPUDataInstructions_SBC() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an SBC operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE) {
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #10\n"
+        "SBC R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 7);
+}
+/**
+ * @brief Tests an SBC operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SBCs R0, R1, #10\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SBCs R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an SBC operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SBCs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SBCs R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an SBC operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "SBCs R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "SBCs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests an SBC operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "SBCs R0, R1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+
+    // V = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #50\n"
+        "SBCs R0, R1, #20\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+
+// ==================================================================================================
+// RSC
+// ==================================================================================================
+class TestCPUDataInstructions_RSC : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_RSC() {}
+    ~TestCPUDataInstructions_RSC() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an RSC operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE) {
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSC R0, R1, #10\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 7);  // (-3 - 1) + 10 + 1
+}
+/**
+ * @brief Tests an RSC operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #10\n"
+        "RSCs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSCs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an RSC operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_ZERO_FLAG) {
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSCs R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSCs R0, R1, #2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an RSC operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "RSCs R0, R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "RSCs R0, R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests an RSC operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_OVERFLOW_FLAG) {
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "RSCs R0, R1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+
+    arm7.reset();
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #20\n"
+        "RSCs R0, R1, #50\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+
+// ==================================================================================================
+// TST
+// ==================================================================================================
+class TestCPUDataInstructions_TST : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_TST() {}
+    ~TestCPUDataInstructions_TST() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a TST operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "TST R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "TST R1, #0xF0000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a TST operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0x5\n"
+        "TST R1, #0x2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x5\n"
+        "TST R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a TST operation's carry flag behaviour using a rotated immediate.
+ */
+TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "TST R1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "TST R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+
+// ==================================================================================================
+// TEQ
+// ==================================================================================================
+class TestCPUDataInstructions_TEQ : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_TEQ() {}
+    ~TestCPUDataInstructions_TEQ() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a TEQ operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "TEQ R1, #0\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "TEQ R1, #0\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a TEQ operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0x5\n"
+        "TEQ R1, #0x5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x5\n"
+        "TEQ R1, #0x3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a TEQ operation's carry flag behaviour using a rotated immediate.
+ */
+TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "TEQ R1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "TEQ R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+
+// ==================================================================================================
+// CMP
+// ==================================================================================================
+class TestCPUDataInstructions_CMP : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_CMP() {}
+    ~TestCPUDataInstructions_CMP() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a CMP operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "CMP R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMP R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a CMP operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMP R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMP R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a CMP operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMP R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #3\n"
+        "CMP R1, #5\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests a CMP operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "CMP R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+
+    // V = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #100\n"
+        "CMP R1, #50\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+// ==================================================================================================
+// CMN
+// ==================================================================================================
+class TestCPUDataInstructions_CMN : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_CMN() {}
+    ~TestCPUDataInstructions_CMN() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a CMN operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "CMN R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMN R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a CMN operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "CMN R1, #0\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMN R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a CMN operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "CMN R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #5\n"
+        "CMN R1, #3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+/**
+ * @brief Tests a CMN operation's overflow flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_OVERFLOW_FLAG) {
+    // V = true
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "CMN R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 1);
+
+    // V = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #100\n"
+        "CMN R1, #50\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(V_FLAG), 0);
+}
+
+// ==================================================================================================
+// ORR
+// ==================================================================================================
+class TestCPUDataInstructions_ORR : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_ORR() {}
+    ~TestCPUDataInstructions_ORR() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an ORR operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE) {
+    writeProgramToMemory(
+        "MOV R1, #0b110001\n"
+        "ORR R0, R1, #0b101100\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0b111101);
+}
+/**
+ * @brief Tests an ORR operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "ORRs R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "ORRs R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an ORR operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "ORRs R0, R1, #0\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "ORRs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an ORR operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "ORRs R0, R1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "ORRs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+
+// ==================================================================================================
+// MOV
+// ==================================================================================================
+class TestCPUDataInstructions_MOV : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_MOV() {}
+    ~TestCPUDataInstructions_MOV() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Test moving imm values into all possible regs. Small imm values
+ * are defined as able to be encoded in 8 bits.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
+    // Generate test cases.
+    std::vector<uint32_t> immValuesToTest = {0, 1, 2, 8, 16, 42, 113, 173, 255};
+    std::vector<std::string> instructions = {
+        "MOV " + BASE_REG_TOKEN + ", #0",   "MOV " + BASE_REG_TOKEN + ", #1",
+        "MOV " + BASE_REG_TOKEN + ", #2",   "MOV " + BASE_REG_TOKEN + ", #8",
+        "MOV " + BASE_REG_TOKEN + ", #16",  "MOV " + BASE_REG_TOKEN + ", #42",
+        "MOV " + BASE_REG_TOKEN + ", #113", "MOV " + BASE_REG_TOKEN + ", #173",
+        "MOV " + BASE_REG_TOKEN + ", #255"};
+    std::vector<InstructionTestCase> testCases =
+        genInstuctionTestCase(instructions, immValuesToTest, false);
+
+    // Loop over all test cases.
+    for (uint32_t i = 0; i < testCases.size(); i++) {
+        int testValue = testCases[i].expectedVal;
+        // Set a default value to the reg.
+        arm7.reset();
+        arm7.writeReg(testCases[i].regNum, testValue ? 0 : 1);
+        bus.write32ARM7(MAIN_RAM_START, testCases[i].instuction);
+        arm7.setPC(MAIN_RAM_START);
+        arm7.fetchAndExecute();
+        ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
+    }
+}
+/**
+ * @brief Test moving imm values into all possible regs. Large imm values
+ * are defined as able to be encoded in 8 bits + a 4 bit shift.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
+    // Generate test cases.
+    std::vector<uint32_t> immValuesToTest = {0xFF0,     0xFF00,     0xFF000,   0xFF0000,
+                                             0xFF00000, 0xFF000000, 0xF000000F};
+    std::vector<std::string> instructions = {
+        "MOV " + BASE_REG_TOKEN + ", #0xFF0",      "MOV " + BASE_REG_TOKEN + ", #0xFF00",
+        "MOV " + BASE_REG_TOKEN + ", #0xFF000",    "MOV " + BASE_REG_TOKEN + ", #0xFF0000",
+        "MOV " + BASE_REG_TOKEN + ", #0xFF00000",  "MOV " + BASE_REG_TOKEN + ", #0xFF000000",
+        "MOV " + BASE_REG_TOKEN + ", #0xF000000F",
+    };
+    std::vector<InstructionTestCase> testCases =
+        genInstuctionTestCase(instructions, immValuesToTest, false);
+
+    // Loop over all test cases.
+    for (uint32_t i = 0; i < testCases.size(); i++) {
+        int testValue = testCases[i].expectedVal;
+        // Set a default value to the reg.
+        arm7.reset();
+        arm7.writeReg(testCases[i].regNum, testValue ? 0 : 1);
+        bus.write32ARM7(MAIN_RAM_START, testCases[i].instuction);
+        arm7.setPC(MAIN_RAM_START);
+        arm7.fetchAndExecute();
+        ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
+    }
+}
+/**
+ * @brief Tests a MOV operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory("MOVs R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 1);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+
+    // Don't update flag.
+    arm7.reset();
+    writeProgramToMemory("MOV R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a MOV operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory("MOVs R0, #0\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 0);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 1);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a MOV operation's carry flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory("MOVs R0, #0xF0000001\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 0xF0000001);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory("MOVs R0, #1\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+
+// ==================================================================================================
+// BIC
+// ==================================================================================================
+class TestCPUDataInstructions_BIC : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_BIC() {}
+    ~TestCPUDataInstructions_BIC() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a BIC operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0x000000F1\n"
+        "BIC R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x000000F0);
+}
+/**
+ * @brief Tests a BIC operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0x80000001\n"
+        "BICs R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "BICs R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests a BIC operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0x1\n"
+        "BICs R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #0x3\n"
+        "BICs R0, R1, #0x1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a BIC operation's carry flag behaviour using a rotated immediate.
+ */
+TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "BICs R0, R1, #0x80000000\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory(
+        "MOV R1, #1\n"
+        "BICs R0, R1, #1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
+}
+
+// ==================================================================================================
+// MVN
+// ==================================================================================================
+class TestCPUDataInstructions_MVN : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_MVN() {}
+    ~TestCPUDataInstructions_MVN() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an MVN operation using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE) {
+    // N = true
+    writeProgramToMemory("MVN R0, #0x000000F0\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFF0F);
+}
+/**
+ * @brief Tests an MVN operation's negative flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory("MVNs R0,#0x7F000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    writeProgramToMemory("MVNs R0,#0x80000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+/**
+ * @brief Tests an MVN operation's zero flag behaviour using an immediate as the second operand.
+ */
+TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_ZERO_FLAG) {
+    // Z = false
+    arm7.reset();
+    writeProgramToMemory("MVNs R0, #0x0\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an MVN operation's carry flag behaviour using a rotated immediate.
+ */
+TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_CARRY_FLAG) {
+    // C = true
+    writeProgramToMemory("MVNs R0, #0x80000000\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+
+    // C = false
+    arm7.reset();
+    writeProgramToMemory("MVNs R0, #1\n", MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
 }

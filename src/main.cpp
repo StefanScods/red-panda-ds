@@ -8,19 +8,16 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     ARM7TDMI arm7;
     Interconnect bus;
     bus.init();
     bus.bindARM7(&arm7);
 
-    bus.write32ARM7(MAIN_RAM_START, armEncodeASM("MOV r8, #111")[0]);
-
-    PROFILE_BLOCK(for (int i = 0; i < 999999; i++) {
-        arm7.reset();
-        arm7.setPC(MAIN_RAM_START);
-        arm7.fetchAndExecute();
-    });
+    bus.write32ARM7(MAIN_RAM_START, armEncodeASM("MOV r0, #111")[0]);
+    arm7.reset();
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute();
 
     return 0;
 }

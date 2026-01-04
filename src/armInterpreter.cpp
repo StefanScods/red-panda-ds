@@ -57,18 +57,22 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
             // TST (immediate).
             case 0b1000:
                 assert(Rd == 0);
+                // !!!TODO: handle s == 0.
                 return ARM_TST(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
             // TEQ (immediate).
             case 0b1001:
                 assert(Rd == 0);
+                // !!!TODO: handle s == 0.
                 return ARM_TEQ(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
             // CMP (immediate).
             case 0b1010:
                 assert(Rd == 0);
+                // !!!TODO: handle s == 0.
                 return ARM_CMP(*activeRegs[Rn], immDecoded.data_u32);
             // CMN (immediate).
             case 0b1011:
                 assert(Rd == 0);
+                // !!!TODO: handle s == 0.
                 return ARM_CMN(*activeRegs[Rn], immDecoded.data_u32);
             // ORR (immediate).
             case 0b1100:
