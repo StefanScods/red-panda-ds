@@ -54,26 +54,42 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
             // RSC (immediate).
             case 0b0111:
                 return ARM_RSC(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
-            // TST (immediate).
-            case 0b1000:
-                assert(Rd == 0);
-                // !!!TODO: handle s == 0.
-                return ARM_TST(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
-            // TEQ (immediate).
-            case 0b1001:
-                assert(Rd == 0);
-                // !!!TODO: handle s == 0.
-                return ARM_TEQ(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
-            // CMP (immediate).
-            case 0b1010:
-                assert(Rd == 0);
-                // !!!TODO: handle s == 0.
-                return ARM_CMP(*activeRegs[Rn], immDecoded.data_u32);
-            // CMN (immediate).
-            case 0b1011:
-                assert(Rd == 0);
-                // !!!TODO: handle s == 0.
-                return ARM_CMN(*activeRegs[Rn], immDecoded.data_u32);
+            case 0b1000: {
+                // TST (immediate).
+                if (S == 1) {
+                    assert(Rd == 0);
+                    return ARM_TST(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
+                }
+                // MOVW (immediate).
+                // Not supported fall though,
+            }
+            case 0b1001: {
+                // TEQ (immediate).
+                if (S == 1) {
+                    assert(Rd == 0);
+                    return ARM_TEQ(*activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool);
+                }
+                // MSR (immediate).
+                // Not supported fall though,
+            }
+            case 0b1010: {
+                // CMP (immediate).
+                if (S == 1) {
+                    assert(Rd == 0);
+                    return ARM_CMP(*activeRegs[Rn], immDecoded.data_u32);
+                }
+                // MOVT (immediate).
+                // Not supported fall though,
+            }
+            case 0b1011: {
+                // CMN (immediate).
+                if (S == 1) {
+                    assert(Rd == 0);
+                    return ARM_CMN(*activeRegs[Rn], immDecoded.data_u32);
+                }
+                // MSR (immediate).
+                // Not supported fall though,
+            }
             // ORR (immediate).
             case 0b1100:
                 return ARM_ORR(Rd, *activeRegs[Rn], immDecoded.data_u32, immDecoded.data_bool, S);
@@ -89,7 +105,6 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instuct, uint8_t cond) {
                 assert(Rn == 0);
                 return ARM_MVN(Rd, immDecoded.data_u32, immDecoded.data_bool, S);
         }
-
     } else {  // Bit 25 = 0;
         bool bit4 = readBits(instuct, 20, 24);
     }

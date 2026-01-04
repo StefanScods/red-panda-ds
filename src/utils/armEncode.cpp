@@ -34,8 +34,9 @@ std::vector<uint32_t> armEncodeASM(std::string instructions) {
 
     // Assemble the instructions.
     std::filesystem::path outputObjectFile = tempDir / "temp.o";
-    std::string armASMCommand =
-        "arm-none-eabi-gcc -c " + inputAsmFile.string() + " -o " + outputObjectFile.string();
+    std::string armASMCommand = "arm-none-eabi-gcc -c " + inputAsmFile.string() + " -o " +
+                                outputObjectFile.string() + " -march=armv4t";
+    LogDebugPrefixed("Calling: " << armASMCommand, "ASM Encode");
     if (system(armASMCommand.c_str()) != 0) {
         LogErrorPrefixed("Failed to compile assembly file!", "ASM Encode");
         cleanUpEncodeTemps();
@@ -46,6 +47,7 @@ std::vector<uint32_t> armEncodeASM(std::string instructions) {
     std::filesystem::path outputObjectDumpFile = tempDir / "temp.txt";
     armASMCommand = "arm-none-eabi-objdump -d " + outputObjectFile.string() + " >> " +
                     outputObjectDumpFile.string();
+    LogDebugPrefixed("Calling: " << armASMCommand, "ASM Encode");
     if (system(armASMCommand.c_str()) != 0) {
         LogErrorPrefixed("Failed to dump object file!", "ASM Encode");
         cleanUpEncodeTemps();
