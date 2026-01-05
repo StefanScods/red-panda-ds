@@ -1478,6 +1478,146 @@ protected:
     void SetUp() override { TestCPUDataInstructions::SetUp(); }
     void TearDown() override { TestCPUDataInstructions::TearDown(); }
 };
+
+/**
+ * @brief Test moving value between registers.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER) {
+    writeProgramToMemory(
+        "MOV R1, #0xFF000000\n"
+        "MOV R0, R1\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+}
+/**
+ * @brief Test moving value between registers and applying a LSL.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSL) {
+    writeProgramToMemory(
+        "MOV R1, #0x00FF0000\n"
+        "MOV R0, R1, LSL#8\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+}
+/**
+ * @brief Test moving value between registers and applying a LSR.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSR) {
+    writeProgramToMemory(
+        "MOV R1, #0x00FF0000\n"
+        "MOV R0, R1, LSR#8\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x0000FF00);
+}
+/**
+ * @brief Test moving value between registers and applying a ASR.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ASR) {
+    writeProgramToMemory(
+        "MOV R1, #0xFF000000\n"
+        "MOV R0, R1, ASR#8\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFF0000);
+}
+/**
+ * @brief Test moving value between registers and applying a ROR.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR) {
+    writeProgramToMemory(
+        "MOV R1, #0xF000000F\n"
+        "MOV R0, R1, ROR#8\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x0FF00000);
+}
+/**
+ * @brief Test moving value between registers and applying a RRX.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_RRX) {
+    arm7.setFlag(C_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #0x00000001\n"
+        "MOVs R0, R1, RRX\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(2);
+    ASSERT_EQ(arm7.readReg(0), 0x80000000);
+    ASSERT_EQ(arm7.readFlag(C_FLAG), 1);
+}
+/**
+ * @brief Test moving value between registers and applying a LSL with a register value amount.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSL_REG) {
+    writeProgramToMemory(
+        "MOV R2, #0x00000008\n"
+        "MOV R1, #0x00FF0000\n"
+        "MOV R0, R1, LSL R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xFF000000);
+}
+/**
+ * @brief Test moving value between registers and applying a LSR with a register value amount.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSR_REG) {
+    writeProgramToMemory(
+        "MOV R2, #0x00000008\n"
+        "MOV R1, #0x00FF0000\n"
+        "MOV R0, R1, LSR R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0x0000FF00);
+}
+/**
+ * @brief Test moving value between registers and applying a ASR with a register value amount.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ASR_REG) {
+    writeProgramToMemory(
+        "MOV R2, #0x00000008\n"
+        "MOV R1, #0xFF000000\n"
+        "MOV R0, R1, ASR R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFF0000);
+}
+/**
+ * @brief Test moving value between registers and applying a ROR with a register value amount.
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR_REG) {
+    writeProgramToMemory(
+        "MOV R2, #0x00000008\n"
+        "MOV R1, #0xF000000F\n"
+        "MOV R0, R1, ROR R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0x0FF00000);
+}
+/**
+ * @brief Test moving value between registers and applying a ROR with a register value amount (0).
+ */
+TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR_ZERO_REG) {
+    writeProgramToMemory(
+        "MOV R2, #0x00000000\n"
+        "MOV R1, #0xF000000F\n"
+        "MOV R0, R1, ROR R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xF000000F);
+}
 /**
  * @brief Test moving imm values into all possible regs. Small imm values
  * are defined as able to be encoded in 8 bits.

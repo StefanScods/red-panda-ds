@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <assert.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <iomanip>
@@ -110,8 +112,25 @@ inline void writeBits(T& data, T value, uint8_t rangeStart, uint8_t rangeEnd) {
  * u32AndBool.data_bool - Carry out flag.
  */
 inline u32AndBool ROR(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
+    shift = shift % bitWidth;
     uint32_t rotatedValue = (value >> shift) | (value << (bitWidth - shift));
     bool carryOut = (value >> (shift - 1)) & 0b1;
+    return {rotatedValue, carryOut};
+}
+
+/**
+ * @brief Calculate the RRX (Rotate Right with Extend) of a value.
+ *
+ *
+ * @param value Value to rotate.
+ * @param carryIn Carry in flag.
+ * @return u32AndBool.data_u32 - The rotated value.
+ *
+ * u32AndBool.data_bool - Carry out flag.
+ */
+inline u32AndBool RRX(uint32_t value, uint32_t carryIn, uint32_t bitWidth = 32) {
+    uint32_t rotatedValue = (value >> 1) | (carryIn << (bitWidth - 1));
+    bool carryOut = (value) & 0b1;
     return {rotatedValue, carryOut};
 }
 
@@ -133,11 +152,27 @@ inline u32AndBool ROL(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
 }
 
 /**
- * @brief Calculate the ASR (Arithmetic shift right) of a value.
- * Note: Function does not safety check that shift <= 31.
+ * @brief Calculate the LSR (Logical shift right) of a value.
  *
  * @param value Value to rotate.
- * @param shift Number of bits to shift by 0-31.
+ * @param shift Number of bits to shift by.
+ * @param bitWidth The bit width of the value.
+ * @return u32AndBool.data_u32 - The shifted value.
+ *
+ * u32AndBool.data_bool - Carry out flag.
+ */
+inline u32AndBool LSR(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
+    if (shift >= bitWidth) return {0, readBit(value, bitWidth - 1)};
+    bool carryOut = readBit(value, shift - 1);
+    value = value >> shift;
+    return {value, carryOut};
+}
+
+/**
+ * @brief Calculate the ASR (Arithmetic shift right) of a value.
+ *
+ * @param value Value to rotate.
+ * @param shift Number of bits to shift by.
  * @param bitWidth The bit width of the value.
  * @return u32AndBool.data_u32 - The shifted value.
  *
@@ -145,6 +180,8 @@ inline u32AndBool ROL(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
  */
 inline u32AndBool ASR(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
     bool signExtend = readBit(value, bitWidth - 1);
+    if (shift >= bitWidth)
+        return {signExtend ? 0xFFFFFFFF : 0x00000000, readBit(value, bitWidth - 1)};
     bool carryOut = readBit(value, shift - 1);
     value = value >> shift;
     if (signExtend) {
@@ -158,6 +195,7 @@ inline u32AndBool ASR(uint32_t value, uint8_t shift, uint32_t bitWidth = 32) {
 #define ARM_SHIFT_LSR 0b01
 #define ARM_SHIFT_ASR 0b10
 #define ARM_SHIFT_ROR 0b11
+#define ARM_SHIFT_RRX 0b100
 
 /**
  * @brief Implements ARM shift() function.
@@ -184,9 +222,7 @@ inline u32AndBool ARMShift(uint8_t type, uint32_t value, uint8_t shift, bool car
         }
         // Logical shift right.
         case ARM_SHIFT_LSR: {
-            bool carryOut = readBit(value, shift - 1);
-            value = value >> shift;
-            return {value, carryOut};
+            return LSR(value, shift, bitWidth);
         }
         // Arithmetic shift right.
         case ARM_SHIFT_ASR: {
@@ -196,9 +232,19 @@ inline u32AndBool ARMShift(uint8_t type, uint32_t value, uint8_t shift, bool car
         case ARM_SHIFT_ROR: {
             return ROR(value, shift, bitWidth);
         }
+        // Rotate Right with Extend.
+        case ARM_SHIFT_RRX: {
+            return RRX(value, carryIn, bitWidth);
+        }
+        default:
+            break;
     }
     // Unknown shift type
     return {value, carryIn};
+}
+inline u32AndBool ARMShift(uint32_t value, const decodeShiftResult& shiftType, bool carryIn,
+                           uint32_t bitWidth = 32) {
+    return ARMShift(shiftType.shiftType, value, shiftType.shiftAmount, carryIn, bitWidth);
 }
 
 /**
@@ -236,24 +282,28 @@ inline u32WithCarryAndOverflow ARMAddWithCarry(uint32_t opperand1, uint32_t oppe
     bool overflow = int64_t(int32_t(result)) != signedSum;
     return {result, carryOut, overflow};
 }
-
 /**
- * @brief Splits a string at tokens matched via a regular expression.
- * Use std::regex("\\s+") to match and split on white space.
+ * @brief Implements DecodeImmShift - used to decode a shift operation.
+ * https://developer.arm.com/documentation/ddi0602/2025-12/Shared-Pseudocode/aarch32-functions-common?lang=en
  *
- * @param input String to split
- * @param splitOnRegex Regex to model where to split
- * @return std::vector<std::string>
+ * @param srcType The source 2 bits used to determine type.
+ * @param amount The source 5 bits used to determine amount.
+ * @return decodeShiftResult.shiftType - The type of shift.
+ *
+ * decodeShiftResult.shiftAmount - The amount of shifting.
  */
-inline std::vector<std::string> splitString(const std::string& input,
-                                            const std::regex& splitOnRegex) {
-    std::vector<std::string> splitTokens;
-    std::sregex_token_iterator it(input.begin(), input.end(), splitOnRegex, -1);
-    std::sregex_token_iterator end;
-    for (; it != end; ++it) {
-        splitTokens.push_back(it->str());
+inline decodeShiftResult ARMDecodeImmShift(uint8_t srcType, uint8_t amount) {
+    uint8_t shiftType = srcType;
+    uint8_t shiftAmount = amount;
+    // Special cases:
+    if (shiftType == ARM_SHIFT_ROR && shiftAmount == 0) {
+        shiftType = ARM_SHIFT_RRX;
+        shiftAmount = 1;
     }
-    return splitTokens;
+    if ((shiftType == ARM_SHIFT_LSR || shiftType == ARM_SHIFT_ASR) && shiftAmount == 0) {
+        shiftAmount = 32;
+    }
+    return {shiftType, shiftAmount};
 }
 
 /**

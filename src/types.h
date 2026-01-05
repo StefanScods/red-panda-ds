@@ -22,6 +22,7 @@ struct busPayload {
     uint32_t size;
 };
 
+// ARM helper function return types.
 struct u32AndBool {
     uint32_t data_u32;
     bool data_bool;
@@ -31,5 +32,8 @@ struct u32WithCarryAndOverflow {
     bool carry;
     bool overflow;
 };
-
+struct decodeShiftResult {
+    uint8_t shiftType;
+    uint8_t shiftAmount;
+};
 #endif
