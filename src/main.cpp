@@ -15,14 +15,14 @@ int main(int argc, char** argv) {
     bus.bindARM7(&arm7);
     arm7.reset();
 
-    bus.write32ARM7(MAIN_RAM_START, armEncodeASM("MOV R2, #0x00000005\n")[0]);
-    bus.write32ARM7(MAIN_RAM_START + 4, armEncodeASM("MOV R1, #0x00FF0000\n")[0]);
-    bus.write32ARM7(MAIN_RAM_START + 8, armEncodeASM("MOVs R0, R1, LSL R2\n")[0]);
+    bus.write32ARM7(MAIN_RAM_START, armEncodeASM("MOV R1, #0x80000000\n")[0]);
+    bus.write32ARM7(MAIN_RAM_START + 4, armEncodeASM("TEQ R1, #0\n")[0]);
+    // bus.write32ARM7(MAIN_RAM_START + 8, armEncodeASM("MOVs R0, R1, LSL R2\n")[0]);
 
     arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(3);
+    arm7.fetchAndExecute(2);
 
-    LogMsg(std::hex << arm7.readReg(0));
+    LogMsg(std::hex << arm7.readFlag(Z_FLAG));
 
     return 0;
 }

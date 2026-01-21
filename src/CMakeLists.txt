@@ -11,7 +11,7 @@ set(EMU_CORE_SOURCES
    ${EMU_CORE_SOURCES}
    ${CMAKE_CURRENT_SOURCE_DIR}/utils/armEncode.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arm7.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_coprocessor.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_branch.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_data.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_loadStore.cpp
