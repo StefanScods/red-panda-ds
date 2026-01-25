@@ -212,6 +212,7 @@ public:
     /**
      * @brief Instruction set.
      */
+    cycles ARM_UNDEFINED_INST(uint32_t instruct) { return 1; }
     cycles dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
     cycles ARM_AND_REG(uint32_t instruct);
@@ -277,6 +278,14 @@ public:
     cycles ARM_MVN_REG(uint32_t instruct);
     cycles ARM_MVN_REG_SHIFT(uint32_t instruct);
     cycles ARM_MVN_IMM(uint32_t instruct);
+    cycles ARM_MUL(uint32_t instruct);
+    cycles ARM_MLA(uint32_t instruct);
+    cycles ARM_UMAAL(uint32_t instruct);
+    cycles ARM_MLS(uint32_t instruct);
+    cycles ARM_UMULL(uint32_t instruct);
+    cycles ARM_UMLAL(uint32_t instruct);
+    cycles ARM_SMULL(uint32_t instruct);
+    cycles ARM_SMLAL(uint32_t instruct);
     cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
     cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                    bool wback);

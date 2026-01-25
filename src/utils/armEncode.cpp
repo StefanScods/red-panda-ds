@@ -14,7 +14,7 @@ void cleanUpEncodeTemps(std::filesystem::path tempDir) {
     }
 }
 
-std::vector<uint32_t> armEncodeASM(std::string instructions) {
+std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7) {
     LogDebugPrefixed("Assembling:\n===============================\n"
                          << instructions,
                      "ASM Encode");
@@ -32,10 +32,11 @@ std::vector<uint32_t> armEncodeASM(std::string instructions) {
     asmFile << instructions << std::endl;
     asmFile.close();
 
+    std::string arch = arm7 ? "armv4t" : "ARMv5TE";
     // Assemble the instructions.
     std::filesystem::path outputObjectFile = tempDir / "temp.o";
     std::string armASMCommand = "arm-none-eabi-gcc -c " + inputAsmFile.string() + " -o " +
-                                outputObjectFile.string() + " -march=armv4t";
+                                outputObjectFile.string() + " -march=" + arch;
     LogDebugPrefixed("Calling: " << armASMCommand, "ASM Encode");
     if (system(armASMCommand.c_str()) != 0) {
         LogErrorPrefixed("Failed to compile assembly file!", "ASM Encode");

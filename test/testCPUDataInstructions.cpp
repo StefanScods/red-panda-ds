@@ -1901,3 +1901,681 @@ TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_CARRY_FLAG) {
     arm7.fetchAndExecute(1);
     ASSERT_EQ(arm7.readFlag(C_FLAG), 0);
 }
+
+// ==================================================================================================
+// MUL
+// ==================================================================================================
+class TestCPUDataInstructions_MUL : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_MUL() {}
+    ~TestCPUDataInstructions_MUL() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an MUL operation using small numbers.
+ */
+TEST_F(TestCPUDataInstructions_MUL, MUL_0) {
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #6\n"
+        "MUL R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 42);
+}
+/**
+ * @brief Tests an MUL operation using large positive numbers.
+ */
+TEST_F(TestCPUDataInstructions_MUL, MUL_1) {
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "MOV R2, #2\n"
+        "MUL R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFE);
+}
+/**
+ * @brief Tests an MUL operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_MUL, MUL_2) {
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "MOV R2, #2\n"
+        "MUL R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0);
+}
+/**
+ * @brief Tests an MUL operation zero flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_MUL, MUL_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #0\n"
+        "MULs R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(Z_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "MULs R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an MUL operation negative flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_MUL, MUL_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #1\n"
+        "MULs R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(N_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "MULs R0, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+
+// ==================================================================================================
+// MLA
+// ==================================================================================================
+class TestCPUDataInstructions_MLA : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_MLA() {}
+    ~TestCPUDataInstructions_MLA() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an MLA operation using small numbers.
+ */
+TEST_F(TestCPUDataInstructions_MLA, MLA_0) {
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #6\n"
+        "MOV R3, #5\n"
+        "MLA R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readReg(0), 47);
+}
+/**
+ * @brief Tests an MLA operation using large positive numbers.
+ */
+TEST_F(TestCPUDataInstructions_MLA, MLA_1) {
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "MOV R2, #2\n"
+        "MOV R3, #1\n"
+        "MLA R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFF);
+}
+/**
+ * @brief Tests an MLA operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_MLA, MLA_2) {
+    writeProgramToMemory(
+        "MOV R1, #0x80000000\n"
+        "MOV R2, #2\n"
+        "MOV R3, #1\n"
+        "MLA R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readReg(0), 1);
+}
+/**
+ * @brief Tests an MLA operation zero flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_MLA, MLA_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #0\n"
+        "MOV R3, #0\n"
+        "MLAs R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(Z_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "MOV R3, #1\n"
+        "MLAs R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an MLA operation negative flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_MLA, MLA_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #1\n"
+        "MOV R3, #0\n"
+        "MLAs R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(N_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "MOV R3, #0\n"
+        "MLAs R0, R1, R2, R3\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(4);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+
+// ==================================================================================================
+// UMULL
+// ==================================================================================================
+class TestCPUDataInstructions_UMULL : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_UMULL() {}
+    ~TestCPUDataInstructions_UMULL() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an UMULL operation using small numbers.
+ */
+TEST_F(TestCPUDataInstructions_UMULL, UMULL_0) {
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #6\n"
+        "UMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 42);
+    ASSERT_EQ(arm7.readReg(3), 0);
+}
+/**
+ * @brief Tests an UMULL operation using large positive numbers.
+ */
+TEST_F(TestCPUDataInstructions_UMULL, UMULL_1) {
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #2\n"
+        "UMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFE);
+    ASSERT_EQ(arm7.readReg(3), 1);
+}
+/**
+ * @brief Tests an UMULL operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_UMULL, UMULL_2) {
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #0x80000000\n"
+        "UMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0x80000000);
+    ASSERT_EQ(arm7.readReg(3), 0x7FFFFFFF);
+}
+/**
+ * @brief Tests an UMULL operation with zero result
+ */
+TEST_F(TestCPUDataInstructions_UMULL, UMULL_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "MOV R2, #7\n"
+        "UMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(Z_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "UMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an UMULL operation negative flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_UMULL, UMULL_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #0xFFFFFFFF\n"
+        "UMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(N_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "UMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+
+// UMLAL
+// ==================================================================================================
+class TestCPUDataInstructions_UMLAL : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_UMLAL() {}
+    ~TestCPUDataInstructions_UMLAL() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a UMLAL operation using small numbers.
+ */
+TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_0) {
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #7\n"
+        "MOV R2, #6\n"
+        "UMLAL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readReg(0), 42);
+    ASSERT_EQ(arm7.readReg(3), 0);
+}
+/**
+ * @brief Tests a UMLAL operation using large positive numbers.
+ */
+TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_1) {
+    writeProgramToMemory(
+        "MOV R0, #1\n"
+        "MOV R3, #1\n"
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #2\n"
+        "UMLAL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFF);
+    ASSERT_EQ(arm7.readReg(3), 2);
+}
+/**
+ * @brief Tests an UMLAL operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_2) {
+    writeProgramToMemory(
+        "MOV R0, #0xFFFFFFFF\n"
+        "MOV R3, #0xFFFFFFFF\n"
+        "MOV R1, #-6\n"
+        "MOV R2, #10\n"
+        "UMLAL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFC3);
+    ASSERT_EQ(arm7.readReg(3), 0x00000009);
+}
+/**
+ * @brief Tests a UMLAL operation with zero result
+ */
+TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #0\n"
+        "MOV R2, #0\n"
+        "UMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(Z_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "UMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests a UMLAL operation negative flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0x80000000\n"
+        "MOV R1, #2\n"
+        "MOV R2, #1\n"
+        "UMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(N_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "UMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+
+// ==================================================================================================
+// SMULL
+// ==================================================================================================
+class TestCPUDataInstructions_SMULL : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_SMULL() {}
+    ~TestCPUDataInstructions_SMULL() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an SMULL operation using small numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMULL, SMULL_0) {
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #6\n"
+        "SMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 42);
+    ASSERT_EQ(arm7.readReg(3), 0);
+}
+/**
+ * @brief Tests an SMULL operation using large positive numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMULL, SMULL_1) {
+    writeProgramToMemory(
+        "MOV R1, #0x7FFFFFFF\n"
+        "MOV R2, #2\n"
+        "SMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFE);
+    ASSERT_EQ(arm7.readReg(3), 0);
+}
+/**
+ * @brief Tests an SMULL operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMULL, SMULL_2) {
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #0x80000000\n"
+        "SMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0x80000000);
+    ASSERT_EQ(arm7.readReg(3), 0);
+}
+/**
+ * @brief Tests an SMULL operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMULL, SMULL_3) {
+    writeProgramToMemory(
+        "MOV R1, #0xFFFFFFFF\n"
+        "MOV R2, #2\n"
+        "SMULL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFE);
+    ASSERT_EQ(arm7.readReg(3), 0xFFFFFFFF);
+}
+/**
+ * @brief Tests an SMULL operation zero flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_SMULL, SMULL_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R1, #0\n"
+        "MOV R2, #0\n"
+        "SMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(Z_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "SMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an SMULL operation negative flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_SMULL, SMULL_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R1, #2\n"
+        "MOV R2, #0x80000000\n"
+        "SMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(N_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "SMULLs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(3);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}
+
+// ==================================================================================================
+// SMLAL
+// ==================================================================================================
+class TestCPUDataInstructions_SMLAL : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_SMLAL() {}
+    ~TestCPUDataInstructions_SMLAL() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests an SMLAL operation using small numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_0) {
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #7\n"
+        "MOV R2, #6\n"
+        "SMLAL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readReg(0), 42);
+    ASSERT_EQ(arm7.readReg(3), 0);
+}
+/**
+ * @brief Tests an SMLAL operation using large positive numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_1) {
+    writeProgramToMemory(
+        "MOV R0, #1\n"
+        "MOV R3, #1\n"
+        "MOV R1, #0x7FFFFFFF\n"
+        "MOV R2, #2\n"
+        "SMLAL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFFF);
+    ASSERT_EQ(arm7.readReg(3), 1);
+}
+/**
+ * @brief Tests an SMLAL operation using large negative numbers.
+ */
+TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_2) {
+    writeProgramToMemory(
+        "MOV R0, #0xFFFFFFFF\n"
+        "MOV R3, #0xFFFFFFFF\n"
+        "MOV R1, #-6\n"
+        "MOV R2, #10\n"
+        "SMLAL R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readReg(0), 0xFFFFFFC3);
+    ASSERT_EQ(arm7.readReg(3), 0xFFFFFFFF);
+}
+/**
+ * @brief Tests an SMLAL operation zero flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_ZERO_FLAG) {
+    // Z = true
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #0\n"
+        "MOV R2, #0\n"
+        "SMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 1);
+
+    // Z = false
+    arm7.reset();
+    arm7.setFlag(Z_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R0, #1\n"
+        "MOV R3, #1\n"
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "SMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(Z_FLAG), 0);
+}
+/**
+ * @brief Tests an SMLAL operation negative flag behaviour
+ */
+TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_NEGATIVE_FLAG) {
+    // N = true
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0x80000000\n"
+        "MOV R1, #2\n"
+        "MOV R2, #1\n"
+        "SMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 1);
+
+    // N = false
+    arm7.reset();
+    arm7.setFlag(N_FLAG, 1);
+    writeProgramToMemory(
+        "MOV R0, #0\n"
+        "MOV R3, #0\n"
+        "MOV R1, #7\n"
+        "MOV R2, #1\n"
+        "SMLALs R0, R3, R1, R2\n",
+        MAIN_RAM_START, &bus, true);
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(5);
+    ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
+}

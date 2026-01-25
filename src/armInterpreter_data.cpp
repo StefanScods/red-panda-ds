@@ -7,6 +7,8 @@
 
 // Control print statements.
 #define LOG_LEVEL 2
+#include <bit>
+
 #include "logger.h"
 
 // !!!TODO Handle when commands target PC.
@@ -46,9 +48,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // AND (Register)
         case 0b0000001000:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // MUL
         case 0b0000001001:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_MUL(instruct);
         // AND (Register)
         case 0b0000001010:
             return ARM_AND_REG(instruct);
@@ -93,9 +95,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // AND (Register)
         case 0b0000011000:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // MUL
         case 0b0000011001:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_MUL(instruct);
         // AND (Register)
         case 0b0000011010:
             return ARM_AND_REG(instruct);
@@ -141,9 +143,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // EOR (Register)
         case 0b0000101000:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // MLA
         case 0b0000101001:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_MLA(instruct);
         // EOR (Register)
         case 0b0000101010:
             return ARM_EOR_REG(instruct);
@@ -189,9 +191,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // EOR (Register)
         case 0b0000111000:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // MLA
         case 0b0000111001:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_MLA(instruct);
         // EOR (Register)
         case 0b0000111010:
             return ARM_EOR_REG(instruct);
@@ -237,9 +239,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SUB (Register)
         case 0b0001001000:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // UMAAL -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0001001001:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // SUB (Register)
         case 0b0001001010:
             return ARM_SUB_REG(instruct);
@@ -285,9 +287,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SUB (Register)
         case 0b0001011000:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // Undefined
         case 0b0001011001:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // SUB (Register)
         case 0b0001011010:
             return ARM_SUB_REG(instruct);
@@ -333,9 +335,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSB (Register)
         case 0b0001101000:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // MLS -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0001101001:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // RSB (Register)
         case 0b0001101010:
             return ARM_RSB_REG(instruct);
@@ -381,9 +383,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSB (Register)
         case 0b0001111000:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // Undefined
         case 0b0001111001:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // RSB (Register)
         case 0b0001111010:
             return ARM_RSB_REG(instruct);
@@ -429,9 +431,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADD (Register)
         case 0b0010001000:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // UMULL
         case 0b0010001001:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_UMULL(instruct);
         // ADD (Register)
         case 0b0010001010:
             return ARM_ADD_REG(instruct);
@@ -477,9 +479,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADD (Register)
         case 0b0010011000:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // UMULL
         case 0b0010011001:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_UMULL(instruct);
         // ADD (Register)
         case 0b0010011010:
             return ARM_ADD_REG(instruct);
@@ -498,7 +500,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADD (Register Shifted)
         case 0b0010011111:
             return ARM_ADD_REG_SHIFT(instruct);
-            // ADC (Register)
+        // ADC (Register)
         case 0b0010100000:
             return ARM_ADC_REG(instruct);
         // ADC (Register Shifted)
@@ -525,9 +527,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADC (Register)
         case 0b0010101000:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // UMLAL
         case 0b0010101001:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_UMLAL(instruct);
         // ADC (Register)
         case 0b0010101010:
             return ARM_ADC_REG(instruct);
@@ -573,9 +575,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADC (Register)
         case 0b0010111000:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // UMLAL
         case 0b0010111001:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_UMLAL(instruct);
         // ADC (Register)
         case 0b0010111010:
             return ARM_ADC_REG(instruct);
@@ -621,9 +623,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SBC (Register)
         case 0b0011001000:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // SMULL
         case 0b0011001001:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_SMULL(instruct);
         // SBC (Register)
         case 0b0011001010:
             return ARM_SBC_REG(instruct);
@@ -669,9 +671,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SBC (Register)
         case 0b0011011000:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // SMULL
         case 0b0011011001:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_SMULL(instruct);
         // SBC (Register)
         case 0b0011011010:
             return ARM_SBC_REG(instruct);
@@ -717,9 +719,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSC (Register)
         case 0b0011101000:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // SMLAL
         case 0b0011101001:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_SMLAL(instruct);
         // RSC (Register)
         case 0b0011101010:
             return ARM_RSC_REG(instruct);
@@ -765,9 +767,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSC (Register)
         case 0b0011111000:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // SMLAL
         case 0b0011111001:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_SMLAL(instruct);
         // RSC (Register)
         case 0b0011111010:
             return ARM_RSC_REG(instruct);
@@ -2049,6 +2051,12 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
     return 1;
 }
 // ==================================================================================================
+// Data-processing
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Data-processing--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Data-processing--register-shifted-register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Data-processing--immediate-?lang=en
+// ==================================================================================================
+// ==================================================================================================
 // AND
 // ==================================================================================================
 cycles ARM::ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags) {
@@ -2077,10 +2085,10 @@ cycles ARM::ARM_AND_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_AND(Rd, opperand1, opperand2, carry, S);
+    return ARM_AND(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_AND_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2096,10 +2104,10 @@ cycles ARM::ARM_AND_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_AND(Rd, opperand1, opperand2, carry, S);
+    return ARM_AND(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_AND_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2118,10 +2126,10 @@ cycles ARM::ARM_AND_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_AND(Rd, opperand1, opperand2, carry, S);
+    return ARM_AND(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // EOR
@@ -2152,10 +2160,10 @@ cycles ARM::ARM_EOR_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_EOR(Rd, opperand1, opperand2, carry, S);
+    return ARM_EOR(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_EOR_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2171,10 +2179,10 @@ cycles ARM::ARM_EOR_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_EOR(Rd, opperand1, opperand2, carry, S);
+    return ARM_EOR(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_EOR_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2193,10 +2201,10 @@ cycles ARM::ARM_EOR_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_EOR(Rd, opperand1, opperand2, carry, S);
+    return ARM_EOR(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // SUB
@@ -2228,10 +2236,10 @@ cycles ARM::ARM_SUB_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_SUB(Rd, opperand1, opperand2, S);
+    return ARM_SUB(Rd, operand1, operand2, S);
 }
 cycles ARM::ARM_SUB_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2247,10 +2255,10 @@ cycles ARM::ARM_SUB_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_SUB(Rd, opperand1, opperand2, S);
+    return ARM_SUB(Rd, operand1, operand2, S);
 }
 cycles ARM::ARM_SUB_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2269,10 +2277,10 @@ cycles ARM::ARM_SUB_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_SUB(Rd, opperand1, opperand2, S);
+    return ARM_SUB(Rd, operand1, operand2, S);
 }
 // ==================================================================================================
 // RSB
@@ -2304,10 +2312,10 @@ cycles ARM::ARM_RSB_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_RSB(Rd, opperand1, opperand2, S);
+    return ARM_RSB(Rd, operand1, operand2, S);
 }
 cycles ARM::ARM_RSB_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2323,10 +2331,10 @@ cycles ARM::ARM_RSB_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_RSB(Rd, opperand1, opperand2, S);
+    return ARM_RSB(Rd, operand1, operand2, S);
 }
 cycles ARM::ARM_RSB_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2345,10 +2353,10 @@ cycles ARM::ARM_RSB_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_RSB(Rd, opperand1, opperand2, S);
+    return ARM_RSB(Rd, operand1, operand2, S);
 }
 // ==================================================================================================
 // ADD
@@ -2380,10 +2388,10 @@ cycles ARM::ARM_ADD_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ADD(Rd, opperand1, opperand2, S);
+    return ARM_ADD(Rd, operand1, operand2, S);
 }
 cycles ARM::ARM_ADD_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2399,10 +2407,10 @@ cycles ARM::ARM_ADD_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ADD(Rd, opperand1, opperand2, S);
+    return ARM_ADD(Rd, operand1, operand2, S);
 }
 cycles ARM::ARM_ADD_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2421,10 +2429,10 @@ cycles ARM::ARM_ADD_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_ADD(Rd, opperand1, opperand2, S);
+    return ARM_ADD(Rd, operand1, operand2, S);
 }
 // ==================================================================================================
 // ADC
@@ -2456,10 +2464,10 @@ cycles ARM::ARM_ADC_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ADC(Rd, opperand1, opperand2, carry, S);
+    return ARM_ADC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_ADC_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2475,10 +2483,10 @@ cycles ARM::ARM_ADC_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ADC(Rd, opperand1, opperand2, carry, S);
+    return ARM_ADC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_ADC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2497,10 +2505,10 @@ cycles ARM::ARM_ADC_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_ADC(Rd, opperand1, opperand2, carry, S);
+    return ARM_ADC(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // SBC
@@ -2532,10 +2540,10 @@ cycles ARM::ARM_SBC_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_SBC(Rd, opperand1, opperand2, carry, S);
+    return ARM_SBC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_SBC_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2551,10 +2559,10 @@ cycles ARM::ARM_SBC_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_SBC(Rd, opperand1, opperand2, carry, S);
+    return ARM_SBC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_SBC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2573,10 +2581,10 @@ cycles ARM::ARM_SBC_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_SBC(Rd, opperand1, opperand2, carry, S);
+    return ARM_SBC(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // RSC
@@ -2608,10 +2616,10 @@ cycles ARM::ARM_RSC_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_RSC(Rd, opperand1, opperand2, carry, S);
+    return ARM_RSC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_RSC_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2627,10 +2635,10 @@ cycles ARM::ARM_RSC_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_RSC(Rd, opperand1, opperand2, carry, S);
+    return ARM_RSC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_RSC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2649,10 +2657,10 @@ cycles ARM::ARM_RSC_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_RSC(Rd, opperand1, opperand2, carry, S);
+    return ARM_RSC(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // TST
@@ -2676,10 +2684,10 @@ cycles ARM::ARM_TST_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_TST(opperand1, opperand2, carry);
+    return ARM_TST(operand1, operand2, carry);
 }
 cycles ARM::ARM_TST_REG_SHIFT(uint32_t instruct) {
     // 1st Operand Register.
@@ -2691,10 +2699,10 @@ cycles ARM::ARM_TST_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_TST(opperand1, opperand2, carry);
+    return ARM_TST(operand1, operand2, carry);
 }
 cycles ARM::ARM_TST_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -2709,10 +2717,10 @@ cycles ARM::ARM_TST_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_TST(opperand1, opperand2, carry);
+    return ARM_TST(operand1, operand2, carry);
 }
 // ==================================================================================================
 // TEQ
@@ -2736,10 +2744,10 @@ cycles ARM::ARM_TEQ_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_TEQ(opperand1, opperand2, carry);
+    return ARM_TEQ(operand1, operand2, carry);
 }
 cycles ARM::ARM_TEQ_REG_SHIFT(uint32_t instruct) {
     // 1st Operand Register.
@@ -2751,10 +2759,10 @@ cycles ARM::ARM_TEQ_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_TEQ(opperand1, opperand2, carry);
+    return ARM_TEQ(operand1, operand2, carry);
 }
 cycles ARM::ARM_TEQ_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -2769,10 +2777,10 @@ cycles ARM::ARM_TEQ_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_TEQ(opperand1, opperand2, carry);
+    return ARM_TEQ(operand1, operand2, carry);
 }
 // ==================================================================================================
 // CMP
@@ -2797,10 +2805,10 @@ cycles ARM::ARM_CMP_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_CMP(opperand1, opperand2);
+    return ARM_CMP(operand1, operand2);
 }
 cycles ARM::ARM_CMP_REG_SHIFT(uint32_t instruct) {
     // 1st Operand Register.
@@ -2812,10 +2820,10 @@ cycles ARM::ARM_CMP_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_CMP(opperand1, opperand2);
+    return ARM_CMP(operand1, operand2);
 }
 cycles ARM::ARM_CMP_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -2830,10 +2838,10 @@ cycles ARM::ARM_CMP_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_CMP(opperand1, opperand2);
+    return ARM_CMP(operand1, operand2);
 }
 // ==================================================================================================
 // CMN
@@ -2858,10 +2866,10 @@ cycles ARM::ARM_CMN_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_CMN(opperand1, opperand2);
+    return ARM_CMN(operand1, operand2);
 }
 cycles ARM::ARM_CMN_REG_SHIFT(uint32_t instruct) {
     // 1st Operand Register.
@@ -2873,10 +2881,10 @@ cycles ARM::ARM_CMN_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_CMN(opperand1, opperand2);
+    return ARM_CMN(operand1, operand2);
 }
 cycles ARM::ARM_CMN_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -2891,10 +2899,10 @@ cycles ARM::ARM_CMN_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_CMN(opperand1, opperand2);
+    return ARM_CMN(operand1, operand2);
 }
 // ==================================================================================================
 // ORR
@@ -2925,10 +2933,10 @@ cycles ARM::ARM_ORR_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ORR(Rd, opperand1, opperand2, carry, S);
+    return ARM_ORR(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_ORR_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2944,10 +2952,10 @@ cycles ARM::ARM_ORR_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ORR(Rd, opperand1, opperand2, carry, S);
+    return ARM_ORR(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_ORR_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -2966,10 +2974,10 @@ cycles ARM::ARM_ORR_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_ORR(Rd, opperand1, opperand2, carry, S);
+    return ARM_ORR(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // MOV
@@ -2997,9 +3005,9 @@ cycles ARM::ARM_MOV_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand = operandShifted.data_u32;
+    uint32_t operand = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_MOV(Rd, opperand, carry, S);
+    return ARM_MOV(Rd, operand, carry, S);
 }
 cycles ARM::ARM_MOV_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -3013,9 +3021,9 @@ cycles ARM::ARM_MOV_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand = operandShifted.data_u32;
+    uint32_t operand = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_MOV(Rd, opperand, carry, S);
+    return ARM_MOV(Rd, operand, carry, S);
 }
 cycles ARM::ARM_MOV_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -3032,9 +3040,9 @@ cycles ARM::ARM_MOV_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand = immDecoded.data_u32;
+    uint32_t operand = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_MOV(Rd, opperand, carry, S);
+    return ARM_MOV(Rd, operand, carry, S);
 }
 // ==================================================================================================
 // BIC
@@ -3065,10 +3073,10 @@ cycles ARM::ARM_BIC_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_BIC(Rd, opperand1, opperand2, carry, S);
+    return ARM_BIC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_BIC_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -3084,10 +3092,10 @@ cycles ARM::ARM_BIC_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = operandShifted.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_BIC(Rd, opperand1, opperand2, carry, S);
+    return ARM_BIC(Rd, operand1, operand2, carry, S);
 }
 cycles ARM::ARM_BIC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -3106,10 +3114,10 @@ cycles ARM::ARM_BIC_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand1 = *activeRegs[Rn];
-    uint32_t opperand2 = immDecoded.data_u32;
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_BIC(Rd, opperand1, opperand2, carry, S);
+    return ARM_BIC(Rd, operand1, operand2, carry, S);
 }
 // ==================================================================================================
 // MVN
@@ -3138,9 +3146,9 @@ cycles ARM::ARM_MVN_REG(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     u32AndBool operandShifted = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand = operandShifted.data_u32;
+    uint32_t operand = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_MVN(Rd, opperand, carry, S);
+    return ARM_MVN(Rd, operand, carry, S);
 }
 cycles ARM::ARM_MVN_REG_SHIFT(uint32_t instruct) {
     // S - Set Condition Codes
@@ -3154,9 +3162,9 @@ cycles ARM::ARM_MVN_REG_SHIFT(uint32_t instruct) {
     uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
     u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Data processing arguments.;
-    uint32_t opperand = operandShifted.data_u32;
+    uint32_t operand = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_MVN(Rd, opperand, carry, S);
+    return ARM_MVN(Rd, operand, carry, S);
 }
 cycles ARM::ARM_MVN_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -3173,7 +3181,184 @@ cycles ARM::ARM_MVN_IMM(uint32_t instruct) {
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
     // Data processing arguments.
-    uint32_t opperand = immDecoded.data_u32;
+    uint32_t operand = immDecoded.data_u32;
     bool carry = immDecoded.data_bool;
-    return ARM_MVN(Rd, opperand, carry, S);
+    return ARM_MVN(Rd, operand, carry, S);
+}
+// ==================================================================================================
+// Multiply and Multiply Accumulate
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Multiply-and-multiply-accumulate?lang=en
+// ==================================================================================================
+cycles ARM::ARM_MUL(uint32_t instruct) {
+    // S - Set Condition Codes
+    bool S = readBit(instruct, 20);
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = *activeRegs[Rm];
+    uint32_t result = operand1 * operand2;
+    // Update the flags and save the result.
+    if (S) {
+        LogDebug("Updating CPU flags...");
+        writeBit(cpsr, readBit(result, 31), N_FLAG);
+        writeBit(cpsr, result == 0, Z_FLAG);
+    }
+    *activeRegs[Rd] = result;
+    return 1;
+}
+cycles ARM::ARM_MLA(uint32_t instruct) {
+    // S - Set Condition Codes
+    bool S = readBit(instruct, 20);
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rs = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = *activeRegs[Rm];
+    uint32_t addend = *activeRegs[Rs];
+    uint32_t result = operand1 * operand2 + addend;
+    // Update the flags and save the result.
+    if (S) {
+        LogDebug("Updating CPU flags...");
+        writeBit(cpsr, readBit(result, 31), N_FLAG);
+        writeBit(cpsr, result == 0, Z_FLAG);
+    }
+    *activeRegs[Rd] = result;
+    return 1;
+}
+cycles ARM::ARM_UMAAL(uint32_t instruct) {
+    // Note: Not supported by the DS's arm7 or arm9 cores.
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    uint64_t operand1 = *activeRegs[Rn];
+    uint64_t operand2 = *activeRegs[Rm];
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    uint64_t result = operand1 * operand2 + addend1 + addend2;
+    // Save the result.
+    LogDebug(result);
+    *activeRegs[RdHi] = (uint32_t)(result >> 32);
+    *activeRegs[RdLo] = (uint32_t)(result);
+    return 1;
+}
+cycles ARM::ARM_MLS(uint32_t instruct) {
+    // Note: Not supported by the DS's arm7 or arm9 cores.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rs = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    uint32_t operand1 = *activeRegs[Rn];
+    uint32_t operand2 = *activeRegs[Rm];
+    uint32_t addend = *activeRegs[Rs];
+    uint32_t result = addend - operand1 * operand2;
+    // Save the result.
+    *activeRegs[Rd] = result;
+    return 1;
+}
+cycles ARM::ARM_UMULL(uint32_t instruct) {
+    // S - Set Condition Codes
+    bool S = readBit(instruct, 20);
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    uint64_t operand1 = *activeRegs[Rn];
+    uint64_t operand2 = *activeRegs[Rm];
+    uint64_t result = operand1 * operand2;
+    // Update the flags and save the result.
+    if (S) {
+        LogDebug("Updating CPU flags...");
+        writeBit(cpsr, readBit(result, 63), N_FLAG);
+        writeBit(cpsr, result == 0, Z_FLAG);
+    }
+    *activeRegs[RdHi] = (uint32_t)(result >> 32);
+    *activeRegs[RdLo] = (uint32_t)(result);
+    return 1;
+}
+cycles ARM::ARM_UMLAL(uint32_t instruct) {
+    // S - Set Condition Codes
+    bool S = readBit(instruct, 20);
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    uint64_t operand1 = *activeRegs[Rn];
+    uint64_t operand2 = *activeRegs[Rm];
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    uint64_t result = operand1 * operand2 + (addend1 << 32 | addend2);
+    // Update the flags and save the result.
+    if (S) {
+        LogDebug("Updating CPU flags...");
+        writeBit(cpsr, readBit(result, 63), N_FLAG);
+        writeBit(cpsr, result == 0, Z_FLAG);
+    }
+    *activeRegs[RdHi] = (uint32_t)(result >> 32);
+    *activeRegs[RdLo] = (uint32_t)(result);
+    return 1;
+}
+cycles ARM::ARM_SMULL(uint32_t instruct) {
+    // S - Set Condition Codes
+    bool S = readBit(instruct, 20);
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    int64_t operand1 = (int32_t)(*activeRegs[Rn]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rm]);
+    int64_t result = operand1 * operand2;
+    // Update the flags and save the result.
+    if (S) {
+        LogDebug("Updating CPU flags...");
+        writeBit(cpsr, readBit(result, 63), N_FLAG);
+        writeBit(cpsr, result == 0, Z_FLAG);
+    }
+    *activeRegs[RdHi] = (int32_t)(result >> 32);
+    *activeRegs[RdLo] = (int32_t)(result);
+    return 1;
+}
+cycles ARM::ARM_SMLAL(uint32_t instruct) {
+    // S - Set Condition Codes
+    bool S = readBit(instruct, 20);
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Compute the result using the operand registers.
+    int64_t operand1 = (int32_t)(*activeRegs[Rn]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rm]);
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
+    int64_t result = operand1 * operand2 + addend;
+    // Update the flags and save the result.
+    if (S) {
+        LogDebug("Updating CPU flags...");
+        writeBit(cpsr, readBit(result, 63), N_FLAG);
+        writeBit(cpsr, result == 0, Z_FLAG);
+    }
+    *activeRegs[RdHi] = (int32_t)(result >> 32);
+    *activeRegs[RdLo] = (int32_t)(result);
+    return 1;
 }

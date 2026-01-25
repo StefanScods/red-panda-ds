@@ -7,7 +7,7 @@
 
 void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus,
                           bool arm7) {
-    std::vector<uint32_t> instuctionEncodings = armEncodeASM(program);
+    std::vector<uint32_t> instuctionEncodings = armEncodeASM(program, arm7);
     LogDebug("Writing program to 0x" << std::hex << startAddress << std::dec << "...");
     for (int i = 0; i < instuctionEncodings.size(); i++) {
         uint32_t address = startAddress + i * ARM_WORD_SIZE;

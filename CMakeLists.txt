@@ -15,7 +15,7 @@ set(TEST_BINARY_NAME runTests)
 # Build the testing suite.
 set(BUILD_TEST True)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Output to either debug or release

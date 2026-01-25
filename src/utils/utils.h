@@ -267,16 +267,16 @@ inline u32AndBool ARMExpandImm_C(uint32_t imm12, bool carryIn) {
  * @brief Implements AddWithCarry - used to add two numbers with a carry value.
  * https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Application-Level-Programmers--Model/ARM-core-data-types-and-arithmetic/Integer-arithmetic?lang=en
  *
- * @param opperand1 First operand
- * @param opperand2 Second operand
+ * @param operand1 First operand
+ * @param operand2 Second operand
  * @param carryIn
  * @return u32WithCarryAndOverflow
  */
-inline u32WithCarryAndOverflow ARMAddWithCarry(uint32_t opperand1, uint32_t opperand2,
+inline u32WithCarryAndOverflow ARMAddWithCarry(uint32_t operand1, uint32_t operand2,
                                                bool carryIn) {
-    uint64_t unsignedSum = uint64_t(opperand1) + uint64_t(opperand2) + uint64_t(carryIn);
+    uint64_t unsignedSum = uint64_t(operand1) + uint64_t(operand2) + uint64_t(carryIn);
     int64_t signedSum =
-        int64_t(int32_t(opperand1)) + int64_t(int32_t(opperand2)) + uint64_t(carryIn);
+        int64_t(int32_t(operand1)) + int64_t(int32_t(operand2)) + uint64_t(carryIn);
     uint32_t result = uint32_t(unsignedSum & 0xFFFFFFFF);
     bool carryOut = uint64_t(result) != unsignedSum;
     bool overflow = int64_t(int32_t(result)) != signedSum;

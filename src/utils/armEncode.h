@@ -25,8 +25,9 @@ void cleanUpEncodeTemps(std::filesystem::path tempDir = "asm_temp");
  * is an element of the returned array.
  *
  * @param instructions The assembly program to assemble.
+ * @param arm7 True if assembling arm7 code, else arm9 is targeted.
  * @return std::vector<uint32_t>
  */
-std::vector<uint32_t> armEncodeASM(std::string instructions);
+std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7 = true);
 
 #endif
