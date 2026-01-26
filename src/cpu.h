@@ -286,6 +286,26 @@ public:
     cycles ARM_UMLAL(uint32_t instruct);
     cycles ARM_SMULL(uint32_t instruct);
     cycles ARM_SMLAL(uint32_t instruct);
+    cycles ARM_SMLABB(uint32_t instruct);
+    cycles ARM_SMLABT(uint32_t instruct);
+    cycles ARM_SMLATB(uint32_t instruct);
+    cycles ARM_SMLATT(uint32_t instruct);
+    cycles ARM_SMLAWB(uint32_t instruct);
+    cycles ARM_SMLAWT(uint32_t instruct);
+    cycles ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend);
+    cycles ARM_SMULBB(uint32_t instruct);
+    cycles ARM_SMULBT(uint32_t instruct);
+    cycles ARM_SMULTB(uint32_t instruct);
+    cycles ARM_SMULTT(uint32_t instruct);
+    cycles ARM_SMULWB(uint32_t instruct);
+    cycles ARM_SMULWT(uint32_t instruct);
+    cycles ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2);
+    cycles ARM_SMLALBB(uint32_t instruct);
+    cycles ARM_SMLALBT(uint32_t instruct);
+    cycles ARM_SMLALTB(uint32_t instruct);
+    cycles ARM_SMLALTT(uint32_t instruct);
+    cycles ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int64_t opp2,
+                     int64_t addend);
     cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
     cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                    bool wback);

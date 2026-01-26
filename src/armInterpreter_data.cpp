@@ -90,6 +90,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // AND (Register)
         case 0b0000010110:
             return ARM_AND_REG(instruct);
+        // AND (Register Shifted)
         case 0b0000010111:
             return ARM_AND_REG_SHIFT(instruct);
         // AND (Register)
@@ -804,20 +805,24 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
             break;
         case 0b0100000111:
             break;
+        // SMLABB (ARM9 only)
         case 0b0100001000:
-            break;
+            return ARM_SMLABB(instruct);
         case 0b0100001001:
             break;
+        // SMLATB (ARM9 only)
         case 0b0100001010:
-            break;
+            return ARM_SMLATB(instruct);
         case 0b0100001011:
             break;
+        // SMLABT (ARM9 only)
         case 0b0100001100:
-            break;
+            return ARM_SMLABT(instruct);
         case 0b0100001101:
             break;
+        // SMLATT (ARM9 only)
         case 0b0100001110:
-            break;
+            return ARM_SMLATT(instruct);
         case 0b0100001111:
             break;
         // TST (Register)
@@ -884,20 +889,24 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
             break;
         case 0b0100100111:
             break;
+        // SMLAWB (ARM9 Only)
         case 0b0100101000:
-            break;
+            return ARM_SMLAWB(instruct);
         case 0b0100101001:
             break;
+        // SMULWB (ARM9 Only)
         case 0b0100101010:
-            break;
+            return ARM_SMULWB(instruct);
         case 0b0100101011:
             break;
+        // SMLAWT (ARM9 Only)
         case 0b0100101100:
-            break;
+            return ARM_SMLAWT(instruct);
         case 0b0100101101:
             break;
+        // SMULWT (ARM9 Only)
         case 0b0100101110:
-            break;
+            return ARM_SMULWT(instruct);
         case 0b0100101111:
             break;
         // TEQ (Register)
@@ -964,20 +973,24 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
             break;
         case 0b0101000111:
             break;
+        // SMLALBB (ARM9 Only)
         case 0b0101001000:
-            break;
+            return ARM_SMLALBB(instruct);
         case 0b0101001001:
             break;
+        // SMLALTB (ARM9 Only)
         case 0b0101001010:
-            break;
+            return ARM_SMLALTB(instruct);
         case 0b0101001011:
             break;
+        // SMLALBT (ARM9 Only)
         case 0b0101001100:
-            break;
+            return ARM_SMLALBT(instruct);
         case 0b0101001101:
             break;
+        // SMLALTT (ARM9 Only)
         case 0b0101001110:
-            break;
+            return ARM_SMLALTT(instruct);
         case 0b0101001111:
             break;
         // CMP (Register)
@@ -1044,20 +1057,24 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
             break;
         case 0b0101100111:
             break;
+        // SMULBB (ARM9 Only)
         case 0b0101101000:
-            break;
+            return ARM_SMULBB(instruct);
         case 0b0101101001:
             break;
+        // SMULTB (ARM9 Only)
         case 0b0101101010:
-            break;
+            return ARM_SMULTB(instruct);
         case 0b0101101011:
             break;
+        // SMULBT (ARM9 Only)
         case 0b0101101100:
-            break;
+            return ARM_SMULBT(instruct);
         case 0b0101101101:
             break;
+        // SMULTT (ARM9 Only)
         case 0b0101101110:
-            break;
+            return ARM_SMULTT(instruct);
         case 0b0101101111:
             break;
         // CMN (Register)
@@ -3360,5 +3377,268 @@ cycles ARM::ARM_SMLAL(uint32_t instruct) {
     }
     *activeRegs[RdHi] = (int32_t)(result >> 32);
     *activeRegs[RdLo] = (int32_t)(result);
+    return 1;
+}
+// ==================================================================================================
+// Halfword multiply and multiply accumulate
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions/Halfword-multiply-and-multiply-accumulate?lang=en
+// ==================================================================================================
+// ==================================================================================================
+// SMLA
+// ==================================================================================================
+cycles ARM::ARM_SMLABB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Ra = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn]);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm]);
+    int32_t addend = (*activeRegs[Ra]);
+    return ARM_SMLA(Rd, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLABT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Ra = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn]);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
+    int32_t addend = (*activeRegs[Ra]);
+    return ARM_SMLA(Rd, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLATB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Ra = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn] >> 16);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm]);
+    int32_t addend = (*activeRegs[Ra]);
+    return ARM_SMLA(Rd, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLATT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Ra = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn] >> 16);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
+    int32_t addend = (*activeRegs[Ra]);
+    return ARM_SMLA(Rd, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLAWB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Ra = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (*activeRegs[Rn]);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm]);
+    int64_t addend = ((int32_t)(*activeRegs[Ra]) << 16);
+    // Compute the result.
+    int64_t result = operand1 * operand2 + addend;
+    *activeRegs[Rd] = (result >> 16);
+    return 1;
+}
+cycles ARM::ARM_SMLAWT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Ra = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (*activeRegs[Rn]);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
+    int64_t addend = ((int32_t)(*activeRegs[Ra]) << 16);
+    // Compute the result.
+    int64_t result = operand1 * operand2 + addend;
+    *activeRegs[Rd] = (result >> 16);
+    return 1;
+}
+cycles ARM::ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend) {
+    // Note: Only supported by the DS's arm9 core.
+    int32_t result = opp1 * opp2 + addend;
+    *activeRegs[desReg] = result;
+    return 1;
+}
+// ==================================================================================================
+// SMUL
+// ==================================================================================================
+cycles ARM::ARM_SMULBB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn]);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm]);
+    return ARM_SMUL(Rd, operand1, operand2);
+}
+cycles ARM::ARM_SMULBT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn]);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
+    return ARM_SMUL(Rd, operand1, operand2);
+}
+cycles ARM::ARM_SMULTB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn] >> 16);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm]);
+    return ARM_SMUL(Rd, operand1, operand2);
+}
+cycles ARM::ARM_SMULTT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int32_t operand1 = (int16_t)(*activeRegs[Rn] >> 16);
+    int32_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
+    return ARM_SMUL(Rd, operand1, operand2);
+}
+cycles ARM::ARM_SMULWB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int64_t operand1 = (int16_t)(*activeRegs[Rn]);
+    int64_t operand2 = (int16_t)(*activeRegs[Rm]);
+    int64_t result = operand1 * operand2;
+    *activeRegs[Rd] = (result >> 16);
+    return 1;
+}
+cycles ARM::ARM_SMULWT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 16, 19);
+    // Operand Resigners.
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int64_t operand1 = (int16_t)(*activeRegs[Rn]);
+    int64_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
+    int64_t result = operand1 * operand2;
+    *activeRegs[Rd] = (result >> 16);
+    return 1;
+}
+cycles ARM::ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2) {
+    // Note: Only supported by the DS's arm9 core.
+    int32_t result = opp1 * opp2;
+    *activeRegs[desReg] = result;
+    return 1;
+}
+// ==================================================================================================
+// SMLAL
+// ==================================================================================================
+cycles ARM::ARM_SMLALBB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int64_t operand1 = (int32_t)(*activeRegs[Rn]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rm]);
+    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
+    return ARM_SMLAL(RdLo, RdHi, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLALBT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int64_t operand1 = (int32_t)(*activeRegs[Rn]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rm] >> 16);
+    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
+    return ARM_SMLAL(RdLo, RdHi, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLALTB(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int64_t operand1 = (int32_t)(*activeRegs[Rn] >> 16);
+    int64_t operand2 = (int32_t)(*activeRegs[Rm]);
+    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
+    return ARM_SMLAL(RdLo, RdHi, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLALTT(uint32_t instruct) {
+    // Note: Only supported by the DS's arm9 core.
+    // Operand Resigners.
+    uint8_t RdHi = readBits(instruct, 16, 19);
+    uint8_t RdLo = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 8, 11);
+    uint8_t Rn = readBits(instruct, 0, 3);
+    // Process Operands.
+    int64_t operand1 = (int32_t)(*activeRegs[Rn] >> 16);
+    int64_t operand2 = (int32_t)(*activeRegs[Rm] >> 16);
+    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
+    uint64_t addend1 = *activeRegs[RdHi];
+    uint64_t addend2 = *activeRegs[RdLo];
+    int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
+    return ARM_SMLAL(RdLo, RdHi, operand1, operand2, addend);
+}
+cycles ARM::ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int64_t opp2,
+                      int64_t addend) {
+    // Note: Only supported by the DS's arm9 core.
+    int64_t result = opp1 * opp2 + addend;
+    *activeRegs[desRegHigh] = (int32_t)(result >> 32);
+    *activeRegs[desRegLow] = (int32_t)(result);
     return 1;
 }

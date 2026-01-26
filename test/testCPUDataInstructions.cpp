@@ -6,6 +6,8 @@
 #include "../src/utils/armEncode.h"
 #include "commonTest.h"
 
+// TODO Handle ARM9 only commands.
+
 /**
  * @brief Test fixture for the CPU's instructions in the data category.
  */
