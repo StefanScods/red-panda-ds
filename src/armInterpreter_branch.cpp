@@ -128,54 +128,27 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b101110:
         case 0b101111:
             return ARM_B(instruct);
-        // Unsupported
+        // Branch Link and Exchange
         case 0b110000:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110001:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110010:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110011:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110100:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110101:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110110:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b110111:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111000:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111001:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111010:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111011:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111100:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111101:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b111110:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b111111:
-            return ARM_UNDEFINED_INST(instruct);
+        case 0b111111: {
+            if (cond == ConditionMnemonics::SPECIAL) return ARM_BLX(instruct);
+            return ARM_BL(instruct);
+        }
+
         default:
             break;
     }
@@ -191,6 +164,28 @@ cycles ARM::ARM_B(uint32_t instruct) {
     uint32_t imm24 = readBits(instruct, 0, 23);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
     branch(pc + offset);
+    return 1;
+}
+// ==================================================================================================
+// Branch Link and Exchange
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BL--BLX--immediate-?lang=en//
+// ==================================================================================================
+cycles ARM::ARM_BL(uint32_t instruct) {
+    lr = pc - 4;  // Point to the previous instruction.
+    // Sign extend the bottom 24 bits and align address to 4 bytes.
+    uint32_t imm24 = readBits(instruct, 0, 23);
+    int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
+    branch(pc + offset);
+    return 1;
+}
+// ==================================================================================================
+cycles ARM::ARM_BLX(uint32_t instruct) {
+    lr = pc - 4;  // Point to the previous instruction.
+    // Sign extend the bottom 24 bits and align address to 4 bytes.
+    uint32_t imm24 = readBits(instruct, 0, 23);
+    bool H = readBit(instruct, 24);
+    int32_t offset = ((int32_t)(imm24 << 8)) >> 6 | (H << 1);
+    branch(pc + offset + 1);  // Offset by + 1 to enter thumb mode.
     return 1;
 }
 // ==================================================================================================

@@ -34,7 +34,30 @@ class Interconnect;
 // Thumb execution state bit
 #define T_BIT 5
 
+#define LR_REGISTER_NUM 14
 #define PC_REGISTER_NUM 15
+
+// Condition code
+namespace ConditionMnemonics {
+enum ConditionMnemonics : uint8_t {
+    EQ = 0b0000,
+    NE = 0b0001,
+    CS = 0b0010,
+    CC = 0b0011,
+    MI = 0b0100,
+    PL = 0b0101,
+    VS = 0b0110,
+    VC = 0b0111,
+    HI = 0b1000,
+    LS = 0b1001,
+    GE = 0b1010,
+    LT = 0b1011,
+    GT = 0b1100,
+    LE = 0b1101,
+    AL = 0b1110,
+    SPECIAL = 0b1111
+};
+}
 
 extern std::vector<std::string> g_regNames;
 
@@ -64,6 +87,9 @@ protected:
 
     // Program counter maps to the 15th standard register in all modes.
     uint32_t& pc = reg[PC_REGISTER_NUM];
+    // Link register maps to the 14th standard register.
+    // TODO!!! Handle other modes.
+    uint32_t& lr = reg[LR_REGISTER_NUM];
 
     // Keep track of the component's cycle time.
     cycles fetchCooldown = 0;
@@ -335,6 +361,8 @@ public:
     cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
     cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_B(uint32_t instruct);
+    cycles ARM_BL(uint32_t instruct);
+    cycles ARM_BLX(uint32_t instruct);
 
     cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond);
 };

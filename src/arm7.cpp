@@ -122,9 +122,49 @@ cycles ARM7TDMI::execute() {
     // Make space in the pipeline.
     uint32_t nextInstruction = instuctionPipeLine[0];
     instuctionPipeLine[0] = NO_INSTRUCT;
+    uint8_t condition = readBits(nextInstruction, 28, 31);
+    // Check the condition code skip opcodes which do not pass.
+    bool Z = readBit(cpsr, Z_FLAG);
+    bool C = readBit(cpsr, C_FLAG);
+    bool N = readBit(cpsr, N_FLAG);
+    bool V = readBit(cpsr, V_FLAG);
+    switch (condition) {
+        case ConditionMnemonics::EQ:
+            if (!Z) return 1;
+        case ConditionMnemonics::NE:
+            if (Z) return 1;
+        case ConditionMnemonics::CS:
+            if (!C) return 1;
+        case ConditionMnemonics::CC:
+            if (C) return 1;
+        case ConditionMnemonics::MI:
+            if (!N) return 1;
+        case ConditionMnemonics::PL:
+            if (N) return 1;
+        case ConditionMnemonics::VS:
+            if (!V) return 1;
+        case ConditionMnemonics::VC:
+            if (V) return 1;
+        case ConditionMnemonics::HI:
+            if (!C || Z) return 1;
+        case ConditionMnemonics::LS:
+            if (C && !Z) return 1;
+        case ConditionMnemonics::GE:
+            if (N != V) return 1;
+        case ConditionMnemonics::LT:
+            if (N == V) return 1;
+        case ConditionMnemonics::GT:
+            if (!Z || N != V) return 1;
+        case ConditionMnemonics::LE:
+            if (Z && N == V) return 1;
+        case ConditionMnemonics::AL:
+        case ConditionMnemonics::SPECIAL:
+            break;  // Unconditional execution
+        default:
+            return 1;
+    }
     // Decode and execute the instuction.
     uint8_t opCode = readBits(nextInstruction, 26, 27);
-    uint8_t condition = readBits(nextInstruction, 28, 31);
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/ARM-instruction-set-encoding?lang=en
     switch (opCode) {
         // Data-processing and miscellaneous instructions.
