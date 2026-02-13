@@ -8,6 +8,7 @@
 // Control print statements.
 #include "logger.h"
 
+// ==================================================================================================
 ARM7TDMI::ARM7TDMI() {
     arm9 = false;
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
@@ -22,10 +23,10 @@ ARM7TDMI::ARM7TDMI() {
     data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 9;
     data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 1;
 }
-
+// ==================================================================================================
 ARM7TDMI::~ARM7TDMI() {
 }
-
+// ==================================================================================================
 busPayload ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
     uint32_t& previousAddr = codeRead ? previousCodeAddr : previousDataAddr;
     /**
@@ -73,7 +74,7 @@ busPayload ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
     return {data, sequencial ? cycleMapSequential[memRegion] : cycleMapNonSequential[memRegion],
             size};
 }
-
+// ==================================================================================================
 busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     // Writes always relate to the previous data.
     uint32_t& previousAddr = previousDataAddr;
@@ -116,7 +117,7 @@ busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     return {data, sequencial ? cycleMapSequential[memRegion] : cycleMapNonSequential[memRegion],
             size};
 }
-
+// ==================================================================================================
 cycles ARM7TDMI::execute() {
     // Make space in the pipeline.
     uint32_t nextInstruction = instuctionPipeLine[0];
@@ -141,8 +142,12 @@ cycles ARM7TDMI::execute() {
             return 1;
     }
 }
-
+// ==================================================================================================
 cycles ARM7TDMI::fetch() {
+    bool thumbMode = readBit(cpsr, T_BIT);
+    if (thumbMode) {
+        LogError("Thumb mode is not currently supported!");
+    }
     // Fetch the next 32 bits and increment PC.
     busPayload readResult = readBus(pc, 32, true);
     instuctionPipeLine[2] = readResult.data;
@@ -150,17 +155,15 @@ cycles ARM7TDMI::fetch() {
     // Get the fetch cooldown.
     return readResult.numCycles;
 }
-
+// ==================================================================================================
 cycles ARM7TDMI::cycle() {
+    bool thumbMode = readBit(cpsr, T_BIT);
+    if (thumbMode) {
+        LogError("Thumb mode is not currently supported!");
+    }
     cycles cyclesRan = 0;
     while (currentCycle < targetCycle) {
         // Perform fetches and executes in parallel.
-        if (fetchCooldown == 0) {
-            // Instruction pipeline has space, fetch a new instuction.
-            if (instuctionPipeLine[2] == NO_INSTRUCT) {
-                fetchCooldown = fetch();
-            }
-        }
         if (executeCooldown == 0) {
             // Move pipeline.
             instuctionPipeLine[0] = instuctionPipeLine[1];
@@ -168,6 +171,12 @@ cycles ARM7TDMI::cycle() {
             instuctionPipeLine[2] = NO_INSTRUCT;
             if (instuctionPipeLine[0] != NO_INSTRUCT) {
                 executeCooldown = execute();
+            }
+        }
+        if (fetchCooldown == 0) {
+            // Instruction pipeline has space, fetch a new instuction.
+            if (instuctionPipeLine[2] == NO_INSTRUCT) {
+                fetchCooldown = fetch();
             }
         }
 
@@ -187,3 +196,4 @@ cycles ARM7TDMI::cycle() {
 
     return cyclesRan;
 }
+// ==================================================================================================

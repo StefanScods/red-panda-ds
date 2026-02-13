@@ -11,8 +11,7 @@
 
 #include "logger.h"
 
-// !!!TODO Handle when commands target PC.
-
+// ==================================================================================================
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions?lang=en
 cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
     // Extract useful parts of the instruction in order to decode.
@@ -2086,6 +2085,7 @@ cycles ARM::ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, carry, C_FLAG);
     }
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_AND_REG(uint32_t instruct) {
@@ -2161,6 +2161,7 @@ cycles ARM::ARM_EOR(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, carry, C_FLAG);
     }
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_EOR_REG(uint32_t instruct) {
@@ -2237,6 +2238,7 @@ cycles ARM::ARM_SUB(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool setFlags
         writeBit(cpsr, result.overflow, V_FLAG);
     }
     *activeRegs[desReg] = result.data_u32;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_SUB_REG(uint32_t instruct) {
@@ -2313,6 +2315,7 @@ cycles ARM::ARM_RSB(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool setFlags
         writeBit(cpsr, result.overflow, V_FLAG);
     }
     *activeRegs[desReg] = result.data_u32;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_RSB_REG(uint32_t instruct) {
@@ -2389,6 +2392,7 @@ cycles ARM::ARM_ADD(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool setFlags
         writeBit(cpsr, result.overflow, V_FLAG);
     }
     *activeRegs[desReg] = result.data_u32;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_ADD_REG(uint32_t instruct) {
@@ -2465,6 +2469,7 @@ cycles ARM::ARM_ADC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, result.overflow, V_FLAG);
     }
     *activeRegs[desReg] = result.data_u32;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_ADC_REG(uint32_t instruct) {
@@ -2541,6 +2546,7 @@ cycles ARM::ARM_SBC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, result.overflow, V_FLAG);
     }
     *activeRegs[desReg] = result.data_u32;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_SBC_REG(uint32_t instruct) {
@@ -2617,6 +2623,7 @@ cycles ARM::ARM_RSC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, result.overflow, V_FLAG);
     }
     *activeRegs[desReg] = result.data_u32;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_RSC_REG(uint32_t instruct) {
@@ -2934,6 +2941,7 @@ cycles ARM::ARM_ORR(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, carry, C_FLAG);
     }
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_ORR_REG(uint32_t instruct) {
@@ -3008,6 +3016,7 @@ cycles ARM::ARM_MOV(uint32_t desReg, uint32_t srcValue, bool carry, bool setFlag
         writeBit(cpsr, carry, C_FLAG);
     }
     *activeRegs[desReg] = srcValue;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_MOV_REG(uint32_t instruct) {
@@ -3074,6 +3083,7 @@ cycles ARM::ARM_BIC(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, b
         writeBit(cpsr, carry, C_FLAG);
     }
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_BIC_REG(uint32_t instruct) {
@@ -3149,6 +3159,7 @@ cycles ARM::ARM_MVN(uint32_t desReg, uint32_t opp1, bool carry, bool setFlags) {
         writeBit(cpsr, carry, C_FLAG);
     }
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;  // An instruction prefetch occurs at the same time as the data operation.
 }
 cycles ARM::ARM_MVN_REG(uint32_t instruct) {
@@ -3225,6 +3236,7 @@ cycles ARM::ARM_MUL(uint32_t instruct) {
         writeBit(cpsr, result == 0, Z_FLAG);
     }
     *activeRegs[Rd] = result;
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_MLA(uint32_t instruct) {
@@ -3248,6 +3260,7 @@ cycles ARM::ARM_MLA(uint32_t instruct) {
         writeBit(cpsr, result == 0, Z_FLAG);
     }
     *activeRegs[Rd] = result;
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_UMAAL(uint32_t instruct) {
@@ -3267,6 +3280,8 @@ cycles ARM::ARM_UMAAL(uint32_t instruct) {
     LogDebug(result);
     *activeRegs[RdHi] = (uint32_t)(result >> 32);
     *activeRegs[RdLo] = (uint32_t)(result);
+    fixupIfTargetingPC(RdHi);
+    fixupIfTargetingPC(RdLo);
     return 1;
 }
 cycles ARM::ARM_MLS(uint32_t instruct) {
@@ -3284,6 +3299,7 @@ cycles ARM::ARM_MLS(uint32_t instruct) {
     uint32_t result = addend - operand1 * operand2;
     // Save the result.
     *activeRegs[Rd] = result;
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_UMULL(uint32_t instruct) {
@@ -3306,6 +3322,8 @@ cycles ARM::ARM_UMULL(uint32_t instruct) {
     }
     *activeRegs[RdHi] = (uint32_t)(result >> 32);
     *activeRegs[RdLo] = (uint32_t)(result);
+    fixupIfTargetingPC(RdHi);
+    fixupIfTargetingPC(RdLo);
     return 1;
 }
 cycles ARM::ARM_UMLAL(uint32_t instruct) {
@@ -3330,6 +3348,8 @@ cycles ARM::ARM_UMLAL(uint32_t instruct) {
     }
     *activeRegs[RdHi] = (uint32_t)(result >> 32);
     *activeRegs[RdLo] = (uint32_t)(result);
+    fixupIfTargetingPC(RdHi);
+    fixupIfTargetingPC(RdLo);
     return 1;
 }
 cycles ARM::ARM_SMULL(uint32_t instruct) {
@@ -3352,6 +3372,8 @@ cycles ARM::ARM_SMULL(uint32_t instruct) {
     }
     *activeRegs[RdHi] = (int32_t)(result >> 32);
     *activeRegs[RdLo] = (int32_t)(result);
+    fixupIfTargetingPC(RdHi);
+    fixupIfTargetingPC(RdLo);
     return 1;
 }
 cycles ARM::ARM_SMLAL(uint32_t instruct) {
@@ -3377,6 +3399,8 @@ cycles ARM::ARM_SMLAL(uint32_t instruct) {
     }
     *activeRegs[RdHi] = (int32_t)(result >> 32);
     *activeRegs[RdLo] = (int32_t)(result);
+    fixupIfTargetingPC(RdHi);
+    fixupIfTargetingPC(RdLo);
     return 1;
 }
 // ==================================================================================================
@@ -3457,6 +3481,7 @@ cycles ARM::ARM_SMLAWB(uint32_t instruct) {
     // Compute the result.
     int64_t result = operand1 * operand2 + addend;
     *activeRegs[Rd] = (result >> 16);
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_SMLAWT(uint32_t instruct) {
@@ -3474,12 +3499,14 @@ cycles ARM::ARM_SMLAWT(uint32_t instruct) {
     // Compute the result.
     int64_t result = operand1 * operand2 + addend;
     *activeRegs[Rd] = (result >> 16);
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend) {
     // Note: Only supported by the DS's arm9 core.
     int32_t result = opp1 * opp2 + addend;
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;
 }
 // ==================================================================================================
@@ -3545,6 +3572,7 @@ cycles ARM::ARM_SMULWB(uint32_t instruct) {
     int64_t operand2 = (int16_t)(*activeRegs[Rm]);
     int64_t result = operand1 * operand2;
     *activeRegs[Rd] = (result >> 16);
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_SMULWT(uint32_t instruct) {
@@ -3559,12 +3587,14 @@ cycles ARM::ARM_SMULWT(uint32_t instruct) {
     int64_t operand2 = (int16_t)(*activeRegs[Rm] >> 16);
     int64_t result = operand1 * operand2;
     *activeRegs[Rd] = (result >> 16);
+    fixupIfTargetingPC(Rd);
     return 1;
 }
 cycles ARM::ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2) {
     // Note: Only supported by the DS's arm9 core.
     int32_t result = opp1 * opp2;
     *activeRegs[desReg] = result;
+    fixupIfTargetingPC(desReg);
     return 1;
 }
 // ==================================================================================================
@@ -3580,7 +3610,6 @@ cycles ARM::ARM_SMLALBB(uint32_t instruct) {
     // Process Operands.
     int64_t operand1 = (int32_t)(*activeRegs[Rn]);
     int64_t operand2 = (int32_t)(*activeRegs[Rm]);
-    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
     uint64_t addend1 = *activeRegs[RdHi];
     uint64_t addend2 = *activeRegs[RdLo];
     int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
@@ -3596,7 +3625,6 @@ cycles ARM::ARM_SMLALBT(uint32_t instruct) {
     // Process Operands.
     int64_t operand1 = (int32_t)(*activeRegs[Rn]);
     int64_t operand2 = (int32_t)(*activeRegs[Rm] >> 16);
-    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
     uint64_t addend1 = *activeRegs[RdHi];
     uint64_t addend2 = *activeRegs[RdLo];
     int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
@@ -3612,7 +3640,6 @@ cycles ARM::ARM_SMLALTB(uint32_t instruct) {
     // Process Operands.
     int64_t operand1 = (int32_t)(*activeRegs[Rn] >> 16);
     int64_t operand2 = (int32_t)(*activeRegs[Rm]);
-    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
     uint64_t addend1 = *activeRegs[RdHi];
     uint64_t addend2 = *activeRegs[RdLo];
     int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
@@ -3628,7 +3655,6 @@ cycles ARM::ARM_SMLALTT(uint32_t instruct) {
     // Process Operands.
     int64_t operand1 = (int32_t)(*activeRegs[Rn] >> 16);
     int64_t operand2 = (int32_t)(*activeRegs[Rm] >> 16);
-    int64_t addend = (((uint64_t)(*activeRegs[RdHi])) << 32) | *activeRegs[RdLo];
     uint64_t addend1 = *activeRegs[RdHi];
     uint64_t addend2 = *activeRegs[RdLo];
     int64_t addend = std::bit_cast<int64_t>((addend1 << 32) | addend2);
@@ -3640,5 +3666,8 @@ cycles ARM::ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int
     int64_t result = opp1 * opp2 + addend;
     *activeRegs[desRegHigh] = (int32_t)(result >> 32);
     *activeRegs[desRegLow] = (int32_t)(result);
+    fixupIfTargetingPC(desRegHigh);
+    fixupIfTargetingPC(desRegLow);
     return 1;
 }
+// ==================================================================================================

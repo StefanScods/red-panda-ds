@@ -1634,7 +1634,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
         "MOV " + BASE_REG_TOKEN + ", #113", "MOV " + BASE_REG_TOKEN + ", #173",
         "MOV " + BASE_REG_TOKEN + ", #255"};
     std::vector<InstructionTestCase> testCases =
-        genInstuctionTestCase(instructions, immValuesToTest, false);
+        genInstuctionTestCase(instructions, immValuesToTest, true);
 
     // Loop over all test cases.
     for (uint32_t i = 0; i < testCases.size(); i++) {
@@ -1648,7 +1648,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
         ASSERT_EQ(arm7.readReg(testCases[i].regNum), testValue);
     }
 }
-/**
+/**`
  * @brief Test moving imm values into all possible regs. Large imm values
  * are defined as able to be encoded in 8 bits + a 4 bit shift.
  */
@@ -1663,7 +1663,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
         "MOV " + BASE_REG_TOKEN + ", #0xF000000F",
     };
     std::vector<InstructionTestCase> testCases =
-        genInstuctionTestCase(instructions, immValuesToTest, false);
+        genInstuctionTestCase(instructions, immValuesToTest, true);
 
     // Loop over all test cases.
     for (uint32_t i = 0; i < testCases.size(); i++) {

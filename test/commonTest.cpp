@@ -5,20 +5,6 @@
 #define LOG_LEVEL 1
 #include "logger.h"
 
-void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus,
-                          bool arm7) {
-    std::vector<uint32_t> instuctionEncodings = armEncodeASM(program, arm7);
-    LogDebug("Writing program to 0x" << std::hex << startAddress << std::dec << "...");
-    for (int i = 0; i < instuctionEncodings.size(); i++) {
-        uint32_t address = startAddress + i * ARM_WORD_SIZE;
-        arm7 ? bus->write32ARM7(address, instuctionEncodings[i])
-             : bus->write32ARM7(address, instuctionEncodings[i]);
-    }
-    LogDebug("Finished writing program! - " << instuctionEncodings.size() << " instructions - "
-                                            << instuctionEncodings.size() * ARM_WORD_SIZE
-                                            << " byte(s)");
-}
-
 std::vector<InstructionTestCase> genInstuctionTestCase(std::vector<std::string> instruction,
                                                        std::vector<uint32_t> expectedVals,
                                                        bool skipPC) {

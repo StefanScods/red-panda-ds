@@ -19,17 +19,6 @@ struct InstructionTestCase {
 } typedef InstructionTestCase;
 
 /**
- * @brief Assembles and writes the passed program into emulator's memory.
- *
- * @param program Assembly code to assemble and write.
- * @param startAddress The address to begin writing to.
- * @param bus The bus to write to
- * @param arm7 Boolean indicating which ARM memory map to use. True uses ARM7 and false uses the
- * ARM9.
- */
-void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus, bool arm7);
-
-/**
  * @brief Creates a bunch of test cases with only one call to the assembler.
  *
  * @param instruction The string instructions to generate encodings for, an encoding

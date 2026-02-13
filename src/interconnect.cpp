@@ -6,9 +6,10 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+// ==================================================================================================
 Interconnect::Interconnect() {
 }
-
+// ==================================================================================================
 Interconnect::~Interconnect() {
     arm7 = nullptr;
 
@@ -17,7 +18,7 @@ Interconnect::~Interconnect() {
         mainRAM = nullptr;
     }
 }
-
+// ==================================================================================================
 void Interconnect::init() {
     // Malloc Data.
 
@@ -28,12 +29,12 @@ void Interconnect::init() {
         exit(1);
     }
 }
-
+// ==================================================================================================
 void Interconnect::bindARM7(ARM* cpu) {
     arm7 = cpu;
     arm7->connectToInterconnect(this);
 }
-
+// ==================================================================================================
 uint32_t Interconnect::read32ARM7(uint32_t addr) {
     // Word align mem accesses.
     addr &= ~0x3;
@@ -53,7 +54,7 @@ uint32_t Interconnect::read32ARM7(uint32_t addr) {
     // Unreachable.
     return INVALID_MEM_32BIT;
 }
-
+// ==================================================================================================
 uint16_t Interconnect::read16ARM7(uint32_t addr) {
     // Half word align mem accesses.
     addr &= ~0x1;
@@ -73,7 +74,7 @@ uint16_t Interconnect::read16ARM7(uint32_t addr) {
     // Unreachable.
     return INVALID_MEM_16BIT;
 }
-
+// ==================================================================================================
 uint8_t Interconnect::read8ARM7(uint32_t addr) {
     // Memory map.
     uint8_t memRegion = addr >> 24;
@@ -91,7 +92,7 @@ uint8_t Interconnect::read8ARM7(uint32_t addr) {
     // Unreachable.
     return INVALID_MEM_8BIT;
 }
-
+// ==================================================================================================
 void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
     // Byte align mem accesses.
     addr &= ~0x3;
@@ -109,7 +110,7 @@ void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
             break;
     }
 }
-
+// ==================================================================================================
 void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
     // Byte align mem accesses.
     addr &= ~0x1;
@@ -127,7 +128,7 @@ void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
             break;
     }
 }
-
+// ==================================================================================================
 void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
     // Memory map.
     uint8_t memRegion = addr >> 24;
@@ -143,3 +144,4 @@ void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
             break;
     }
 }
+// ==================================================================================================

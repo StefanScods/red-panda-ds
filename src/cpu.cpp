@@ -5,18 +5,18 @@
 // Control print statements.
 #define LOG_LEVEL 2
 #include "logger.h"
-
+// ==================================================================================================
 std::vector<std::string> g_regNames = {"r0", "r1", "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
                                        "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
-
+// ==================================================================================================
 ARM::ARM() {
     reset();
 }
-
+// ==================================================================================================
 ARM::~ARM() {
     bus = nullptr;
 }
-
+// ==================================================================================================
 void ARM::reset() {
     // Standard Registers.
     reg[0] = 0;
@@ -80,55 +80,77 @@ void ARM::reset() {
     previousCodeAddr = 0;
     previousDataAddr = 0;
 }
-
+// ==================================================================================================
 cycles ARM::execute() {
     LogError("Unimplemented execute()");
     return 0;
 }
-
+// ==================================================================================================
 cycles ARM::fetch() {
     LogError("Unimplemented fetch()");
     return 0;
 }
-
+// ==================================================================================================
 cycles ARM::cycle() {
     LogError("Unimplemented cycle()");
     return 0;
 }
-
+// ==================================================================================================
 cycles ARM::fetchAndExecute(int numExecutions) {
     cycles cycleCount = 0;
+    cycleCount += fillInstuctionPipeline();
     while (numExecutions) {
-        cycleCount += fillInstuctionPipeline();
-        cycleCount += execute();
+        instuctionPipeLine[0] = instuctionPipeLine[1];
+        instuctionPipeLine[1] = instuctionPipeLine[2];
+        cycles exeCycles = execute();
+        cycles fetchCycles = fetch();
+        cycleCount += std::max(exeCycles, fetchCycles);
         numExecutions--;
     }
     return cycleCount;
 }
-
+// ==================================================================================================
 cycles ARM::fillInstuctionPipeline() {
     cycles cycleCount = 0;
     // Fill pipeline.
-    while (instuctionPipeLine[0] == NO_INSTRUCT) {
+    while (instuctionPipeLine[1] == NO_INSTRUCT) {
         instuctionPipeLine[0] = instuctionPipeLine[1];
         instuctionPipeLine[1] = instuctionPipeLine[2];
         cycleCount += fetch();
     }
     return cycleCount;
 }
-
+// ==================================================================================================
 busPayload ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {
     LogError("Unimplemented readBus()");
     return {0, 0, 0};
 }
-
+// ==================================================================================================
 busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     LogError("Unimplemented writeBus()");
     return {0, 0, 0};
 }
-
-ARM946ES::ARM946ES() {
+// ==================================================================================================
+cycles ARM::ARM_UNDEFINED_INST(uint32_t instruct) {
+    LogError("Unsupported instuction: 0x" << std::hex << instruct << std::dec << "!");
+    return 1;
 }
-
-ARM946ES::~ARM946ES() {
+// ==================================================================================================
+void ARM::branch(uint32_t dest) {
+    // Determine if we are going to thumb mode.
+    bool thumb = readBit(dest, 0);
+    writeBit(cpsr, T_BIT, thumb);
+    // Mask the bottom bit (thumb mode) or bottom 2 bits (arm mode).
+    uint32_t pcMask = thumb ? ~(0b1) : ~(0b11);
+    pc = dest & pcMask;
+    // Clear the instuction pipeline.
+    instuctionPipeLine[0] = NO_INSTRUCT;
+    instuctionPipeLine[1] = NO_INSTRUCT;
+    instuctionPipeLine[2] = NO_INSTRUCT;
 }
+// ==================================================================================================
+void ARM::fixupIfTargetingPC(uint32_t destReg) {
+    if (destReg != PC_REGISTER_NUM) return;
+    branch(pc);
+}
+// ==================================================================================================

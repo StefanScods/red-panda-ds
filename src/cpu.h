@@ -31,6 +31,8 @@ class Interconnect;
 #define V_FLAG 28
 // Cumulative saturation Flag
 #define Q_FLAG 27
+// Thumb execution state bit
+#define T_BIT 5
 
 #define PC_REGISTER_NUM 15
 
@@ -123,6 +125,18 @@ public:
     virtual cycles fetch();
 
     virtual cycles cycle();
+    /**
+     * @brief Updates PC + performs any processing after PC has been updated.
+     *
+     * @param dest The new address to branch to.
+     */
+    virtual void branch(uint32_t dest);
+    /**
+     * @brief Call after updating an arbitrary reg to ensure writes to PC are handled correctly.
+     *
+     * @param destReg The register being updated.No op if dest register is not the PC.
+     */
+    void fixupIfTargetingPC(uint32_t destReg);
 
     /**
      * @brief Keep cycling until the next instuction is executed. Cycle behaviour may not be
@@ -151,13 +165,13 @@ public:
      * @brief Debug function to read a register value.
      * @param regNum (0-15)
      */
-    uint32_t readReg(uint32_t regNum) { return *activeRegs[regNum]; }
+    uint32_t readReg(uint32_t regNum) const { return *activeRegs[regNum]; }
 
     /**
      * @brief Debug function to read a cpu flag value.
      * @param flagBit
      */
-    bool readFlag(uint32_t flagBit) { return readBit(cpsr, flagBit); }
+    bool readFlag(uint32_t flagBit) const { return readBit(cpsr, flagBit); }
 
     /**
      * @brief Debug function to write to a register.
@@ -212,7 +226,7 @@ public:
     /**
      * @brief Instruction set.
      */
-    cycles ARM_UNDEFINED_INST(uint32_t instruct) { return 1; }
+    cycles ARM_UNDEFINED_INST(uint32_t instruct);
     cycles dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
     cycles ARM_AND_REG(uint32_t instruct);
@@ -306,7 +320,7 @@ public:
     cycles ARM_SMLALTT(uint32_t instruct);
     cycles ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int64_t opp2,
                      int64_t addend);
-    cycles loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    cycles loadStoreDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                    bool wback);
     cycles ARM_STRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add);
@@ -319,8 +333,10 @@ public:
     cycles ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                     bool wback);
     cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
-    cycles branchDecodeAndExecute(uint32_t instuct, uint8_t cond);
-    cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instuct, uint8_t cond);
+    cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    cycles ARM_B(uint32_t instruct);
+
+    cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond);
 };
 
 /**

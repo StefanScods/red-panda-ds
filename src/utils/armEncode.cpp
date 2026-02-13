@@ -5,15 +5,18 @@
 
 #include "armEncode.h"
 
+#include "interconnect.h"
+
 #define LOG_LEVEL 1
 #include "logger.h"
 
+// ==================================================================================================
 void cleanUpEncodeTemps(std::filesystem::path tempDir) {
     if (std::filesystem::exists(tempDir)) {
         std::filesystem::remove_all(tempDir);
     }
 }
-
+// ==================================================================================================
 std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7) {
     LogDebugPrefixed("Assembling:\n===============================\n"
                          << instructions,
@@ -92,3 +95,19 @@ std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7) {
     LogDebugPrefixed("Finished assembling program!", "ASM Encode");
     return encodings;
 }
+// ==================================================================================================
+void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus,
+                          bool arm7) {
+    std::vector<uint32_t> instuctionEncodings = armEncodeASM(program, arm7);
+    LogDebug("Writing program to 0x" << std::hex << startAddress << std::dec << "...");
+    for (int i = 0; i < instuctionEncodings.size(); i++) {
+        uint32_t address = startAddress + i * ARM_WORD_SIZE;
+        LogDebug("Writing instuction to 0x" << std::hex << instuctionEncodings[i] << " to 0x" << address << std::dec << "...");
+        arm7 ? bus->write32ARM7(address, instuctionEncodings[i])
+             : bus->write32ARM7(address, instuctionEncodings[i]);
+    }
+    LogDebug("Finished writing program! - " << instuctionEncodings.size() << " instructions - "
+                                            << instuctionEncodings.size() * ARM_WORD_SIZE
+                                            << " byte(s)");
+}
+// ==================================================================================================
