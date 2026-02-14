@@ -6,6 +6,7 @@
 #include "interconnect.h"
 
 // Control print statements.
+#define LOG_LEVEL 2
 #include "logger.h"
 
 // ==================================================================================================

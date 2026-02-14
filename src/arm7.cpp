@@ -6,6 +6,7 @@
 #include "interconnect.h"
 
 // Control print statements.
+#define LOG_LEVEL 2
 #include "logger.h"
 
 // ==================================================================================================
@@ -123,6 +124,12 @@ cycles ARM7TDMI::execute() {
     uint32_t nextInstruction = instuctionPipeLine[0];
     instuctionPipeLine[0] = NO_INSTRUCT;
     uint8_t condition = readBits(nextInstruction, 28, 31);
+    LogDebug("Executing " << PrintHex(nextInstruction) << " with condition code "
+                          << PrintHex(condition) << "!");
+    // TODO!!! Remove this if statement once the execute() is less buggy.
+    if (nextInstruction == NO_INSTRUCT) {
+        LogError("Trying to execute an empty pipeline / bubble in pipeline!");
+    }
     // Check the condition code skip opcodes which do not pass.
     bool Z = readBit(cpsr, Z_FLAG);
     bool C = readBit(cpsr, C_FLAG);
@@ -130,36 +137,64 @@ cycles ARM7TDMI::execute() {
     bool V = readBit(cpsr, V_FLAG);
     switch (condition) {
         case ConditionMnemonics::EQ:
-            if (!Z) return 1;
+            if (Z) break;
+            LogDebug("Condition EQ not passed!");
+            return 1;
         case ConditionMnemonics::NE:
-            if (Z) return 1;
+            if (!Z) break;
+            LogDebug("Condition NE not passed!");
+            return 1;
         case ConditionMnemonics::CS:
-            if (!C) return 1;
+            if (C) break;
+            LogDebug("Condition CS not passed!");
+            return 1;
         case ConditionMnemonics::CC:
-            if (C) return 1;
+            if (!C) break;
+            LogDebug("Condition CC not passed!");
+            return 1;
         case ConditionMnemonics::MI:
-            if (!N) return 1;
+            if (N) break;
+            LogDebug("Condition MI not passed!");
+            return 1;
         case ConditionMnemonics::PL:
-            if (N) return 1;
+            if (!N) break;
+            LogDebug("Condition PL not passed!");
+            return 1;
         case ConditionMnemonics::VS:
-            if (!V) return 1;
+            if (V) break;
+            LogDebug("Condition VS not passed!");
+            return 1;
         case ConditionMnemonics::VC:
-            if (V) return 1;
+            if (!V) break;
+            LogDebug("Condition VC not passed!");
+            return 1;
         case ConditionMnemonics::HI:
-            if (!C || Z) return 1;
+            if (C && !Z) break;
+            LogDebug("Condition HI not passed!");
+            return 1;
         case ConditionMnemonics::LS:
-            if (C && !Z) return 1;
+            if (!C || Z) break;
+            LogDebug("Condition LS not passed!");
+            return 1;
         case ConditionMnemonics::GE:
-            if (N != V) return 1;
+            if (N == V) break;
+            LogDebug("Condition GE not passed!");
+            return 1;
         case ConditionMnemonics::LT:
-            if (N == V) return 1;
+            if (N != V) break;
+            LogDebug("Condition LT not passed!");
+            return 1;
         case ConditionMnemonics::GT:
-            if (!Z || N != V) return 1;
+            if (!Z && N == V) break;
+            LogDebug("Condition GT not passed!");
+            return 1;
         case ConditionMnemonics::LE:
-            if (Z && N == V) return 1;
+            if (Z || N != V) break;
+            LogDebug("Condition LE not passed!");
+            return 1;
         case ConditionMnemonics::AL:
         case ConditionMnemonics::SPECIAL:
-            break;  // Unconditional execution
+            break;  // Unconditional execution.
         default:
             return 1;
     }
@@ -177,9 +212,7 @@ cycles ARM7TDMI::execute() {
         case 0b10:
             return ARM::branchDecodeAndExecute(nextInstruction, condition);
         default:
-            LogError("Unsupported OpCode: " << opCode
-                                            << "! Full instruction data: " << nextInstruction);
-            return 1;
+            return ARM::ARM_UNDEFINED_INST(nextInstruction);
     }
 }
 // ==================================================================================================
@@ -189,8 +222,10 @@ cycles ARM7TDMI::fetch() {
         LogError("Thumb mode is not currently supported!");
     }
     // Fetch the next 32 bits and increment PC.
+    LogDebug("Fetching instruction at: " << PrintHex(pc) << "...");
     busPayload readResult = readBus(pc, 32, true);
     instuctionPipeLine[2] = readResult.data;
+    LogDebug("Fetched instruction: " << PrintHex(instuctionPipeLine[2]) << "!");
     pc += 4;
     // Get the fetch cooldown.
     return readResult.numCycles;

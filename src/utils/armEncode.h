@@ -1,6 +1,6 @@
 /**
  * @file armEncode.h
- * @brief Covert written instructions into their encoded binary equivelent.
+ * @brief Covert written instructions into their encoded binary equivalent.
  */
 #ifndef ARMENCODE_H
 #define ARMENCODE_H

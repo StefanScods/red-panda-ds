@@ -272,11 +272,9 @@ inline u32AndBool ARMExpandImm_C(uint32_t imm12, bool carryIn) {
  * @param carryIn
  * @return u32WithCarryAndOverflow
  */
-inline u32WithCarryAndOverflow ARMAddWithCarry(uint32_t operand1, uint32_t operand2,
-                                               bool carryIn) {
+inline u32WithCarryAndOverflow ARMAddWithCarry(uint32_t operand1, uint32_t operand2, bool carryIn) {
     uint64_t unsignedSum = uint64_t(operand1) + uint64_t(operand2) + uint64_t(carryIn);
-    int64_t signedSum =
-        int64_t(int32_t(operand1)) + int64_t(int32_t(operand2)) + uint64_t(carryIn);
+    int64_t signedSum = int64_t(int32_t(operand1)) + int64_t(int32_t(operand2)) + uint64_t(carryIn);
     uint32_t result = uint32_t(unsignedSum & 0xFFFFFFFF);
     bool carryOut = uint64_t(result) != unsignedSum;
     bool overflow = int64_t(int32_t(result)) != signedSum;

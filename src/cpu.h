@@ -10,7 +10,7 @@
 class Interconnect;
 
 // TODO!!! Make sure this is an invalid instruction for both CPUs
-#define NO_INSTRUCT 0b11110111111111111111111111111111
+#define NO_INSTRUCT 0b11101100000000000000000000000000
 
 #define NUM_OF_STANDARD_REGISTERS 16
 #define NUM_OF_FIQ_REGISTERS 8
@@ -37,7 +37,8 @@ class Interconnect;
 #define LR_REGISTER_NUM 14
 #define PC_REGISTER_NUM 15
 
-// Condition code
+// Condition codes
+// https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Instruction-Details/Conditional-execution?lang=en#Chdcgdjb
 namespace ConditionMnemonics {
 enum ConditionMnemonics : uint8_t {
     EQ = 0b0000,
@@ -149,7 +150,11 @@ public:
      * @return cycles
      */
     virtual cycles fetch();
-
+    /**
+     * @brief Main cycle logic of the module.
+     *
+     * @return cycles
+     */
     virtual cycles cycle();
     /**
      * @brief Updates PC + performs any processing after PC has been updated.

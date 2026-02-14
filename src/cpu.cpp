@@ -98,14 +98,16 @@ cycles ARM::cycle() {
 // ==================================================================================================
 cycles ARM::fetchAndExecute(int numExecutions) {
     cycles cycleCount = 0;
-    cycleCount += fillInstuctionPipeline();
     while (numExecutions) {
         instuctionPipeLine[0] = instuctionPipeLine[1];
         instuctionPipeLine[1] = instuctionPipeLine[2];
-        cycles exeCycles = execute();
+        cycles exeCycles = 0;
+        if (instuctionPipeLine[0] != NO_INSTRUCT) {
+            exeCycles = execute();
+            numExecutions--;
+        }
         cycles fetchCycles = fetch();
         cycleCount += std::max(exeCycles, fetchCycles);
-        numExecutions--;
     }
     return cycleCount;
 }
@@ -132,16 +134,19 @@ busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 }
 // ==================================================================================================
 cycles ARM::ARM_UNDEFINED_INST(uint32_t instruct) {
-    LogError("Unsupported instuction: 0x" << std::hex << instruct << std::dec << "!");
+    LogError("Unsupported instuction: " << PrintHex(instruct) << "!");
     return 1;
 }
 // ==================================================================================================
 void ARM::branch(uint32_t dest) {
     // Determine if we are going to thumb mode.
     bool thumb = readBit(dest, 0);
-    writeBit(cpsr, T_BIT, thumb);
+    writeBit(cpsr, thumb, T_BIT);
     // Mask the bottom bit (thumb mode) or bottom 2 bits (arm mode).
     uint32_t pcMask = thumb ? ~(0b1) : ~(0b11);
+    LogDebug("Branching - PC currently at: " << PrintHex(pc) << "...");
+    LogDebug("Moving PC to: " << PrintHex(dest & pcMask) << "!");
+    LogDebug("Thumb mode after branch: " << thumb << "!");
     pc = dest & pcMask;
     // Clear the instuction pipeline.
     instuctionPipeLine[0] = NO_INSTRUCT;

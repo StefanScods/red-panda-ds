@@ -127,6 +127,7 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b101101:
         case 0b101110:
         case 0b101111:
+            if (cond == ConditionMnemonics::SPECIAL) return ARM_BLX(instruct);
             return ARM_B(instruct);
         // Branch Link and Exchange
         case 0b110000:
@@ -152,8 +153,7 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         default:
             break;
     }
-    LogError("Unsupported instruction: " << instruct << "!");
-    return 1;
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
 // Branch

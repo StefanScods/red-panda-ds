@@ -2063,8 +2063,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         default:
             break;
     }
-    LogError("Unsupported instruction: " << instruct << "!");
-    return 1;
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
 // Data-processing

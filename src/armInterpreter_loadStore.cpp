@@ -1,6 +1,6 @@
 /**
  * @file armInterpreter_loadStore.cpp
- * @brief Implements arm load store instuction set
+ * @brief Implements arm load store instruction set
  */
 #include "cpu.h"
 #include "interconnect.h"
@@ -14,41 +14,41 @@
 
 // ==================================================================================================
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Load-store-word-and-unsigned-byte?lang=en
-cycles ARM::loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond) {
+cycles ARM::loadStoreDecodeAndExecute(uint32_t instruct, uint8_t cond) {
     // Extract useful parts of the instruction in order to decode.
     // P - Pre/Post (0=post; add offset after transfer, 1=pre; before trans.)
-    bool P = readBit(instuct, 24);
+    bool P = readBit(instruct, 24);
     // U - Up/Down Bit (0=down; subtract offset from base, 1=up; add to base)
-    bool U = readBit(instuct, 23);
+    bool U = readBit(instruct, 23);
     /**
      * When above Bit 24 P=0 (Post-indexing, write-back is ALWAYS enabled):
      *   21     T - Memory Management (0=Normal, 1=Force non-privileged access)
      * When above Bit 24 P=1 (Pre-indexing, write-back is optional):
      *   21     W - Write-back bit (0=no write-back, 1=write address into base)
      */
-    bool bit21 = readBit(instuct, 21);
+    bool bit21 = readBit(instruct, 21);
     // 1st Operand Register.
-    uint8_t Rn = readBits(instuct, 16, 19);
+    uint8_t Rn = readBits(instruct, 16, 19);
     // Destination / target Register.
-    uint8_t Rd = readBits(instuct, 12, 15);
-    uint8_t op = readBits(instuct, 20, 24);
+    uint8_t Rd = readBits(instruct, 12, 15);
+    uint8_t op = readBits(instruct, 20, 24);
     // I - Immediate Offset Flag (0=Immediate, 1=Shifted Register)
-    bool I = readBit(instuct, 25);
+    bool I = readBit(instruct, 25);
     // Get the offset.
     uint32_t offset;
     if (I) {  // 1=Shifted Register
         // Shift type.
-        uint8_t type = readBits(instuct, 5, 6);
+        uint8_t type = readBits(instruct, 5, 6);
         // Offset Register.
-        uint8_t Rm = readBits(instuct, 0, 3);
+        uint8_t Rm = readBits(instruct, 0, 3);
         assert(Rm != 15);
         // Shift amount.
-        uint8_t shiftAmount = readBits(instuct, 7, 11);
+        uint8_t shiftAmount = readBits(instruct, 7, 11);
         // Calculate the offset via a shift operation.
         decodeShiftResult shiftOp = ARMDecodeImmShift(type, shiftAmount);
         offset = ARMShift(*activeRegs[Rm], shiftOp, readBit(cpsr, C_FLAG)).data_u32;
     } else {  // 0=Immediate.
-        offset = readBits(instuct, 0, 11);
+        offset = readBits(instruct, 0, 11);
     }
     switch (op) {
         // STR (immediate, register)
@@ -101,8 +101,7 @@ cycles ARM::loadStoreDecodeAndExecute(uint32_t instuct, uint8_t cond) {
             return ARM_LDRBT(Rd, Rn, offset, U);
     }
 
-    LogError("Unsupported instruction: " << instuct << "!");
-    return 1;
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STR--register-?lang=en

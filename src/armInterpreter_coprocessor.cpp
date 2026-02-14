@@ -14,8 +14,7 @@
 
 // ==================================================================================================
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Coprocessor-instructions--and-Supervisor-Call?lang=en
-cycles ARM::coprocessorAndSupervisorDecodeAndExecute(uint32_t instuct, uint8_t cond) {
-    LogError("Unsupported instruction: " << instuct << "!");
-    return 1;
+cycles ARM::coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond) {
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================

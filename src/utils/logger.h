@@ -35,6 +35,9 @@
 #define LOG_LEVEL 0
 #endif
 
+// ========= Log Helpers ==========================================================================
+#define PrintHex(x) "0x" << std::hex << (uint32_t)(x) << std::dec
+
 // ========= Debug ================================================================================
 #if LOG_LEVEL >= 3
 // Logs a debug message to standard cout. Need LOG_LEVEL >= 3.
