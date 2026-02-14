@@ -20,4 +20,19 @@ enum ARM7MemoryRegionNum {
     GBARAM = 0x0A
 };
 }
+
+namespace ARM9MemoryRegionNum {
+enum ARM9MemoryRegionNum {
+    INSTUCTION_TCM = 0x00,
+    MAIN_RAM = 0x02,
+    WRAM = 0x03,
+    IO = 0x04,
+    PALETTES = 0x05,
+    VRAM = 0x06,
+    OAM = 0x07,
+    GBAROM1 = 0x08,
+    GBAROM2 = 0x09,
+    BIOS = 0xFF
+};
+}
 #endif

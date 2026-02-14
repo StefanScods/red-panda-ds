@@ -105,7 +105,7 @@ void writeProgramToMemory(std::string program, uint32_t startAddress, Interconne
         LogDebug("Writing instuction to " << PrintHex(instuctionEncodings[i]) << " to "
                                           << PrintHex(address) << "...");
         arm7 ? bus->write32ARM7(address, instuctionEncodings[i])
-             : bus->write32ARM7(address, instuctionEncodings[i]);
+             : bus->write32ARM9(address, instuctionEncodings[i]);
     }
     LogDebug("Finished writing program! - " << instuctionEncodings.size() << " instructions - "
                                             << instuctionEncodings.size() * ARM_WORD_SIZE

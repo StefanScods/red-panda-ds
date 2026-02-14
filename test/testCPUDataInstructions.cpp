@@ -15,12 +15,14 @@ class TestCPUDataInstructions : public testing::Test {
 protected:
     Interconnect bus;
     ARM7TDMI arm7;
+    ARM946ES arm9;
     TestCPUDataInstructions() {}
     ~TestCPUDataInstructions() {}
 
     void SetUp() override {
         bus.init();
         bus.bindARM7(&arm7);
+        bus.bindARM9(&arm9);
     }
 
     void TearDown() override {}

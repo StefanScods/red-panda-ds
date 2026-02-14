@@ -13,12 +13,14 @@ class TestCPUBranchInstructions : public testing::Test {
 protected:
     Interconnect bus;
     ARM7TDMI arm7;
+    ARM946ES arm9;
     TestCPUBranchInstructions() {}
     ~TestCPUBranchInstructions() {}
 
     void SetUp() override {
         bus.init();
         bus.bindARM7(&arm7);
+        bus.bindARM9(&arm9);
     }
 
     void TearDown() override {}
@@ -46,7 +48,7 @@ TEST_F(TestCPUBranchInstructions_B, B_IMMEDIATE) {
         "B .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
@@ -64,7 +66,7 @@ TEST_F(TestCPUBranchInstructions_B, BEQ_IMMEDIATE) {
         "Beq .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
@@ -79,7 +81,7 @@ TEST_F(TestCPUBranchInstructions_B, BEQ_IMMEDIATE) {
         "Beq .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 20);
@@ -97,7 +99,7 @@ TEST_F(TestCPUBranchInstructions_B, BNE_IMMEDIATE) {
         "Bne .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
@@ -112,7 +114,7 @@ TEST_F(TestCPUBranchInstructions_B, BNE_IMMEDIATE) {
         "Bne .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 20);
@@ -131,7 +133,7 @@ TEST_F(TestCPUBranchInstructions_B, BCS_IMMEDIATE) {
         "Bcs .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -147,7 +149,7 @@ TEST_F(TestCPUBranchInstructions_B, BCS_IMMEDIATE) {
         "Bcs .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -166,7 +168,7 @@ TEST_F(TestCPUBranchInstructions_B, BCC_IMMEDIATE) {
         "Bcc .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -182,7 +184,7 @@ TEST_F(TestCPUBranchInstructions_B, BCC_IMMEDIATE) {
         "Bcc .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -201,7 +203,7 @@ TEST_F(TestCPUBranchInstructions_B, BMI_IMMEDIATE) {
         "Bmi .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -217,7 +219,7 @@ TEST_F(TestCPUBranchInstructions_B, BMI_IMMEDIATE) {
         "Bmi .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -236,7 +238,7 @@ TEST_F(TestCPUBranchInstructions_B, BPL_IMMEDIATE) {
         "Bpl .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -252,7 +254,7 @@ TEST_F(TestCPUBranchInstructions_B, BPL_IMMEDIATE) {
         "Bpl .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -271,7 +273,7 @@ TEST_F(TestCPUBranchInstructions_B, BVS_IMMEDIATE) {
         "Bvs .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -287,7 +289,7 @@ TEST_F(TestCPUBranchInstructions_B, BVS_IMMEDIATE) {
         "Bvs .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -306,7 +308,7 @@ TEST_F(TestCPUBranchInstructions_B, BVC_IMMEDIATE) {
         "Bvc .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -322,7 +324,7 @@ TEST_F(TestCPUBranchInstructions_B, BVC_IMMEDIATE) {
         "Bvc .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -341,7 +343,7 @@ TEST_F(TestCPUBranchInstructions_B, BHI_IMMEDIATE) {
         "Bhi .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -357,7 +359,7 @@ TEST_F(TestCPUBranchInstructions_B, BHI_IMMEDIATE) {
         "Bhi .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -376,7 +378,7 @@ TEST_F(TestCPUBranchInstructions_B, BLS_IMMEDIATE) {
         "Bls .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -392,7 +394,7 @@ TEST_F(TestCPUBranchInstructions_B, BLS_IMMEDIATE) {
         "Bls .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -411,7 +413,7 @@ TEST_F(TestCPUBranchInstructions_B, BGE_IMMEDIATE) {
         "Bge .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -427,7 +429,7 @@ TEST_F(TestCPUBranchInstructions_B, BGE_IMMEDIATE) {
         "Bge .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -446,7 +448,7 @@ TEST_F(TestCPUBranchInstructions_B, BLT_IMMEDIATE) {
         "Blt .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -462,7 +464,7 @@ TEST_F(TestCPUBranchInstructions_B, BLT_IMMEDIATE) {
         "Blt .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -481,7 +483,7 @@ TEST_F(TestCPUBranchInstructions_B, BGT_IMMEDIATE) {
         "Bgt .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -497,7 +499,7 @@ TEST_F(TestCPUBranchInstructions_B, BGT_IMMEDIATE) {
         "Bgt .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -516,7 +518,7 @@ TEST_F(TestCPUBranchInstructions_B, BLE_IMMEDIATE) {
         "Ble .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 12);
@@ -532,7 +534,7 @@ TEST_F(TestCPUBranchInstructions_B, BLE_IMMEDIATE) {
         "Ble .-4\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(4);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 24);
@@ -561,7 +563,7 @@ TEST_F(TestCPUBranchInstructions_BL, BL_IMMEDIATE) {
         "MOV R0, #0\n"
         "BL .-4",
         MAIN_RAM_START, &bus,
-        /*arm7=*/true);
+        arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
     ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
@@ -584,33 +586,31 @@ protected:
  * @brief Tests a Branch Link and Exchange operation using an immediate.
  */
 TEST_F(TestCPUBranchInstructions_BLX, BLX_IMMEDIATE) {
-    // TODO!!! Change test to use arm9.
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "BLX .-4",
         MAIN_RAM_START, &bus,
-        /*arm7=*/false);
-    arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(3);
-    ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
-    ASSERT_EQ(arm7.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
-    ASSERT_EQ(arm7.readFlag(T_BIT), 1);
+        arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(3);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
+    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
 }
 /**
  * @brief Tests a Branch Link and Exchange operation using an immediate not aligned to 4.
  */
 TEST_F(TestCPUBranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
-    // TODO!!! Change test to use arm9.
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "BLX .-2",
         MAIN_RAM_START, &bus,
-        /*arm7=*/false);
-    arm7.setPC(MAIN_RAM_START);
-    arm7.fetchAndExecute(3);
-    ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 10);
-    ASSERT_EQ(arm7.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
-    ASSERT_EQ(arm7.readFlag(T_BIT), 1);
+        arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(3);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 10);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
+    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
 }

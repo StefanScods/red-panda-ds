@@ -106,14 +106,14 @@ protected:
     uint32_t instuctionPipeLine[INSTUCTION_PIPELINE_LENGTH];
 
     // Cycle timing map.
-    cycles code_sequencial32BitAccessTimings[0xA] = {0};
-    cycles code_nonSequencial32BitAccessTimings[0xA] = {0};
-    cycles code_sequencial16BitAccessTimings[0xA] = {0};
-    cycles code_nonSequencial16BitAccessTimings[0xA] = {0};
-    cycles data_sequencial32BitAccessTimings[0xA] = {0};
-    cycles data_nonSequencial32BitAccessTimings[0xA] = {0};
-    cycles data_sequencial16BitAccessTimings[0xA] = {0};
-    cycles data_nonSequencial16BitAccessTimings[0xA] = {0};
+    cycles code_sequencial32BitAccessTimings[0xFF] = {0};
+    cycles code_nonSequencial32BitAccessTimings[0xFF] = {0};
+    cycles code_sequencial16BitAccessTimings[0xFF] = {0};
+    cycles code_nonSequencial16BitAccessTimings[0xFF] = {0};
+    cycles data_sequencial32BitAccessTimings[0xFF] = {0};
+    cycles data_nonSequencial32BitAccessTimings[0xFF] = {0};
+    cycles data_sequencial16BitAccessTimings[0xFF] = {0};
+    cycles data_nonSequencial16BitAccessTimings[0xFF] = {0};
 
     /**
      * @brief adds the current value of `cyclesElapsed` to the `currentCycle` and reduces fetch
@@ -130,6 +130,15 @@ protected:
 public:
     ARM();
     ~ARM();
+
+    /**
+     * @brief Returns true if this CPU implements arm7.
+     */
+    bool isARM7() { return !arm9; }
+    /**
+     * @brief Returns true if this CPU implements arm9.
+     */
+    bool isARM9() { return arm9; }
 
     /**
      * @brief Set all vars back to their initial value.
@@ -161,7 +170,7 @@ public:
      *
      * @param dest The new address to branch to.
      */
-    virtual void branch(uint32_t dest);
+    void branch(uint32_t dest);
     /**
      * @brief Call after updating an arbitrary reg to ensure writes to PC are handled correctly.
      *
@@ -383,8 +392,6 @@ public:
     ~ARM7TDMI();
 
     // Function overrides.
-    cycles execute() override;
-    cycles fetch() override;
     cycles cycle() override;
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
@@ -399,6 +406,11 @@ private:
 public:
     ARM946ES();
     ~ARM946ES();
+
+    // Function overrides.
+    cycles cycle() override;
+    busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
+    busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };
 
 #endif
