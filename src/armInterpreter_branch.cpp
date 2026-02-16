@@ -13,106 +13,57 @@
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Branch--branch-with-link--and-block-data-transfer?lang=en
 cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
     uint8_t op = readBits(instruct, 20, 25);
-    uint8_t Rn = readBits(instruct, 16, 19);
     switch (op) {
-        // Unsupported
+        // Store Multiple Decrement After
         case 0b000000:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b000001:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b000010:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_STMDA(instruct);
+        // 	Load Multiple Decrement After
+        case 0b000001:
         case 0b000011:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b000100:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b000101:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b000110:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b000111:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_LDMDA(instruct);
+        // Store Multiple Increment After
         case 0b001000:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b001001:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b001010:
-            return ARM_UNDEFINED_INST(instruct);
+            return ARM_STMIA(instruct);
+        // 	Load Multiple Increment After
+        case 0b001001:
         case 0b001011:
-            // POP
-            if (Rn == 0b1101) return ARM_POP(instruct);
-            // Unsupported
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b001100:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b001101:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b001110:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b001111:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_LDMIA(instruct);
+        // Store Multiple Decrement Before
         case 0b010000:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b010001:
-            return ARM_UNDEFINED_INST(instruct);
         case 0b010010:
-            // PUSH
-            if (Rn == 0b1101) return ARM_PUSH(instruct);
-            // Unsupported
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_STMDB(instruct);
+        // 	Load Multiple Decrement Before
+        case 0b010001:
         case 0b010011:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b010100:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b010101:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b010110:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b010111:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_LDMDB(instruct);
+        // Store Multiple Increment Before
         case 0b011000:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b011001:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b011010:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_STMIB(instruct);
+        // 	Load Multiple Increment Before
+        case 0b011001:
         case 0b011011:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+            return ARM_LDMIB(instruct);
+        // Store Multiple (user registers)
+        case 0b000100:
+        case 0b000110:
+        case 0b001100:
+        case 0b001110:
+        case 0b010100:
+        case 0b010110:
         case 0b011100:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
-        case 0b011101:
-            return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b011110:
             return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
+        // Load Multiple (user registers).
+        case 0b000101:
+        case 0b000111:
+        case 0b001101:
+        case 0b001111:
+        case 0b010101:
+        case 0b010111:
+        case 0b011101:
         case 0b011111:
             return ARM_UNDEFINED_INST(instruct);
         // Branch

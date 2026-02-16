@@ -375,8 +375,18 @@ public:
     cycles ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                     bool wback);
     cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
-    cycles ARM_POP(uint32_t registerList);
-    cycles ARM_PUSH(uint32_t registerList);
+    cycles ARM_STMIA(uint32_t instruct);
+    cycles ARM_STMIB(uint32_t instruct);
+    cycles ARM_STMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
+    cycles ARM_STMDA(uint32_t instruct);
+    cycles ARM_STMDB(uint32_t instruct);
+    cycles ARM_STMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
+    cycles ARM_LDMIA(uint32_t instruct);
+    cycles ARM_LDMIB(uint32_t instruct);
+    cycles ARM_LDMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
+    cycles ARM_LDMDA(uint32_t instruct);
+    cycles ARM_LDMDB(uint32_t instruct);
+    cycles ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
     cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_B(uint32_t instruct);
     cycles ARM_BL(uint32_t instruct);
