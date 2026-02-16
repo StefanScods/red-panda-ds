@@ -184,11 +184,11 @@ cycles ARM::fetch() {
         LogError("Thumb mode is not currently supported!");
     }
     // Fetch the next 32 bits and increment PC.
-    LogDebug("Fetching instruction at: " << PrintHex(pc) << "...");
-    busPayload readResult = readBus(pc, 32, true);
+    LogDebug("Fetching instruction at: " << PrintHex(pc()) << "...");
+    busPayload readResult = readBus(pc(), 32, true);
     instuctionPipeLine[2] = readResult.data;
     LogDebug("Fetched instruction: " << PrintHex(instuctionPipeLine[2]) << "!");
-    pc += 4;
+    pc() += 4;
     // Get the fetch cooldown.
     return readResult.numCycles;
 }
@@ -246,10 +246,10 @@ void ARM::branch(uint32_t dest) {
     writeBit(cpsr, thumb, T_BIT);
     // Mask the bottom bit (thumb mode) or bottom 2 bits (arm mode).
     uint32_t pcMask = thumb ? ~(0b1) : ~(0b11);
-    LogDebug("Branching - PC currently at: " << PrintHex(pc) << "...");
+    LogDebug("Branching - PC currently at: " << PrintHex(pc()) << "...");
     LogDebug("Moving PC to: " << PrintHex(dest & pcMask) << "!");
     LogDebug("Thumb mode after branch: " << thumb << "!");
-    pc = dest & pcMask;
+    pc() = dest & pcMask;
     // Clear the instuction pipeline.
     instuctionPipeLine[0] = NO_INSTRUCT;
     instuctionPipeLine[1] = NO_INSTRUCT;
@@ -258,6 +258,6 @@ void ARM::branch(uint32_t dest) {
 // ==================================================================================================
 void ARM::fixupIfTargetingPC(uint32_t destReg) {
     if (destReg != PC_REGISTER_NUM) return;
-    branch(pc);
+    branch(pc());
 }
 // ==================================================================================================

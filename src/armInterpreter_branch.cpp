@@ -13,6 +13,7 @@
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Branch--branch-with-link--and-block-data-transfer?lang=en
 cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
     uint8_t op = readBits(instruct, 20, 25);
+    uint8_t Rn = readBits(instruct, 16, 19);
     switch (op) {
         // Unsupported
         case 0b000000:
@@ -47,8 +48,10 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // Unsupported
         case 0b001010:
             return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b001011:
+            // POP
+            if (Rn == 0b1101) return ARM_POP(instruct);
+            // Unsupported
             return ARM_UNDEFINED_INST(instruct);
         // Unsupported
         case 0b001100:
@@ -68,8 +71,10 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // Unsupported
         case 0b010001:
             return ARM_UNDEFINED_INST(instruct);
-        // Unsupported
         case 0b010010:
+            // PUSH
+            if (Rn == 0b1101) return ARM_PUSH(instruct);
+            // Unsupported
             return ARM_UNDEFINED_INST(instruct);
         // Unsupported
         case 0b010011:
@@ -163,7 +168,7 @@ cycles ARM::ARM_B(uint32_t instruct) {
     // Sign extend the bottom 24 bits and align address to 4 bytes.
     uint32_t imm24 = readBits(instruct, 0, 23);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
-    branch(pc + offset);
+    branch(pc() + offset);
     return 1;
 }
 // ==================================================================================================
@@ -171,21 +176,21 @@ cycles ARM::ARM_B(uint32_t instruct) {
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BL--BLX--immediate-?lang=en//
 // ==================================================================================================
 cycles ARM::ARM_BL(uint32_t instruct) {
-    lr = pc - 4;  // Point to the previous instruction.
+    lr() = pc() - 4;  // Point to the previous instruction.
     // Sign extend the bottom 24 bits and align address to 4 bytes.
     uint32_t imm24 = readBits(instruct, 0, 23);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
-    branch(pc + offset);
+    branch(pc() + offset);
     return 1;
 }
 // ==================================================================================================
 cycles ARM::ARM_BLX(uint32_t instruct) {
-    lr = pc - 4;  // Point to the previous instruction.
+    lr() = pc() - 4;  // Point to the previous instruction.
     // Sign extend the bottom 24 bits and align address to 4 bytes.
     uint32_t imm24 = readBits(instruct, 0, 23);
     bool H = readBit(instruct, 24);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6 | (H << 1);
-    branch(pc + offset + 1);  // Offset by + 1 to enter thumb mode.
+    branch(pc() + offset + 1);  // Offset by + 1 to enter thumb mode.
     return 1;
 }
 // ==================================================================================================

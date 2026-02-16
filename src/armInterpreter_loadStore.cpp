@@ -210,3 +210,61 @@ cycles ARM::ARM_LDRBT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool a
     return ARM_LDRB(srcReg, baseReg, offset, false, add, true);
 }
 // ==================================================================================================
+// POP
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/POP--ARM-?lang=en
+// ==================================================================================================
+cycles ARM::ARM_POP(uint32_t registerList) {
+    LogDebug("Executing POP");
+    uint32_t baseAddress = sp();
+    uint32_t numPops = 0;
+    cycles totalCycles = 0;
+    // Align the base addres to 4.
+    uint32_t popAddress = baseAddress & ~(0b11);
+    for (uint32_t i = 0; i <= LR_REGISTER_NUM; i++) {
+        bool shouldPop = registerList & (0b1 << i);
+        if (!shouldPop) continue;
+        // Pop at the target address.
+        LogDebug("Popping R" << i << " off the stack (" << PrintHex(popAddress) << ")");
+        busPayload payload = readBus(popAddress, 32);
+        totalCycles += payload.numCycles;
+        *activeRegs[i] = payload.data;
+        // Increment the pop address.
+        popAddress += 4;
+        numPops++;
+    }
+    if (readBit(registerList, PC_REGISTER_NUM)) {
+        // Use the popped address to branch.
+        busPayload payload = readBus(popAddress, 32);
+        totalCycles += payload.numCycles;
+        branch(payload.data);
+        numPops++;
+    }
+    sp() = baseAddress + 4 * numPops;
+    return 1;
+}
+// ==================================================================================================
+// PUSH
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/PUSH?lang=en
+// ==================================================================================================
+cycles ARM::ARM_PUSH(uint32_t registerList) {
+    LogDebug("Executing PUSH");
+    uint32_t baseAddress = sp();
+    uint32_t numPushes = 0;
+    cycles totalCycles = 0;
+    // Align the base addres to 4.
+    uint32_t pushAddress = (baseAddress & ~(0b11)) - 4;
+    for (int32_t i = PC_REGISTER_NUM; i >= 0; --i) {
+        bool shouldPush = registerList & (0b1 << i);
+        if (!shouldPush) continue;
+        // Push to the target address.
+        LogDebug("Pushing R" << i << " on to the stack (" << PrintHex(pushAddress) << ")");
+        busPayload payload = writeBus(pushAddress, *activeRegs[i], 32);
+        totalCycles += payload.numCycles;
+        // Increment the push address.
+        pushAddress -= 4;
+        numPushes++;
+    }
+    sp() = baseAddress - 4 * numPushes;
+    return 1;
+}
+// ==================================================================================================

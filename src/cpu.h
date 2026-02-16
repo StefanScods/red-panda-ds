@@ -34,6 +34,7 @@ class Interconnect;
 // Thumb execution state bit
 #define T_BIT 5
 
+#define SP_REGISTER_NUM 13
 #define LR_REGISTER_NUM 14
 #define PC_REGISTER_NUM 15
 
@@ -87,10 +88,11 @@ protected:
         &(reg[12]), &(reg[13]), &(reg[14]), &(reg[15])};
 
     // Program counter maps to the 15th standard register in all modes.
-    uint32_t& pc = reg[PC_REGISTER_NUM];
-    // Link register maps to the 14th standard register.
-    // TODO!!! Handle other modes.
-    uint32_t& lr = reg[LR_REGISTER_NUM];
+    inline uint32_t& pc() { return *activeRegs[PC_REGISTER_NUM]; }
+    // Link register maps to the 14th register.
+    inline uint32_t& lr() { return *activeRegs[LR_REGISTER_NUM]; }
+    // Stack pointer maps to the 13th register.
+    inline uint32_t& sp() { return *activeRegs[SP_REGISTER_NUM]; }
 
     // Keep track of the component's cycle time.
     cycles fetchCooldown = 0;
@@ -199,7 +201,7 @@ public:
      * @brief Debug function to force PC to a value.
      * @param value
      */
-    void setPC(uint32_t value) { pc = value; }
+    void setPC(uint32_t value) { pc() = value; }
 
     /**
      * @brief Debug function to read a register value.
@@ -373,6 +375,8 @@ public:
     cycles ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                     bool wback);
     cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
+    cycles ARM_POP(uint32_t registerList);
+    cycles ARM_PUSH(uint32_t registerList);
     cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_B(uint32_t instruct);
     cycles ARM_BL(uint32_t instruct);
