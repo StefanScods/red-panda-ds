@@ -807,8 +807,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SMLABB (ARM9 only)
         case 0b0100001000:
             return ARM_SMLABB(instruct);
+        // SWP
         case 0b0100001001:
-            break;
+            return ARM_SWP(instruct);
         // SMLATB (ARM9 only)
         case 0b0100001010:
             return ARM_SMLATB(instruct);
@@ -975,8 +976,9 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SMLALBB (ARM9 Only)
         case 0b0101001000:
             return ARM_SMLALBB(instruct);
+        // SWPB
         case 0b0101001001:
-            break;
+            return ARM_SWPB(instruct);
         // SMLALTB (ARM9 Only)
         case 0b0101001010:
             return ARM_SMLALTB(instruct);
@@ -3667,6 +3669,31 @@ cycles ARM::ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int
     *activeRegs[desRegLow] = (int32_t)(result);
     fixupIfTargetingPC(desRegHigh);
     fixupIfTargetingPC(desRegLow);
+    return 1;
+}
+// ==================================================================================================
+// SWP
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/SWP--SWPB?lang=en
+// ==================================================================================================
+cycles ARM::ARM_SWP(uint32_t instruct) {
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rt2 = readBits(instruct, 0, 3);
+    busPayload dataRead = readBus(*activeRegs[Rn]);
+    busPayload dataWrite = writeBus(*activeRegs[Rn], *activeRegs[Rt2]);
+    *activeRegs[Rt] = dataRead.data;
+    fixupIfTargetingPC(Rt);
+    return 1;
+}
+// ==================================================================================================
+cycles ARM::ARM_SWPB(uint32_t instruct) {
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rt2 = readBits(instruct, 0, 3);
+    busPayload dataRead = readBus(*activeRegs[Rn], 8);
+    busPayload dataWrite = writeBus(*activeRegs[Rn], (*activeRegs[Rt2] & 0xFF), 8);
+    *activeRegs[Rt] = (dataRead.data & 0xFF);
+    fixupIfTargetingPC(Rt);
     return 1;
 }
 // ==================================================================================================

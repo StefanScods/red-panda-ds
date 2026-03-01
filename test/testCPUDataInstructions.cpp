@@ -2583,3 +2583,85 @@ TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_NEGATIVE_FLAG) {
     arm7.fetchAndExecute(5);
     ASSERT_EQ(arm7.readFlag(N_FLAG), 0);
 }
+
+// ==================================================================================================
+// SWP
+// ==================================================================================================
+class TestCPUDataInstructions_SWP : public TestCPUDataInstructions {
+protected:
+    TestCPUDataInstructions_SWP() {}
+    ~TestCPUDataInstructions_SWP() {}
+
+    void SetUp() override { TestCPUDataInstructions::SetUp(); }
+    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests SWP (Swap Word) instruction.
+ *
+ * SWP Rd, Rm, [Rn]
+ *
+ * Rd = Mem[Rn]
+ * Mem[Rn] = Rm
+ */
+TEST_F(TestCPUDataInstructions_SWP, SWP_WORD) {
+    uint32_t baseAddress = MAIN_RAM_START + 0x400;
+    uint32_t memoryValue = 0x11223344;
+    uint32_t registerValue = 0xAABBCCDD;
+
+    arm7.reset();
+
+    // Initialize memory
+    bus.write32ARM7(baseAddress, memoryValue);
+
+    // Setup registers
+    arm7.writeReg(0, 0);              // Rd (R0)
+    arm7.writeReg(1, registerValue);  // Rm (R1)
+    arm7.writeReg(2, baseAddress);    // Rn (R2)
+
+    writeProgramToMemory("SWP R0, R1, [R2]\n", MAIN_RAM_START, &bus,
+                         /*arm7=*/true);
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    // Rd should now contain original memory value
+    ASSERT_EQ(arm7.readReg(0), memoryValue);
+
+    // Memory should now contain original Rm value
+    ASSERT_EQ(bus.read32ARM7(baseAddress), registerValue);
+}
+/**
+ * @brief Tests SWPB (Swap Byte) instruction.
+ *
+ * SWPB Rd, Rm, [Rn]
+ *
+ * Rd = Mem8[Rn]
+ * Mem8[Rn] = Rm[7:0]
+ */
+TEST_F(TestCPUDataInstructions_SWP, SWPB_BYTE) {
+    uint32_t baseAddress = MAIN_RAM_START + 0x500;
+    uint8_t memoryValue = 0x44;
+    uint32_t registerValue = 0xAABBCCDD;  // only lowest byte (0xDD) used
+
+    arm7.reset();
+
+    // Initialize memory (write single byte)
+    bus.write8ARM7(baseAddress, memoryValue);
+
+    // Setup registers
+    arm7.writeReg(0, 0);              // Rd (R0)
+    arm7.writeReg(1, registerValue);  // Rm (R1)
+    arm7.writeReg(2, baseAddress);    // Rn (R2)
+
+    writeProgramToMemory("SWPB R0, R1, [R2]\n", MAIN_RAM_START, &bus,
+                         /*arm7=*/true);
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    // Rd should contain zero-extended original memory byte
+    ASSERT_EQ(arm7.readReg(0), memoryValue);
+
+    // Memory should contain low byte of Rm
+    ASSERT_EQ(bus.read8ARM7(baseAddress), 0xDD);
+}

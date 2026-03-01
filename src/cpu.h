@@ -387,6 +387,8 @@ public:
     cycles ARM_LDMDA(uint32_t instruct);
     cycles ARM_LDMDB(uint32_t instruct);
     cycles ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
+    cycles ARM_SWP(uint32_t instruct);
+    cycles ARM_SWPB(uint32_t instruct);
     cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_B(uint32_t instruct);
     cycles ARM_BL(uint32_t instruct);
