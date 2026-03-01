@@ -292,6 +292,10 @@ cycles ARM::ARM_STMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
     return 1;
 }
 // ==================================================================================================
+cycles ARM::ARM_STM_USER_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
 // LDM
 // https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/LDM--User-registers-?lang=en
 // ==================================================================================================
@@ -389,5 +393,69 @@ cycles ARM::ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
         fixupIfTargetingPC(baseReg);
     }
     return 1;
+}
+// ==================================================================================================
+cycles ARM::ARM_LDM_USER_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// STRH
+// ==================================================================================================
+cycles ARM::ARM_STRH_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_STRH_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// STRD
+// ==================================================================================================
+cycles ARM::ARM_STRD_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_STRD_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// LDRH
+// ==================================================================================================
+cycles ARM::ARM_LDRH_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRH_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// LDRD
+// ==================================================================================================
+cycles ARM::ARM_LDRD_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRD_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// LDRSB
+// ==================================================================================================
+cycles ARM::ARM_LDRSB_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRSB_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// LDRSH
+// ==================================================================================================
+cycles ARM::ARM_LDRSH_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRSH_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================

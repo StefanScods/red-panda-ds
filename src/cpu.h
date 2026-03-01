@@ -362,6 +362,15 @@ public:
     cycles ARM_SMLALTT(uint32_t instruct);
     cycles ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int64_t opp2,
                      int64_t addend);
+    cycles ARM_MRS(uint32_t instruct);
+    cycles ARM_MSR_REG(uint32_t instruct);
+    cycles ARM_MSR_IMM(uint32_t instruct);
+    cycles ARM_CLZ(uint32_t instruct);
+    cycles ARM_BKPT(uint32_t instruct);
+    cycles ARM_QADD(uint32_t instruct);
+    cycles ARM_QSUB(uint32_t instruct);
+    cycles ARM_QDADD(uint32_t instruct);
+    cycles ARM_QDSUB(uint32_t instruct);
     cycles loadStoreDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                    bool wback);
@@ -375,24 +384,40 @@ public:
     cycles ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                     bool wback);
     cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
+    cycles ARM_STRH_REG(uint32_t instruct);
+    cycles ARM_STRH_IMM(uint32_t instruct);
+    cycles ARM_STRD_REG(uint32_t instruct);
+    cycles ARM_STRD_IMM(uint32_t instruct);
+    cycles ARM_LDRH_REG(uint32_t instruct);
+    cycles ARM_LDRH_IMM(uint32_t instruct);
+    cycles ARM_LDRD_REG(uint32_t instruct);
+    cycles ARM_LDRD_IMM(uint32_t instruct);
+    cycles ARM_LDRSB_REG(uint32_t instruct);
+    cycles ARM_LDRSB_IMM(uint32_t instruct);
+    cycles ARM_LDRSH_REG(uint32_t instruct);
+    cycles ARM_LDRSH_IMM(uint32_t instruct);
     cycles ARM_STMIA(uint32_t instruct);
     cycles ARM_STMIB(uint32_t instruct);
     cycles ARM_STMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
     cycles ARM_STMDA(uint32_t instruct);
     cycles ARM_STMDB(uint32_t instruct);
     cycles ARM_STMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
+    cycles ARM_STM_USER_REG(uint32_t instruct);
     cycles ARM_LDMIA(uint32_t instruct);
     cycles ARM_LDMIB(uint32_t instruct);
     cycles ARM_LDMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
     cycles ARM_LDMDA(uint32_t instruct);
     cycles ARM_LDMDB(uint32_t instruct);
     cycles ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);
+    cycles ARM_LDM_USER_REG(uint32_t instruct);
     cycles ARM_SWP(uint32_t instruct);
     cycles ARM_SWPB(uint32_t instruct);
     cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
     cycles ARM_B(uint32_t instruct);
     cycles ARM_BL(uint32_t instruct);
-    cycles ARM_BLX(uint32_t instruct);
+    cycles ARM_BLX_REG(uint32_t instruct);
+    cycles ARM_BLX_IMM(uint32_t instruct);
+    cycles ARM_BX(uint32_t instruct);
 
     cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond);
 };

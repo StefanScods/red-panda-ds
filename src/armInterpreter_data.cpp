@@ -53,21 +53,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // AND (Register)
         case 0b0000001010:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // STRH (register)
         case 0b0000001011:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_STRH_REG(instruct);
         // AND (Register)
         case 0b0000001100:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // LDRD (Register)
         case 0b0000001101:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_LDRD_REG(instruct);
         // AND (Register)
         case 0b0000001110:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // STRD (Register)
         case 0b0000001111:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_STRD_REG(instruct);
         // AND (Register)
         case 0b0000010000:
             return ARM_AND_REG(instruct);
@@ -101,21 +101,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // AND (Register)
         case 0b0000011010:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // LDRH (register)
         case 0b0000011011:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // AND (Register)
         case 0b0000011100:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // LDRSB (Register)
         case 0b0000011101:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // AND (Register)
         case 0b0000011110:
             return ARM_AND_REG(instruct);
-        // AND (Register Shifted)
+        // LDRSH (Register)
         case 0b0000011111:
-            return ARM_AND_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
         // EOR (Register)
         case 0b0000100000:
             return ARM_EOR_REG(instruct);
@@ -149,21 +149,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // EOR (Register)
         case 0b0000101010:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // STRH (register)
         case 0b0000101011:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_STRH_REG(instruct);
         // EOR (Register)
         case 0b0000101100:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // LDRD (Register)
         case 0b0000101101:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_LDRD_REG(instruct);
         // EOR (Register)
         case 0b0000101110:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // STRD (Register)
         case 0b0000101111:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_STRD_REG(instruct);
         // EOR (Register)
         case 0b0000110000:
             return ARM_EOR_REG(instruct);
@@ -197,21 +197,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // EOR (Register)
         case 0b0000111010:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // LDRH (Register)
         case 0b0000111011:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // EOR (Register)
         case 0b0000111100:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // LDRSB (Register)
         case 0b0000111101:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // EOR (Register)
         case 0b0000111110:
             return ARM_EOR_REG(instruct);
-        // EOR (Register Shifted)
+        // LDRSH (Register)
         case 0b0000111111:
-            return ARM_EOR_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
         // SUB (Register)
         case 0b0001000000:
             return ARM_SUB_REG(instruct);
@@ -245,21 +245,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SUB (Register)
         case 0b0001001010:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // STRH (Immediate)
         case 0b0001001011:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_STRH_IMM(instruct);
         // SUB (Register)
         case 0b0001001100:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // LDRD (Immediate)
         case 0b0001001101:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_LDRD_IMM(instruct);
         // SUB (Register)
         case 0b0001001110:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // STRD (Immediate)
         case 0b0001001111:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_STRD_IMM(instruct);
         // SUB (Register)
         case 0b0001010000:
             return ARM_SUB_REG(instruct);
@@ -293,21 +293,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SUB (Register)
         case 0b0001011010:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // LDRH (Immediate)
         case 0b0001011011:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // SUB (Register)
         case 0b0001011100:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0001011101:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // SUB (Register)
         case 0b0001011110:
             return ARM_SUB_REG(instruct);
-        // SUB (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0001011111:
-            return ARM_SUB_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
         // RSB (Register)
         case 0b0001100000:
             return ARM_RSB_REG(instruct);
@@ -341,21 +341,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSB (Register)
         case 0b0001101010:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // STRH (Immediate)
         case 0b0001101011:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_STRH_IMM(instruct);
         // RSB (Register)
         case 0b0001101100:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // LDRD (Immediate)
         case 0b0001101101:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_LDRD_IMM(instruct);
         // RSB (Register)
         case 0b0001101110:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // STRD (Immediate)
         case 0b0001101111:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_STRD_IMM(instruct);
         // RSB (Register)
         case 0b0001110000:
             return ARM_RSB_REG(instruct);
@@ -389,22 +389,22 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSB (Register)
         case 0b0001111010:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // LDRH (Immediate)
         case 0b0001111011:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // RSB (Register)
         case 0b0001111100:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0001111101:
-            return ARM_RSB_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // RSB (Register)
         case 0b0001111110:
             return ARM_RSB_REG(instruct);
-        // RSB (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0001111111:
-            return ARM_RSB_REG_SHIFT(instruct);
-            // ADD (Register)
+            return ARM_LDRSH_IMM(instruct);
+        // ADD (Register)
         case 0b0010000000:
             return ARM_ADD_REG(instruct);
         // ADD (Register Shifted)
@@ -437,21 +437,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADD (Register)
         case 0b0010001010:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // STRH (register)
         case 0b0010001011:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_STRH_REG(instruct);
         // ADD (Register)
         case 0b0010001100:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // LDRD (Register)
         case 0b0010001101:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_LDRD_REG(instruct);
         // ADD (Register)
         case 0b0010001110:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // STRD (Register)
         case 0b0010001111:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_STRD_REG(instruct);
         // ADD (Register)
         case 0b0010010000:
             return ARM_ADD_REG(instruct);
@@ -485,21 +485,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADD (Register)
         case 0b0010011010:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // LDRH (register)
         case 0b0010011011:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // ADD (Register)
         case 0b0010011100:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // LDRSB (Register)
         case 0b0010011101:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // ADD (Register)
         case 0b0010011110:
             return ARM_ADD_REG(instruct);
-        // ADD (Register Shifted)
+        // LDRSH (Register)
         case 0b0010011111:
-            return ARM_ADD_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
         // ADC (Register)
         case 0b0010100000:
             return ARM_ADC_REG(instruct);
@@ -533,21 +533,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADC (Register)
         case 0b0010101010:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // STRH (register)
         case 0b0010101011:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_STRH_REG(instruct);
         // ADC (Register)
         case 0b0010101100:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // LDRD (Register)
         case 0b0010101101:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_LDRD_REG(instruct);
         // ADC (Register)
         case 0b0010101110:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // STRD (Register)
         case 0b0010101111:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_STRD_REG(instruct);
         // ADC (Register)
         case 0b0010110000:
             return ARM_ADC_REG(instruct);
@@ -581,21 +581,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ADC (Register)
         case 0b0010111010:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // LDRH (register)
         case 0b0010111011:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // ADC (Register)
         case 0b0010111100:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // LDRSB (Register)
         case 0b0010111101:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // ADC (Register)
         case 0b0010111110:
             return ARM_ADC_REG(instruct);
-        // ADC (Register Shifted)
+        // LDRSH (Register)
         case 0b0010111111:
-            return ARM_ADC_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
         // SBC (Register)
         case 0b0011000000:
             return ARM_SBC_REG(instruct);
@@ -629,21 +629,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SBC (Register)
         case 0b0011001010:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // STRH (Immediate)
         case 0b0011001011:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_STRH_IMM(instruct);
         // SBC (Register)
         case 0b0011001100:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // LDRD (Immediate)
         case 0b0011001101:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_LDRD_IMM(instruct);
         // SBC (Register)
         case 0b0011001110:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // STRD (Immediate)
         case 0b0011001111:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_STRD_IMM(instruct);
         // SBC (Register)
         case 0b0011010000:
             return ARM_SBC_REG(instruct);
@@ -677,21 +677,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SBC (Register)
         case 0b0011011010:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // LDRH (Immediate)
         case 0b0011011011:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // SBC (Register)
         case 0b0011011100:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0011011101:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // SBC (Register)
         case 0b0011011110:
             return ARM_SBC_REG(instruct);
-        // SBC (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0011011111:
-            return ARM_SBC_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
         // RSC (Register)
         case 0b0011100000:
             return ARM_RSC_REG(instruct);
@@ -725,21 +725,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSC (Register)
         case 0b0011101010:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // STRH (Immediate)
         case 0b0011101011:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_STRH_IMM(instruct);
         // RSC (Register)
         case 0b0011101100:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // LDRD (Immediate)
         case 0b0011101101:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_LDRD_IMM(instruct);
         // RSC (Register)
         case 0b0011101110:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // STRD (Immediate)
         case 0b0011101111:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_STRD_IMM(instruct);
         // RSC (Register)
         case 0b0011110000:
             return ARM_RSC_REG(instruct);
@@ -773,37 +773,45 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // RSC (Register)
         case 0b0011111010:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // LDRH (Immediate)
         case 0b0011111011:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // RSC (Register)
         case 0b0011111100:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0011111101:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // RSC (Register)
         case 0b0011111110:
             return ARM_RSC_REG(instruct);
-        // RSC (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0011111111:
-            return ARM_RSC_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
+        // MRS
         case 0b0100000000:
-            break;
+            return ARM_MRS(instruct);
+        // Undefined
         case 0b0100000001:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0100000010:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0100000011:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0100000100:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // QADD (ARM9 only)
         case 0b0100000101:
-            break;
+            return ARM_QADD(instruct);
+        // Undefined
         case 0b0100000110:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0100000111:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
         // SMLABB (ARM9 only)
         case 0b0100001000:
             return ARM_SMLABB(instruct);
@@ -813,18 +821,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SMLATB (ARM9 only)
         case 0b0100001010:
             return ARM_SMLATB(instruct);
+        // STRH (register)
         case 0b0100001011:
-            break;
+            return ARM_STRH_REG(instruct);
         // SMLABT (ARM9 only)
         case 0b0100001100:
             return ARM_SMLABT(instruct);
+        // LDRD (Register)
         case 0b0100001101:
-            break;
+            return ARM_LDRD_REG(instruct);
         // SMLATT (ARM9 only)
         case 0b0100001110:
             return ARM_SMLATT(instruct);
+        // STRD (Register)
         case 0b0100001111:
-            break;
+            return ARM_STRD_REG(instruct);
         // TST (Register)
         case 0b0100010000:
             return ARM_TST_REG(instruct);
@@ -852,63 +863,75 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // TST (Register)
         case 0b0100011000:
             return ARM_TST_REG(instruct);
-        // TST (Register Shifted)
+        // Undefined
         case 0b0100011001:
-            return ARM_TST_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // TST (Register)
         case 0b0100011010:
             return ARM_TST_REG(instruct);
-        // TST (Register Shifted)
+        // LDRH (register)
         case 0b0100011011:
-            return ARM_TST_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // TST (Register)
         case 0b0100011100:
             return ARM_TST_REG(instruct);
-        // TST (Register Shifted)
+        // LDRSB (Register)
         case 0b0100011101:
-            return ARM_TST_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // TST (Register)
         case 0b0100011110:
             return ARM_TST_REG(instruct);
-        // TST (Register Shifted)
+        // LDRSH (Register)
         case 0b0100011111:
-            return ARM_TST_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
+        // MRS (Register)
         case 0b0100100000:
-            break;
+            return ARM_MSR_REG(instruct);
+        // BX
         case 0b0100100001:
-            break;
+            return ARM_BX(instruct);
+        // BXJ -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0100100010:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // BLX (register)
         case 0b0100100011:
-            break;
+            return ARM_BLX_REG(instruct);
+        // Undefined
         case 0b0100100100:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // QSUB (ARM9 only)
         case 0b0100100101:
-            break;
+            return ARM_QSUB(instruct);
+        // Undefined
         case 0b0100100110:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // BKPT
         case 0b0100100111:
-            break;
+            return ARM_BKPT(instruct);
         // SMLAWB (ARM9 Only)
         case 0b0100101000:
             return ARM_SMLAWB(instruct);
+        // Undefined
         case 0b0100101001:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
         // SMULWB (ARM9 Only)
         case 0b0100101010:
             return ARM_SMULWB(instruct);
+        // STRH (register)
         case 0b0100101011:
-            break;
+            return ARM_STRH_REG(instruct);
         // SMLAWT (ARM9 Only)
         case 0b0100101100:
             return ARM_SMLAWT(instruct);
+        // LDRD (Register)
         case 0b0100101101:
-            break;
+            return ARM_LDRD_REG(instruct);
         // SMULWT (ARM9 Only)
         case 0b0100101110:
             return ARM_SMULWT(instruct);
+        // STRD (Register)
         case 0b0100101111:
-            break;
+            return ARM_STRD_REG(instruct);
         // TEQ (Register)
         case 0b0100110000:
             return ARM_TEQ_REG(instruct);
@@ -936,43 +959,51 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // TEQ (Register)
         case 0b0100111000:
             return ARM_TEQ_REG(instruct);
-        // TEQ (Register Shifted)
+        // Undefined
         case 0b0100111001:
-            return ARM_TEQ_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // TEQ (Register)
         case 0b0100111010:
             return ARM_TEQ_REG(instruct);
-        // TEQ (Register Shifted)
+        // LDRH (register)
         case 0b0100111011:
-            return ARM_TEQ_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // TEQ (Register)
         case 0b0100111100:
             return ARM_TEQ_REG(instruct);
-        // TEQ (Register Shifted)
+        // LDRSB (Register)
         case 0b0100111101:
-            return ARM_TEQ_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // TEQ (Register)
         case 0b0100111110:
             return ARM_TEQ_REG(instruct);
-        // TEQ (Register Shifted)
+        // LDRSH (Register)
         case 0b0100111111:
-            return ARM_TEQ_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
+        // MRS
         case 0b0101000000:
-            break;
+            return ARM_MRS(instruct);
+        // Undefined
         case 0b0101000001:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0101000010:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0101000011:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0101000100:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // QDADD (ARM9 only)
         case 0b0101000101:
-            break;
+            return ARM_QDADD(instruct);
+        // Undefined
         case 0b0101000110:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // HVC -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0101000111:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
         // SMLALBB (ARM9 Only)
         case 0b0101001000:
             return ARM_SMLALBB(instruct);
@@ -982,18 +1013,21 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // SMLALTB (ARM9 Only)
         case 0b0101001010:
             return ARM_SMLALTB(instruct);
+        // STRH (Immediate)
         case 0b0101001011:
-            break;
+            return ARM_STRH_IMM(instruct);
         // SMLALBT (ARM9 Only)
         case 0b0101001100:
             return ARM_SMLALBT(instruct);
+        // LDRD (Immediate)
         case 0b0101001101:
-            break;
+            return ARM_LDRD_IMM(instruct);
         // SMLALTT (ARM9 Only)
         case 0b0101001110:
             return ARM_SMLALTT(instruct);
+        // STRD (Immediate)
         case 0b0101001111:
-            break;
+            return ARM_STRD_IMM(instruct);
         // CMP (Register)
         case 0b0101010000:
             return ARM_CMP_REG(instruct);
@@ -1021,63 +1055,75 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // CMP (Register)
         case 0b0101011000:
             return ARM_CMP_REG(instruct);
-        // CMP (Register Shifted)
+        // Undefined
         case 0b0101011001:
-            return ARM_CMP_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // CMP (Register)
         case 0b0101011010:
             return ARM_CMP_REG(instruct);
-        // CMP (Register Shifted)
+        // LDRH (Immediate)
         case 0b0101011011:
-            return ARM_CMP_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // CMP (Register)
         case 0b0101011100:
             return ARM_CMP_REG(instruct);
-        // CMP (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0101011101:
-            return ARM_CMP_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // CMP (Register)
         case 0b0101011110:
             return ARM_CMP_REG(instruct);
-        // CMP (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0101011111:
-            return ARM_CMP_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
+        // MRS
         case 0b0101100000:
-            break;
+            return ARM_MRS(instruct);
+        // CLZ
         case 0b0101100001:
-            break;
+            return ARM_CLZ(instruct);
+        // Undefined
         case 0b0101100010:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0101100011:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // Undefined
         case 0b0101100100:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // QDSUB (ARM9 only)
         case 0b0101100101:
-            break;
+            return ARM_QDSUB(instruct);
+        // ERET -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0101100110:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
+        // SMC / SMI -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0101100111:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
         // SMULBB (ARM9 Only)
         case 0b0101101000:
             return ARM_SMULBB(instruct);
+        // Undefined
         case 0b0101101001:
-            break;
+            return ARM_UNDEFINED_INST(instruct);
         // SMULTB (ARM9 Only)
         case 0b0101101010:
             return ARM_SMULTB(instruct);
+        // STRH (Immediate)
         case 0b0101101011:
-            break;
+            return ARM_STRH_IMM(instruct);
         // SMULBT (ARM9 Only)
         case 0b0101101100:
             return ARM_SMULBT(instruct);
+        // LDRD (Immediate)
         case 0b0101101101:
-            break;
+            return ARM_LDRD_IMM(instruct);
         // SMULTT (ARM9 Only)
         case 0b0101101110:
             return ARM_SMULTT(instruct);
+        // STRD (Immediate)
         case 0b0101101111:
-            break;
+            return ARM_STRD_IMM(instruct);
         // CMN (Register)
         case 0b0101110000:
             return ARM_CMN_REG(instruct);
@@ -1105,27 +1151,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // CMN (Register)
         case 0b0101111000:
             return ARM_CMN_REG(instruct);
-        // CMN (Register Shifted)
+        // Undefined
         case 0b0101111001:
-            return ARM_CMN_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // CMN (Register)
         case 0b0101111010:
             return ARM_CMN_REG(instruct);
-        // CMN (Register Shifted)
+        // LDRH (Immediate)
         case 0b0101111011:
-            return ARM_CMN_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // CMN (Register)
         case 0b0101111100:
             return ARM_CMN_REG(instruct);
-        // CMN (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0101111101:
-            return ARM_CMN_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // CMN (Register)
         case 0b0101111110:
             return ARM_CMN_REG(instruct);
-        // CMN (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0101111111:
-            return ARM_CMN_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
         // ORR (Register)
         case 0b0110000000:
             return ARM_ORR_REG(instruct);
@@ -1153,27 +1199,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ORR (Register)
         case 0b0110001000:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // STREX -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0110001001:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // ORR (Register)
         case 0b0110001010:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // STRH (register)
         case 0b0110001011:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_STRH_REG(instruct);
         // ORR (Register)
         case 0b0110001100:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // LDRD (Register)
         case 0b0110001101:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_LDRD_REG(instruct);
         // ORR (Register)
         case 0b0110001110:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // STRD (Register)
         case 0b0110001111:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_STRD_REG(instruct);
         // ORR (Register)
         case 0b0110010000:
             return ARM_ORR_REG(instruct);
@@ -1201,27 +1247,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // ORR (Register)
         case 0b0110011000:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // LDREX -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0110011001:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // ORR (Register)
         case 0b0110011010:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // LDRH (register)
         case 0b0110011011:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // ORR (Register)
         case 0b0110011100:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // LDRSB (Register)
         case 0b0110011101:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // ORR (Register)
         case 0b0110011110:
             return ARM_ORR_REG(instruct);
-        // ORR (Register Shifted)
+        // LDRSH (Register)
         case 0b0110011111:
-            return ARM_ORR_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
         // MOV (Register)
         case 0b0110100000:
             return ARM_MOV_REG(instruct);
@@ -1249,27 +1295,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // MOV (Register)
         case 0b0110101000:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // STREXD -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0110101001:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // MOV (Register)
         case 0b0110101010:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // STRH (register)
         case 0b0110101011:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_STRH_REG(instruct);
         // MOV (Register)
         case 0b0110101100:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // LDRD (Register)
         case 0b0110101101:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_LDRD_REG(instruct);
         // MOV (Register)
         case 0b0110101110:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // STRD (Register)
         case 0b0110101111:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_STRD_REG(instruct);
         // MOV (Register)
         case 0b0110110000:
             return ARM_MOV_REG(instruct);
@@ -1297,27 +1343,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // MOV (Register)
         case 0b0110111000:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // LRDEXD -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0110111001:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // MOV (Register)
         case 0b0110111010:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // LDRH (register)
         case 0b0110111011:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_LDRH_REG(instruct);
         // MOV (Register)
         case 0b0110111100:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // LDRSB (Register)
         case 0b0110111101:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_LDRSB_REG(instruct);
         // MOV (Register)
         case 0b0110111110:
             return ARM_MOV_REG(instruct);
-        // MOV (Register Shifted)
+        // LDRSH (Register)
         case 0b0110111111:
-            return ARM_MOV_REG_SHIFT(instruct);
+            return ARM_LDRSH_REG(instruct);
         // BIC (Register)
         case 0b0111000000:
             return ARM_BIC_REG(instruct);
@@ -1345,27 +1391,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // BIC (Register)
         case 0b0111001000:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // STREXB -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0111001001:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // BIC (Register)
         case 0b0111001010:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // STRH (Immediate)
         case 0b0111001011:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_STRH_IMM(instruct);
         // BIC (Register)
         case 0b0111001100:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // LDRD (Immediate)
         case 0b0111001101:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_LDRD_IMM(instruct);
         // BIC (Register)
         case 0b0111001110:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // STRD (Immediate)
         case 0b0111001111:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_STRD_IMM(instruct);
         // BIC (Register)
         case 0b0111010000:
             return ARM_BIC_REG(instruct);
@@ -1393,27 +1439,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // BIC (Register)
         case 0b0111011000:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // LDREXB -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0111011001:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // BIC (Register)
         case 0b0111011010:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // LDRH (Immediate)
         case 0b0111011011:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // BIC (Register)
         case 0b0111011100:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0111011101:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // BIC (Register)
         case 0b0111011110:
             return ARM_BIC_REG(instruct);
-        // BIC (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0111011111:
-            return ARM_BIC_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
         // MVN (Register)
         case 0b0111100000:
             return ARM_MVN_REG(instruct);
@@ -1441,27 +1487,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // MVN (Register)
         case 0b0111101000:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // STREXH -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0111101001:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // MVN (Register)
         case 0b0111101010:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // STRH (Immediate)
         case 0b0111101011:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_STRH_IMM(instruct);
         // MVN (Register)
         case 0b0111101100:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // LDRD (Immediate)
         case 0b0111101101:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_LDRD_IMM(instruct);
         // MVN (Register)
         case 0b0111101110:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // STRD (Immediate)
         case 0b0111101111:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_STRD_IMM(instruct);
         // MVN (Register)
         case 0b0111110000:
             return ARM_MVN_REG(instruct);
@@ -1489,27 +1535,27 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         // MVN (Register)
         case 0b0111111000:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // LDREXH -> Unsupported on DS's arm7 and arm9 cores.
         case 0b0111111001:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // MVN (Register)
         case 0b0111111010:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // LDRH (Immediate)
         case 0b0111111011:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_LDRH_IMM(instruct);
         // MVN (Register)
         case 0b0111111100:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // LDRSB (Immediate)
         case 0b0111111101:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_LDRSB_IMM(instruct);
         // MVN (Register)
         case 0b0111111110:
             return ARM_MVN_REG(instruct);
-        // MVN (Register Shifted)
+        // LDRSH (Immediate)
         case 0b0111111111:
-            return ARM_MVN_REG_SHIFT(instruct);
+            return ARM_LDRSH_IMM(instruct);
         // AND (Immediate)
         case 0b1000000000:
         case 0b1000000001:
@@ -1782,7 +1828,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1011111110:
         case 0b1011111111:
             return ARM_RSC_IMM(instruct);
-        // Unsupported
+        // MOV (16bit Immediate) -> Unsupported on DS's arm7 and arm9 cores.
         case 0b1100000000:
         case 0b1100000001:
         case 0b1100000010:
@@ -1799,7 +1845,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1100001101:
         case 0b1100001110:
         case 0b1100001111:
-            break;
+            ARM_UNDEFINED_INST(instruct);
         // TES (Immediate)
         case 0b1100010000:
         case 0b1100010001:
@@ -1818,7 +1864,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1100011110:
         case 0b1100011111:
             return ARM_TST_IMM(instruct);
-        // Unsupported.
+        // MSR (Immediate).
         case 0b1100100000:
         case 0b1100100001:
         case 0b1100100010:
@@ -1835,7 +1881,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1100101101:
         case 0b1100101110:
         case 0b1100101111:
-            break;
+            ARM_MSR_IMM(instruct);
         // TEQ (Immediate)
         case 0b1100110000:
         case 0b1100110001:
@@ -1854,7 +1900,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1100111110:
         case 0b1100111111:
             return ARM_TEQ_IMM(instruct);
-        // Unsupported.
+        // MOVT -> Unsupported on DS's arm7 and arm9 cores.
         case 0b1101000000:
         case 0b1101000001:
         case 0b1101000010:
@@ -1871,7 +1917,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1101001101:
         case 0b1101001110:
         case 0b1101001111:
-            break;
+            ARM_UNDEFINED_INST(instruct);
         // CMP (Immediate)
         case 0b1101010000:
         case 0b1101010001:
@@ -1890,7 +1936,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1101011110:
         case 0b1101011111:
             return ARM_CMP_IMM(instruct);
-        // Unsupported.
+        // MSR (Immediate).
         case 0b1101100000:
         case 0b1101100001:
         case 0b1101100010:
@@ -1907,7 +1953,7 @@ cycles ARM::dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b1101101101:
         case 0b1101101110:
         case 0b1101101111:
-            break;
+            ARM_MSR_IMM(instruct);
         // CMN (Immediate)
         case 0b1101110000:
         case 0b1101110001:
@@ -3695,5 +3741,57 @@ cycles ARM::ARM_SWPB(uint32_t instruct) {
     *activeRegs[Rt] = (dataRead.data & 0xFF);
     fixupIfTargetingPC(Rt);
     return 1;
+}
+// ==================================================================================================
+// MRS
+// ==================================================================================================
+cycles ARM::ARM_MRS(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// MSR
+// ==================================================================================================
+cycles ARM::ARM_MSR_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_MSR_IMM(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// CLZ
+// ==================================================================================================
+cycles ARM::ARM_CLZ(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// BKPT
+// ==================================================================================================
+cycles ARM::ARM_BKPT(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// QUAD
+// ==================================================================================================
+cycles ARM::ARM_QADD(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// QSUB
+// ==================================================================================================
+cycles ARM::ARM_QSUB(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// QDADD
+// ==================================================================================================
+cycles ARM::ARM_QDADD(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// QDSUB
+// ==================================================================================================
+cycles ARM::ARM_QDSUB(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================

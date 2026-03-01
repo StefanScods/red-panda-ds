@@ -55,7 +55,7 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b010110:
         case 0b011100:
         case 0b011110:
-            return ARM_UNDEFINED_INST(instruct);
+            return ARM_STM_USER_REG(instruct);
         // Load Multiple (user registers).
         case 0b000101:
         case 0b000111:
@@ -65,7 +65,7 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b010111:
         case 0b011101:
         case 0b011111:
-            return ARM_UNDEFINED_INST(instruct);
+            return ARM_LDM_USER_REG(instruct);
         // Branch
         case 0b100000:
         case 0b100001:
@@ -83,7 +83,7 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b101101:
         case 0b101110:
         case 0b101111:
-            if (cond == ConditionMnemonics::SPECIAL) return ARM_BLX(instruct);
+            if (cond == ConditionMnemonics::SPECIAL) return ARM_BLX_IMM(instruct);
             return ARM_B(instruct);
         // Branch Link and Exchange
         case 0b110000:
@@ -102,7 +102,7 @@ cycles ARM::branchDecodeAndExecute(uint32_t instruct, uint8_t cond) {
         case 0b111101:
         case 0b111110:
         case 0b111111: {
-            if (cond == ConditionMnemonics::SPECIAL) return ARM_BLX(instruct);
+            if (cond == ConditionMnemonics::SPECIAL) return ARM_BLX_IMM(instruct);
             return ARM_BL(instruct);
         }
 
@@ -135,7 +135,7 @@ cycles ARM::ARM_BL(uint32_t instruct) {
     return 1;
 }
 // ==================================================================================================
-cycles ARM::ARM_BLX(uint32_t instruct) {
+cycles ARM::ARM_BLX_IMM(uint32_t instruct) {
     lr() = pc() - 4;  // Point to the previous instruction.
     // Sign extend the bottom 24 bits and align address to 4 bytes.
     uint32_t imm24 = readBits(instruct, 0, 23);
@@ -143,5 +143,13 @@ cycles ARM::ARM_BLX(uint32_t instruct) {
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6 | (H << 1);
     branch(pc() + offset + 1);  // Offset by + 1 to enter thumb mode.
     return 1;
+}
+// ==================================================================================================
+cycles ARM::ARM_BLX_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_BX(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
