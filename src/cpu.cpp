@@ -236,7 +236,7 @@ busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 }
 // ==================================================================================================
 cycles ARM::ARM_UNDEFINED_INST(uint32_t instruct) {
-    LogError("Unsupported instuction: " << PrintHex(instruct) << "!");
+    LogError("Unsupported ARM instuction: " << PrintHex(instruct) << "!");
     return 1;
 }
 // ==================================================================================================

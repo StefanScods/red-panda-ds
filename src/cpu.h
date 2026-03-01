@@ -266,7 +266,7 @@ public:
     void setTargetCycle(cycles target) { targetCycle = target; }
 
     /**
-     * @brief Instruction set.
+     * @brief ARM Instruction set.
      */
     cycles ARM_UNDEFINED_INST(uint32_t instruct);
     cycles dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond);
@@ -366,7 +366,6 @@ public:
     cycles ARM_MSR_REG(uint32_t instruct);
     cycles ARM_MSR_IMM(uint32_t instruct);
     cycles ARM_CLZ(uint32_t instruct);
-    cycles ARM_BKPT(uint32_t instruct);
     cycles ARM_QADD(uint32_t instruct);
     cycles ARM_QSUB(uint32_t instruct);
     cycles ARM_QDADD(uint32_t instruct);
@@ -418,8 +417,16 @@ public:
     cycles ARM_BLX_REG(uint32_t instruct);
     cycles ARM_BLX_IMM(uint32_t instruct);
     cycles ARM_BX(uint32_t instruct);
-
     cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    cycles ARM_BKPT(uint32_t instruct);
+    cycles ARM_SVC(uint32_t instruct);
+    cycles ARM_MCRR(uint32_t instruct);
+    cycles ARM_MCR(uint32_t instruct);
+    cycles ARM_MRRC(uint32_t instruct);
+    cycles ARM_MRC(uint32_t instruct);
+    cycles ARM_STC(uint32_t instruct);
+    cycles ARM_LDC(uint32_t instruct);
+    cycles ARM_CDP(uint32_t instruct);
 };
 
 /**
