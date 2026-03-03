@@ -154,6 +154,21 @@ public:
      * @return cycles
      */
     virtual cycles execute();
+
+    /**
+     * @brief Execute the instruction at instuctionPipeLine[0] during ARM Mode.
+     *
+     * @return cycles
+     */
+    virtual cycles ARM_execute();
+
+    /**
+     * @brief Execute the instruction at instuctionPipeLine[0] during THUMB Mode.
+     *
+     * @return cycles
+     */
+    virtual cycles THUMB_execute();
+
     /**
      * @brief Fetch the next instuction. This increments PC and fills
      * instuctionPipeLine[2]. Returns the number of cycles the fetching took.
@@ -161,18 +176,21 @@ public:
      * @return cycles
      */
     virtual cycles fetch();
+
     /**
      * @brief Main cycle logic of the module.
      *
      * @return cycles
      */
     virtual cycles cycle();
+
     /**
      * @brief Updates PC + performs any processing after PC has been updated.
      *
      * @param dest The new address to branch to.
      */
     void branch(uint32_t dest);
+
     /**
      * @brief Call after updating an arbitrary reg to ensure writes to PC are handled correctly.
      *
@@ -189,13 +207,6 @@ public:
      * @return cycles
      */
     cycles fetchAndExecute(int numExecutions = 1);
-    /**
-     * @brief Keep cycling until the the instuction pipeline is full (perform fetches without
-     * execution)
-     *
-     * @return cycles
-     */
-    cycles fillInstuctionPipeline();
 
     /**
      * @brief Debug function to force PC to a value.
@@ -266,10 +277,26 @@ public:
     void setTargetCycle(cycles target) { targetCycle = target; }
 
     /**
-     * @brief ARM Instruction set.
+     * @brief Given the current state of the CPU flags, check if a condition is passed. Returns
+     * `true` if the condition passed.
+     *
+     * @param condition The mnemonic of the condition to check.
+     *
+     * @return `bool`
      */
+    bool checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics condition);
+
+    // =============================================================================================
+    // ARM Instruction set.
+    // =============================================================================================
+    // Invalid instruction.
     cycles ARM_UNDEFINED_INST(uint32_t instruct);
-    cycles dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    // Decode helpers.
+    cycles ARM_dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    cycles ARM_loadStoreDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    cycles ARM_branchAndBlockDataTransferDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    cycles ARM_coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    // Data category.
     cycles ARM_AND(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
     cycles ARM_AND_REG(uint32_t instruct);
     cycles ARM_AND_REG_SHIFT(uint32_t instruct);
@@ -370,7 +397,7 @@ public:
     cycles ARM_QSUB(uint32_t instruct);
     cycles ARM_QDADD(uint32_t instruct);
     cycles ARM_QDSUB(uint32_t instruct);
-    cycles loadStoreDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    // Load and store category.
     cycles ARM_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
                    bool wback);
     cycles ARM_STRT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add);
@@ -411,13 +438,13 @@ public:
     cycles ARM_LDM_USER_REG(uint32_t instruct);
     cycles ARM_SWP(uint32_t instruct);
     cycles ARM_SWPB(uint32_t instruct);
-    cycles branchDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    // Branch category.
     cycles ARM_B(uint32_t instruct);
     cycles ARM_BL(uint32_t instruct);
     cycles ARM_BLX_REG(uint32_t instruct);
     cycles ARM_BLX_IMM(uint32_t instruct);
     cycles ARM_BX(uint32_t instruct);
-    cycles coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint8_t cond);
+    // Misc category.
     cycles ARM_BKPT(uint32_t instruct);
     cycles ARM_SVC(uint32_t instruct);
     cycles ARM_MCRR(uint32_t instruct);
@@ -427,6 +454,76 @@ public:
     cycles ARM_STC(uint32_t instruct);
     cycles ARM_LDC(uint32_t instruct);
     cycles ARM_CDP(uint32_t instruct);
+    // =============================================================================================
+    // Thumb Instruction set.
+    // =============================================================================================
+    // Invalid instruction.
+    cycles THUMB_UNDEFINED_INST(uint32_t instruct);
+    // Decode helpers.
+    cycles THUMB_shiftAddSubtractMoveCompareDecodeAndExecute(uint32_t instruct);
+    cycles THUMB_dataProcessingDecodeAndExecute(uint32_t instruct);
+    cycles THUMB_specialDataAndBranchDecodeAndExecute(uint32_t instruct);
+    cycles THUMB_loadStoreDecodeAndExecute(uint32_t instruct);
+    cycles THUMB_miscDecodeAndExecute(uint32_t instruct);
+    cycles THUMB_condBranchAndSupervisorCallDecodeAndExecute(uint32_t instruct);
+    // Data category.
+    cycles THUMB_MOV_REG_HIGH(uint32_t instruct);
+    cycles THUMB_MOV_REG_LOW(uint32_t instruct);
+    cycles THUMB_MOV_IMM(uint32_t instruct);
+    cycles THUMB_AND_REG(uint32_t instruct);
+    cycles THUMB_EOR_REG(uint32_t instruct);
+    cycles THUMB_LSL_REG(uint32_t instruct);
+    cycles THUMB_LSL_IMM(uint32_t instruct);
+    cycles THUMB_LSR_REG(uint32_t instruct);
+    cycles THUMB_LSR_IMM(uint32_t instruct);
+    cycles THUMB_ASR_REG(uint32_t instruct);
+    cycles THUMB_ASR_IMM(uint32_t instruct);
+    cycles THUMB_ADD_REG(uint32_t instruct);
+    cycles THUMB_ADD_REG_HIGH(uint32_t instruct);
+    cycles THUMB_ADD_REG_LOW(uint32_t instruct);
+    cycles THUMB_ADD_3IMM(uint32_t instruct);
+    cycles THUMB_ADD_IMM(uint32_t instruct);
+    cycles THUMB_ADD_SP_IMM(uint32_t instruct);
+    cycles THUMB_SBC_REG(uint32_t instruct);
+    cycles THUMB_ASC_REG(uint32_t instruct);
+    cycles THUMB_SUB_IMM(uint32_t instruct);
+    cycles THUMB_SUB_REG(uint32_t instruct);
+    cycles THUMB_SUB_3IMM(uint32_t instruct);
+    cycles THUMB_SUB_SP_IMM(uint32_t instruct);
+    cycles THUMB_ROR_REG(uint32_t instruct);
+    cycles THUMB_TST_REG(uint32_t instruct);
+    cycles THUMB_RSB_REG(uint32_t instruct);
+    cycles THUMB_CMP_REG(uint32_t instruct);
+    cycles THUMB_CMP_REG_HIGH(uint32_t instruct);
+    cycles THUMB_CMP_IMM(uint32_t instruct);
+    cycles THUMB_CMN_REG(uint32_t instruct);
+    cycles THUMB_ORR_REG(uint32_t instruct);
+    cycles THUMB_MUL(uint32_t instruct);
+    cycles THUMB_BIC_REG(uint32_t instruct);
+    cycles THUMB_MVN_REG(uint32_t instruct);
+    cycles THUMB_ADR(uint32_t instruct);
+    // Load and Store category.
+    cycles THUMB_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_STRH(uint32_t srcReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_STRB(uint32_t srcReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_LDR(uint32_t desReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_LDRH(uint32_t desReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_LDRSH(uint32_t desReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_LDRSB(uint32_t desReg, uint32_t baseReg, uint32_t offset);
+    cycles THUMB_STM(uint32_t instruct);
+    cycles THUMB_LDM(uint32_t instruct);
+    cycles THUMB_LDR_LIT(uint32_t instruct);
+    cycles THUMB_PUSH(uint32_t instruct);
+    cycles THUMB_POP(uint32_t instruct);
+    // Branch category
+    cycles THUMB_B(uint32_t instruct);
+    cycles THUMB_B_COND(uint32_t instruct);
+    cycles THUMB_BX(uint32_t instruct);
+    cycles THUMB_BLX(uint32_t instruct);
+    // Misc category.
+    cycles THUMB_BKPT(uint32_t instruct);
+    cycles THUMB_SVC(uint32_t instruct);
 };
 
 /**

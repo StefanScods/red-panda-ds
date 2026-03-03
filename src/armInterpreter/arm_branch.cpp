@@ -1,0 +1,55 @@
+/**
+ * @file armInterpreter/arm_branch.cpp
+ * @brief Implements ARM mode instuction set for instructions in the branch category.
+ */
+#include "cpu.h"
+#include "interconnect.h"
+
+// Control print statements.
+#define LOG_LEVEL 2
+#include "logger.h"
+
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Branch--branch-with-link--and-block-data-transfer?lang=en
+
+// ==================================================================================================
+// Branch
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/B?lang=en
+// ==================================================================================================
+cycles ARM::ARM_B(uint32_t instruct) {
+    // Sign extend the bottom 24 bits and align address to 4 bytes.
+    uint32_t imm24 = readBits(instruct, 0, 23);
+    int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
+    branch(pc() + offset);
+    return 1;
+}
+// ==================================================================================================
+// Branch Link and Exchange
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BL--BLX--immediate-?lang=en//
+// ==================================================================================================
+cycles ARM::ARM_BL(uint32_t instruct) {
+    lr() = pc() - 4;  // Point to the previous instruction.
+    // Sign extend the bottom 24 bits and align address to 4 bytes.
+    uint32_t imm24 = readBits(instruct, 0, 23);
+    int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
+    branch(pc() + offset);
+    return 1;
+}
+// ==================================================================================================
+cycles ARM::ARM_BLX_IMM(uint32_t instruct) {
+    lr() = pc() - 4;  // Point to the previous instruction.
+    // Sign extend the bottom 24 bits and align address to 4 bytes.
+    uint32_t imm24 = readBits(instruct, 0, 23);
+    bool H = readBit(instruct, 24);
+    int32_t offset = ((int32_t)(imm24 << 8)) >> 6 | (H << 1);
+    branch(pc() + offset + 1);  // Offset by + 1 to enter thumb mode.
+    return 1;
+}
+// ==================================================================================================
+cycles ARM::ARM_BLX_REG(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+cycles ARM::ARM_BX(uint32_t instruct) {
+    return ARM_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================

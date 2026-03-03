@@ -12,12 +12,19 @@ set(EMU_CORE_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/utils/armEncode.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arm7.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arm9.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_coprocessor.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_branch.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_data.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter_loadStore.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/interconnect.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/cpu.cpp
+
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_decodeAndExecute.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_branch.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_data.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_loadStore.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_misc.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_decodeAndExecute.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_branch.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_data.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_loadStore.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_misc.cpp
    PARENT_SCOPE
 )
 
