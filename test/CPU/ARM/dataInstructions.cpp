@@ -11,13 +11,13 @@
 /**
  * @brief Test fixture for the CPU's instructions in the data category.
  */
-class TestCPUDataInstructions : public testing::Test {
+class TestCPU_ARM_DataInstructions : public testing::Test {
 protected:
     Interconnect bus;
     ARM7TDMI arm7;
     ARM946ES arm9;
-    TestCPUDataInstructions() {}
-    ~TestCPUDataInstructions() {}
+    TestCPU_ARM_DataInstructions() {}
+    ~TestCPU_ARM_DataInstructions() {}
 
     void SetUp() override {
         bus.init();
@@ -31,18 +31,18 @@ protected:
 // ==================================================================================================
 // AND
 // ==================================================================================================
-class TestCPUDataInstructions_AND : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_AND : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_AND() {}
-    ~TestCPUDataInstructions_AND() {}
+    TestCPU_ARM_DataInstructions_AND() {}
+    ~TestCPU_ARM_DataInstructions_AND() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an AND operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_AND, AND_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0b110011\n"
         "AND R0, R1, #0b110000\n",
@@ -54,7 +54,7 @@ TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE) {
 /**
  * @brief Tests an AND operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_AND, AND_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xFF000000\n"
@@ -90,7 +90,7 @@ TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an AND operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_AND, AND_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0x0F000000\n"
@@ -115,7 +115,7 @@ TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an AND operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_AND, AND_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory("ANDs r0, r0, #0x80000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -132,7 +132,7 @@ TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an AND operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_AND, AND_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory("ANDs r1, r0, #0x0\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -144,18 +144,18 @@ TEST_F(TestCPUDataInstructions_AND, AND_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // EOR
 // ==================================================================================================
-class TestCPUDataInstructions_EOR : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_EOR : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_EOR() {}
-    ~TestCPUDataInstructions_EOR() {}
+    TestCPU_ARM_DataInstructions_EOR() {}
+    ~TestCPU_ARM_DataInstructions_EOR() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an EOR operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_EOR, EOR_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0b110011\n"
         "EOR R0, R1, #0b101010\n",
@@ -167,7 +167,7 @@ TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE) {
 /**
  * @brief Tests an EOR operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_EOR, EOR_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xF0000000\n"
@@ -203,7 +203,7 @@ TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an EOR operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_EOR, EOR_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0xF0000000\n"
@@ -228,7 +228,7 @@ TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an EOR operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_EOR, EOR_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory("EORs r0, r0, #0x80000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -245,7 +245,7 @@ TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an EOR operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_EOR, EOR_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory("EORs r1, r0, #0x0\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -257,18 +257,18 @@ TEST_F(TestCPUDataInstructions_EOR, EOR_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // SUB
 // ==================================================================================================
-class TestCPUDataInstructions_SUB : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_SUB : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_SUB() {}
-    ~TestCPUDataInstructions_SUB() {}
+    TestCPU_ARM_DataInstructions_SUB() {}
+    ~TestCPU_ARM_DataInstructions_SUB() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a SUB operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_SUB, SUB_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #10\n"
         "SUB R0, R1, #3\n",
@@ -280,7 +280,7 @@ TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE) {
 /**
  * @brief Tests a SUB operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SUB, SUB_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -305,7 +305,7 @@ TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a SUB operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SUB, SUB_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #5\n"
@@ -330,7 +330,7 @@ TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a SUB operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SUB, SUB_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV r0, #1\n"
@@ -353,7 +353,7 @@ TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests a SUB operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SUB, SUB_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory(
         "MOV r1, #0x80000000\n"
@@ -377,18 +377,18 @@ TEST_F(TestCPUDataInstructions_SUB, SUB_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // RSB
 // ==================================================================================================
-class TestCPUDataInstructions_RSB : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_RSB : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_RSB() {}
-    ~TestCPUDataInstructions_RSB() {}
+    TestCPU_ARM_DataInstructions_RSB() {}
+    ~TestCPU_ARM_DataInstructions_RSB() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an RSB operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_RSB, RSB_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #3\n"
         "RSB R0, R1, #10\n",
@@ -400,7 +400,7 @@ TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE) {
 /**
  * @brief Tests an RSB operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSB, RSB_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #10\n"
@@ -425,7 +425,7 @@ TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an RSB operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSB, RSB_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #5\n"
@@ -450,7 +450,7 @@ TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an RSB operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSB, RSB_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV r0, #1\n"
@@ -473,7 +473,7 @@ TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an RSB operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSB, RSB_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory(
         "MOV r1, #0x7FFFFFFF\n"
@@ -497,18 +497,18 @@ TEST_F(TestCPUDataInstructions_RSB, RSB_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // ADD
 // ==================================================================================================
-class TestCPUDataInstructions_ADD : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_ADD : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_ADD() {}
-    ~TestCPUDataInstructions_ADD() {}
+    TestCPU_ARM_DataInstructions_ADD() {}
+    ~TestCPU_ARM_DataInstructions_ADD() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an ADD operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_ADD, ADD_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #100\n"
         "ADD R0, R1, #10\n",
@@ -520,7 +520,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE) {
 /**
  * @brief Tests an ADD operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xFF000000\n"
@@ -556,7 +556,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an ADD operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R9, #0\n"
@@ -581,7 +581,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an ADD operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #0xFF\n"
@@ -609,7 +609,7 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an ADD operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory(
         "MOV R1, #0xFF\n"
@@ -637,18 +637,18 @@ TEST_F(TestCPUDataInstructions_ADD, ADD_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // ADC
 // ==================================================================================================
-class TestCPUDataInstructions_ADC : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_ADC : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_ADC() {}
-    ~TestCPUDataInstructions_ADC() {}
+    TestCPU_ARM_DataInstructions_ADC() {}
+    ~TestCPU_ARM_DataInstructions_ADC() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an ADC operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_ADC, ADC_IMMEDIATE) {
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
         "MOV R1, #5\n"
@@ -661,7 +661,7 @@ TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE) {
 /**
  * @brief Tests an ADC operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADC, ADC_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -686,7 +686,7 @@ TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an ADC operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADC, ADC_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -713,7 +713,7 @@ TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an ADC operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADC, ADC_IMMEDIATE_CARRY_FLAG) {
     // C = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -738,7 +738,7 @@ TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an ADC operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ADC, ADC_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -764,18 +764,18 @@ TEST_F(TestCPUDataInstructions_ADC, ADC_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // SBC
 // ==================================================================================================
-class TestCPUDataInstructions_SBC : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_SBC : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_SBC() {}
-    ~TestCPUDataInstructions_SBC() {}
+    TestCPU_ARM_DataInstructions_SBC() {}
+    ~TestCPU_ARM_DataInstructions_SBC() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an SBC operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_SBC, SBC_IMMEDIATE) {
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
         "MOV R1, #10\n"
@@ -788,7 +788,7 @@ TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE) {
 /**
  * @brief Tests an SBC operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SBC, SBC_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -813,7 +813,7 @@ TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an SBC operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SBC, SBC_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -839,7 +839,7 @@ TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an SBC operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SBC, SBC_IMMEDIATE_CARRY_FLAG) {
     // C = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -864,7 +864,7 @@ TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an SBC operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SBC, SBC_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -890,18 +890,18 @@ TEST_F(TestCPUDataInstructions_SBC, SBC_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // RSC
 // ==================================================================================================
-class TestCPUDataInstructions_RSC : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_RSC : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_RSC() {}
-    ~TestCPUDataInstructions_RSC() {}
+    TestCPU_ARM_DataInstructions_RSC() {}
+    ~TestCPU_ARM_DataInstructions_RSC() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an RSC operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_RSC, RSC_IMMEDIATE) {
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
         "MOV R1, #3\n"
@@ -914,7 +914,7 @@ TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE) {
 /**
  * @brief Tests an RSC operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSC, RSC_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -939,7 +939,7 @@ TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an RSC operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSC, RSC_IMMEDIATE_ZERO_FLAG) {
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
         "MOV R1, #3\n"
@@ -963,7 +963,7 @@ TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an RSC operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSC, RSC_IMMEDIATE_CARRY_FLAG) {
     // C = true
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
@@ -988,7 +988,7 @@ TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests an RSC operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_RSC, RSC_IMMEDIATE_OVERFLOW_FLAG) {
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
         "MOV R1, #0x7FFFFFFF\n"
@@ -1012,18 +1012,18 @@ TEST_F(TestCPUDataInstructions_RSC, RSC_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // TST
 // ==================================================================================================
-class TestCPUDataInstructions_TST : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_TST : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_TST() {}
-    ~TestCPUDataInstructions_TST() {}
+    TestCPU_ARM_DataInstructions_TST() {}
+    ~TestCPU_ARM_DataInstructions_TST() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a TST operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_TST, TST_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
@@ -1046,7 +1046,7 @@ TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a TST operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_TST, TST_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0x5\n"
@@ -1069,7 +1069,7 @@ TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a TST operation's carry flag behaviour using a rotated immediate.
  */
-TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_TST, TST_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #1\n"
@@ -1093,18 +1093,18 @@ TEST_F(TestCPUDataInstructions_TST, TST_IMMEDIATE_CARRY_FLAG) {
 // ==================================================================================================
 // TEQ
 // ==================================================================================================
-class TestCPUDataInstructions_TEQ : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_TEQ : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_TEQ() {}
-    ~TestCPUDataInstructions_TEQ() {}
+    TestCPU_ARM_DataInstructions_TEQ() {}
+    ~TestCPU_ARM_DataInstructions_TEQ() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a TEQ operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_TEQ, TEQ_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
@@ -1127,7 +1127,7 @@ TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a TEQ operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_TEQ, TEQ_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0x5\n"
@@ -1150,7 +1150,7 @@ TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a TEQ operation's carry flag behaviour using a rotated immediate.
  */
-TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_TEQ, TEQ_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #1\n"
@@ -1174,18 +1174,18 @@ TEST_F(TestCPUDataInstructions_TEQ, TEQ_IMMEDIATE_CARRY_FLAG) {
 // ==================================================================================================
 // CMP
 // ==================================================================================================
-class TestCPUDataInstructions_CMP : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_CMP : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_CMP() {}
-    ~TestCPUDataInstructions_CMP() {}
+    TestCPU_ARM_DataInstructions_CMP() {}
+    ~TestCPU_ARM_DataInstructions_CMP() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a CMP operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMP, CMP_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #3\n"
@@ -1208,7 +1208,7 @@ TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a CMP operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMP, CMP_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #5\n"
@@ -1231,7 +1231,7 @@ TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a CMP operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMP, CMP_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #5\n"
@@ -1254,7 +1254,7 @@ TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests a CMP operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMP, CMP_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
@@ -1277,18 +1277,18 @@ TEST_F(TestCPUDataInstructions_CMP, CMP_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // CMN
 // ==================================================================================================
-class TestCPUDataInstructions_CMN : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_CMN : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_CMN() {}
-    ~TestCPUDataInstructions_CMN() {}
+    TestCPU_ARM_DataInstructions_CMN() {}
+    ~TestCPU_ARM_DataInstructions_CMN() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a CMN operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMN, CMN_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
@@ -1311,7 +1311,7 @@ TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a CMN operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMN, CMN_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -1334,7 +1334,7 @@ TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a CMN operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMN, CMN_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
@@ -1357,7 +1357,7 @@ TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_CARRY_FLAG) {
 /**
  * @brief Tests a CMN operation's overflow flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_OVERFLOW_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_CMN, CMN_IMMEDIATE_OVERFLOW_FLAG) {
     // V = true
     writeProgramToMemory(
         "MOV R1, #0x7FFFFFFF\n"
@@ -1381,18 +1381,18 @@ TEST_F(TestCPUDataInstructions_CMN, CMN_IMMEDIATE_OVERFLOW_FLAG) {
 // ==================================================================================================
 // ORR
 // ==================================================================================================
-class TestCPUDataInstructions_ORR : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_ORR : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_ORR() {}
-    ~TestCPUDataInstructions_ORR() {}
+    TestCPU_ARM_DataInstructions_ORR() {}
+    ~TestCPU_ARM_DataInstructions_ORR() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an ORR operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_ORR, ORR_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0b110001\n"
         "ORR R0, R1, #0b101100\n",
@@ -1404,7 +1404,7 @@ TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE) {
 /**
  * @brief Tests an ORR operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ORR, ORR_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
@@ -1427,7 +1427,7 @@ TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an ORR operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ORR, ORR_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -1450,7 +1450,7 @@ TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an ORR operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_ORR, ORR_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #1\n"
@@ -1474,19 +1474,19 @@ TEST_F(TestCPUDataInstructions_ORR, ORR_IMMEDIATE_CARRY_FLAG) {
 // ==================================================================================================
 // MOV
 // ==================================================================================================
-class TestCPUDataInstructions_MOV : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_MOV : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_MOV() {}
-    ~TestCPUDataInstructions_MOV() {}
+    TestCPU_ARM_DataInstructions_MOV() {}
+    ~TestCPU_ARM_DataInstructions_MOV() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 
 /**
  * @brief Test moving value between registers.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER) {
     writeProgramToMemory(
         "MOV R1, #0xFF000000\n"
         "MOV R0, R1\n",
@@ -1498,7 +1498,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER) {
 /**
  * @brief Test moving value between registers and applying a LSL.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSL) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_LSL) {
     writeProgramToMemory(
         "MOV R1, #0x00FF0000\n"
         "MOV R0, R1, LSL#8\n",
@@ -1510,7 +1510,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSL) {
 /**
  * @brief Test moving value between registers and applying a LSR.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSR) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_LSR) {
     writeProgramToMemory(
         "MOV R1, #0x00FF0000\n"
         "MOV R0, R1, LSR#8\n",
@@ -1522,7 +1522,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSR) {
 /**
  * @brief Test moving value between registers and applying a ASR.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ASR) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_ASR) {
     writeProgramToMemory(
         "MOV R1, #0xFF000000\n"
         "MOV R0, R1, ASR#8\n",
@@ -1534,7 +1534,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ASR) {
 /**
  * @brief Test moving value between registers and applying a ROR.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_ROR) {
     writeProgramToMemory(
         "MOV R1, #0xF000000F\n"
         "MOV R0, R1, ROR#8\n",
@@ -1546,7 +1546,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR) {
 /**
  * @brief Test moving value between registers and applying a RRX.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_RRX) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_RRX) {
     arm7.setFlag(C_FLAG, 1);
     writeProgramToMemory(
         "MOV R1, #0x00000001\n"
@@ -1560,7 +1560,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_RRX) {
 /**
  * @brief Test moving value between registers and applying a LSL with a register value amount.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSL_REG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_LSL_REG) {
     writeProgramToMemory(
         "MOV R2, #0x00000008\n"
         "MOV R1, #0x00FF0000\n"
@@ -1573,7 +1573,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSL_REG) {
 /**
  * @brief Test moving value between registers and applying a LSR with a register value amount.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSR_REG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_LSR_REG) {
     writeProgramToMemory(
         "MOV R2, #0x00000008\n"
         "MOV R1, #0x00FF0000\n"
@@ -1586,7 +1586,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_LSR_REG) {
 /**
  * @brief Test moving value between registers and applying a ASR with a register value amount.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ASR_REG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_ASR_REG) {
     writeProgramToMemory(
         "MOV R2, #0x00000008\n"
         "MOV R1, #0xFF000000\n"
@@ -1599,7 +1599,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ASR_REG) {
 /**
  * @brief Test moving value between registers and applying a ROR with a register value amount.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR_REG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_ROR_REG) {
     writeProgramToMemory(
         "MOV R2, #0x00000008\n"
         "MOV R1, #0xF000000F\n"
@@ -1612,7 +1612,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR_REG) {
 /**
  * @brief Test moving value between registers and applying a ROR with a register value amount (0).
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR_ZERO_REG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_REGISTER_ROR_ZERO_REG) {
     writeProgramToMemory(
         "MOV R2, #0x00000000\n"
         "MOV R1, #0xF000000F\n"
@@ -1626,7 +1626,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_REGISTER_ROR_ZERO_REG) {
  * @brief Test moving imm values into all possible regs. Small imm values
  * are defined as able to be encoded in 8 bits.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
     // Generate test cases.
     std::vector<uint32_t> immValuesToTest = {0, 1, 2, 8, 16, 42, 113, 173, 255};
     std::vector<std::string> instructions = {
@@ -1654,7 +1654,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_SMALL_IMMEDIATE) {
  * @brief Test moving imm values into all possible regs. Large imm values
  * are defined as able to be encoded in 8 bits + a 4 bit shift.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
     // Generate test cases.
     std::vector<uint32_t> immValuesToTest = {0xFF0,     0xFF00,     0xFF000,   0xFF0000,
                                              0xFF00000, 0xFF000000, 0xF000000F};
@@ -1682,7 +1682,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_LARGE_IMMEDIATE) {
 /**
  * @brief Tests a MOV operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory("MOVs R0, #0xFF000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -1709,7 +1709,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a MOV operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory("MOVs R0, #0\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -1728,7 +1728,7 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a MOV operation's carry flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory("MOVs R0, #0xF0000001\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -1748,18 +1748,18 @@ TEST_F(TestCPUDataInstructions_MOV, MOV_IMMEDIATE_CARRY_FLAG) {
 // ==================================================================================================
 // BIC
 // ==================================================================================================
-class TestCPUDataInstructions_BIC : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_BIC : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_BIC() {}
-    ~TestCPUDataInstructions_BIC() {}
+    TestCPU_ARM_DataInstructions_BIC() {}
+    ~TestCPU_ARM_DataInstructions_BIC() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a BIC operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_BIC, BIC_IMMEDIATE) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0x000000F1\n"
@@ -1772,7 +1772,7 @@ TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE) {
 /**
  * @brief Tests a BIC operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_BIC, BIC_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0x80000001\n"
@@ -1795,7 +1795,7 @@ TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests a BIC operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_BIC, BIC_IMMEDIATE_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0x1\n"
@@ -1818,7 +1818,7 @@ TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests a BIC operation's carry flag behaviour using a rotated immediate.
  */
-TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_BIC, BIC_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory(
         "MOV R1, #1\n"
@@ -1842,18 +1842,18 @@ TEST_F(TestCPUDataInstructions_BIC, BIC_IMMEDIATE_CARRY_FLAG) {
 // ==================================================================================================
 // MVN
 // ==================================================================================================
-class TestCPUDataInstructions_MVN : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_MVN : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_MVN() {}
-    ~TestCPUDataInstructions_MVN() {}
+    TestCPU_ARM_DataInstructions_MVN() {}
+    ~TestCPU_ARM_DataInstructions_MVN() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an MVN operation using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE) {
+TEST_F(TestCPU_ARM_DataInstructions_MVN, MVN_IMMEDIATE) {
     // N = true
     writeProgramToMemory("MVN R0, #0x000000F0\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -1863,7 +1863,7 @@ TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE) {
 /**
  * @brief Tests an MVN operation's negative flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MVN, MVN_IMMEDIATE_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory("MVNs R0,#0x7F000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -1880,7 +1880,7 @@ TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_NEGATIVE_FLAG) {
 /**
  * @brief Tests an MVN operation's zero flag behaviour using an immediate as the second operand.
  */
-TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MVN, MVN_IMMEDIATE_ZERO_FLAG) {
     // Z = false
     arm7.reset();
     writeProgramToMemory("MVNs R0, #0x0\n", MAIN_RAM_START, &bus, true);
@@ -1891,7 +1891,7 @@ TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_ZERO_FLAG) {
 /**
  * @brief Tests an MVN operation's carry flag behaviour using a rotated immediate.
  */
-TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_CARRY_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MVN, MVN_IMMEDIATE_CARRY_FLAG) {
     // C = true
     writeProgramToMemory("MVNs R0, #0x80000000\n", MAIN_RAM_START, &bus, true);
     arm7.setPC(MAIN_RAM_START);
@@ -1909,18 +1909,18 @@ TEST_F(TestCPUDataInstructions_MVN, MVN_IMMEDIATE_CARRY_FLAG) {
 // ==================================================================================================
 // MUL
 // ==================================================================================================
-class TestCPUDataInstructions_MUL : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_MUL : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_MUL() {}
-    ~TestCPUDataInstructions_MUL() {}
+    TestCPU_ARM_DataInstructions_MUL() {}
+    ~TestCPU_ARM_DataInstructions_MUL() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an MUL operation using small numbers.
  */
-TEST_F(TestCPUDataInstructions_MUL, MUL_0) {
+TEST_F(TestCPU_ARM_DataInstructions_MUL, MUL_0) {
     writeProgramToMemory(
         "MOV R1, #7\n"
         "MOV R2, #6\n"
@@ -1933,7 +1933,7 @@ TEST_F(TestCPUDataInstructions_MUL, MUL_0) {
 /**
  * @brief Tests an MUL operation using large positive numbers.
  */
-TEST_F(TestCPUDataInstructions_MUL, MUL_1) {
+TEST_F(TestCPU_ARM_DataInstructions_MUL, MUL_1) {
     writeProgramToMemory(
         "MOV R1, #0x7FFFFFFF\n"
         "MOV R2, #2\n"
@@ -1946,7 +1946,7 @@ TEST_F(TestCPUDataInstructions_MUL, MUL_1) {
 /**
  * @brief Tests an MUL operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_MUL, MUL_2) {
+TEST_F(TestCPU_ARM_DataInstructions_MUL, MUL_2) {
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
         "MOV R2, #2\n"
@@ -1959,7 +1959,7 @@ TEST_F(TestCPUDataInstructions_MUL, MUL_2) {
 /**
  * @brief Tests an MUL operation zero flag behaviour
  */
-TEST_F(TestCPUDataInstructions_MUL, MUL_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MUL, MUL_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #7\n"
@@ -1985,7 +1985,7 @@ TEST_F(TestCPUDataInstructions_MUL, MUL_ZERO_FLAG) {
 /**
  * @brief Tests an MUL operation negative flag behaviour
  */
-TEST_F(TestCPUDataInstructions_MUL, MUL_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MUL, MUL_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
@@ -2012,18 +2012,18 @@ TEST_F(TestCPUDataInstructions_MUL, MUL_NEGATIVE_FLAG) {
 // ==================================================================================================
 // MLA
 // ==================================================================================================
-class TestCPUDataInstructions_MLA : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_MLA : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_MLA() {}
-    ~TestCPUDataInstructions_MLA() {}
+    TestCPU_ARM_DataInstructions_MLA() {}
+    ~TestCPU_ARM_DataInstructions_MLA() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an MLA operation using small numbers.
  */
-TEST_F(TestCPUDataInstructions_MLA, MLA_0) {
+TEST_F(TestCPU_ARM_DataInstructions_MLA, MLA_0) {
     writeProgramToMemory(
         "MOV R1, #7\n"
         "MOV R2, #6\n"
@@ -2037,7 +2037,7 @@ TEST_F(TestCPUDataInstructions_MLA, MLA_0) {
 /**
  * @brief Tests an MLA operation using large positive numbers.
  */
-TEST_F(TestCPUDataInstructions_MLA, MLA_1) {
+TEST_F(TestCPU_ARM_DataInstructions_MLA, MLA_1) {
     writeProgramToMemory(
         "MOV R1, #0x7FFFFFFF\n"
         "MOV R2, #2\n"
@@ -2051,7 +2051,7 @@ TEST_F(TestCPUDataInstructions_MLA, MLA_1) {
 /**
  * @brief Tests an MLA operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_MLA, MLA_2) {
+TEST_F(TestCPU_ARM_DataInstructions_MLA, MLA_2) {
     writeProgramToMemory(
         "MOV R1, #0x80000000\n"
         "MOV R2, #2\n"
@@ -2065,7 +2065,7 @@ TEST_F(TestCPUDataInstructions_MLA, MLA_2) {
 /**
  * @brief Tests an MLA operation zero flag behaviour
  */
-TEST_F(TestCPUDataInstructions_MLA, MLA_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MLA, MLA_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #7\n"
@@ -2093,7 +2093,7 @@ TEST_F(TestCPUDataInstructions_MLA, MLA_ZERO_FLAG) {
 /**
  * @brief Tests an MLA operation negative flag behaviour
  */
-TEST_F(TestCPUDataInstructions_MLA, MLA_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_MLA, MLA_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
@@ -2122,18 +2122,18 @@ TEST_F(TestCPUDataInstructions_MLA, MLA_NEGATIVE_FLAG) {
 // ==================================================================================================
 // UMULL
 // ==================================================================================================
-class TestCPUDataInstructions_UMULL : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_UMULL : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_UMULL() {}
-    ~TestCPUDataInstructions_UMULL() {}
+    TestCPU_ARM_DataInstructions_UMULL() {}
+    ~TestCPU_ARM_DataInstructions_UMULL() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an UMULL operation using small numbers.
  */
-TEST_F(TestCPUDataInstructions_UMULL, UMULL_0) {
+TEST_F(TestCPU_ARM_DataInstructions_UMULL, UMULL_0) {
     writeProgramToMemory(
         "MOV R1, #7\n"
         "MOV R2, #6\n"
@@ -2147,7 +2147,7 @@ TEST_F(TestCPUDataInstructions_UMULL, UMULL_0) {
 /**
  * @brief Tests an UMULL operation using large positive numbers.
  */
-TEST_F(TestCPUDataInstructions_UMULL, UMULL_1) {
+TEST_F(TestCPU_ARM_DataInstructions_UMULL, UMULL_1) {
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
         "MOV R2, #2\n"
@@ -2161,7 +2161,7 @@ TEST_F(TestCPUDataInstructions_UMULL, UMULL_1) {
 /**
  * @brief Tests an UMULL operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_UMULL, UMULL_2) {
+TEST_F(TestCPU_ARM_DataInstructions_UMULL, UMULL_2) {
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
         "MOV R2, #0x80000000\n"
@@ -2175,7 +2175,7 @@ TEST_F(TestCPUDataInstructions_UMULL, UMULL_2) {
 /**
  * @brief Tests an UMULL operation with zero result
  */
-TEST_F(TestCPUDataInstructions_UMULL, UMULL_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_UMULL, UMULL_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -2201,7 +2201,7 @@ TEST_F(TestCPUDataInstructions_UMULL, UMULL_ZERO_FLAG) {
 /**
  * @brief Tests an UMULL operation negative flag behaviour
  */
-TEST_F(TestCPUDataInstructions_UMULL, UMULL_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_UMULL, UMULL_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
@@ -2227,18 +2227,18 @@ TEST_F(TestCPUDataInstructions_UMULL, UMULL_NEGATIVE_FLAG) {
 
 // UMLAL
 // ==================================================================================================
-class TestCPUDataInstructions_UMLAL : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_UMLAL : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_UMLAL() {}
-    ~TestCPUDataInstructions_UMLAL() {}
+    TestCPU_ARM_DataInstructions_UMLAL() {}
+    ~TestCPU_ARM_DataInstructions_UMLAL() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests a UMLAL operation using small numbers.
  */
-TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_0) {
+TEST_F(TestCPU_ARM_DataInstructions_UMLAL, UMLAL_0) {
     writeProgramToMemory(
         "MOV R0, #0\n"
         "MOV R3, #0\n"
@@ -2254,7 +2254,7 @@ TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_0) {
 /**
  * @brief Tests a UMLAL operation using large positive numbers.
  */
-TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_1) {
+TEST_F(TestCPU_ARM_DataInstructions_UMLAL, UMLAL_1) {
     writeProgramToMemory(
         "MOV R0, #1\n"
         "MOV R3, #1\n"
@@ -2270,7 +2270,7 @@ TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_1) {
 /**
  * @brief Tests an UMLAL operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_2) {
+TEST_F(TestCPU_ARM_DataInstructions_UMLAL, UMLAL_2) {
     writeProgramToMemory(
         "MOV R0, #0xFFFFFFFF\n"
         "MOV R3, #0xFFFFFFFF\n"
@@ -2286,7 +2286,7 @@ TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_2) {
 /**
  * @brief Tests a UMLAL operation with zero result
  */
-TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_UMLAL, UMLAL_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R0, #0\n"
@@ -2316,7 +2316,7 @@ TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_ZERO_FLAG) {
 /**
  * @brief Tests a UMLAL operation negative flag behaviour
  */
-TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_UMLAL, UMLAL_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R0, #0\n"
@@ -2347,18 +2347,18 @@ TEST_F(TestCPUDataInstructions_UMLAL, UMLAL_NEGATIVE_FLAG) {
 // ==================================================================================================
 // SMULL
 // ==================================================================================================
-class TestCPUDataInstructions_SMULL : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_SMULL : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_SMULL() {}
-    ~TestCPUDataInstructions_SMULL() {}
+    TestCPU_ARM_DataInstructions_SMULL() {}
+    ~TestCPU_ARM_DataInstructions_SMULL() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an SMULL operation using small numbers.
  */
-TEST_F(TestCPUDataInstructions_SMULL, SMULL_0) {
+TEST_F(TestCPU_ARM_DataInstructions_SMULL, SMULL_0) {
     writeProgramToMemory(
         "MOV R1, #7\n"
         "MOV R2, #6\n"
@@ -2372,7 +2372,7 @@ TEST_F(TestCPUDataInstructions_SMULL, SMULL_0) {
 /**
  * @brief Tests an SMULL operation using large positive numbers.
  */
-TEST_F(TestCPUDataInstructions_SMULL, SMULL_1) {
+TEST_F(TestCPU_ARM_DataInstructions_SMULL, SMULL_1) {
     writeProgramToMemory(
         "MOV R1, #0x7FFFFFFF\n"
         "MOV R2, #2\n"
@@ -2386,7 +2386,7 @@ TEST_F(TestCPUDataInstructions_SMULL, SMULL_1) {
 /**
  * @brief Tests an SMULL operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_SMULL, SMULL_2) {
+TEST_F(TestCPU_ARM_DataInstructions_SMULL, SMULL_2) {
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
         "MOV R2, #0x80000000\n"
@@ -2400,7 +2400,7 @@ TEST_F(TestCPUDataInstructions_SMULL, SMULL_2) {
 /**
  * @brief Tests an SMULL operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_SMULL, SMULL_3) {
+TEST_F(TestCPU_ARM_DataInstructions_SMULL, SMULL_3) {
     writeProgramToMemory(
         "MOV R1, #0xFFFFFFFF\n"
         "MOV R2, #2\n"
@@ -2414,7 +2414,7 @@ TEST_F(TestCPUDataInstructions_SMULL, SMULL_3) {
 /**
  * @brief Tests an SMULL operation zero flag behaviour
  */
-TEST_F(TestCPUDataInstructions_SMULL, SMULL_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SMULL, SMULL_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -2440,7 +2440,7 @@ TEST_F(TestCPUDataInstructions_SMULL, SMULL_ZERO_FLAG) {
 /**
  * @brief Tests an SMULL operation negative flag behaviour
  */
-TEST_F(TestCPUDataInstructions_SMULL, SMULL_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SMULL, SMULL_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R1, #2\n"
@@ -2467,18 +2467,18 @@ TEST_F(TestCPUDataInstructions_SMULL, SMULL_NEGATIVE_FLAG) {
 // ==================================================================================================
 // SMLAL
 // ==================================================================================================
-class TestCPUDataInstructions_SMLAL : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_SMLAL : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_SMLAL() {}
-    ~TestCPUDataInstructions_SMLAL() {}
+    TestCPU_ARM_DataInstructions_SMLAL() {}
+    ~TestCPU_ARM_DataInstructions_SMLAL() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests an SMLAL operation using small numbers.
  */
-TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_0) {
+TEST_F(TestCPU_ARM_DataInstructions_SMLAL, SMLAL_0) {
     writeProgramToMemory(
         "MOV R0, #0\n"
         "MOV R3, #0\n"
@@ -2494,7 +2494,7 @@ TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_0) {
 /**
  * @brief Tests an SMLAL operation using large positive numbers.
  */
-TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_1) {
+TEST_F(TestCPU_ARM_DataInstructions_SMLAL, SMLAL_1) {
     writeProgramToMemory(
         "MOV R0, #1\n"
         "MOV R3, #1\n"
@@ -2510,7 +2510,7 @@ TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_1) {
 /**
  * @brief Tests an SMLAL operation using large negative numbers.
  */
-TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_2) {
+TEST_F(TestCPU_ARM_DataInstructions_SMLAL, SMLAL_2) {
     writeProgramToMemory(
         "MOV R0, #0xFFFFFFFF\n"
         "MOV R3, #0xFFFFFFFF\n"
@@ -2526,7 +2526,7 @@ TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_2) {
 /**
  * @brief Tests an SMLAL operation zero flag behaviour
  */
-TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_ZERO_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SMLAL, SMLAL_ZERO_FLAG) {
     // Z = true
     writeProgramToMemory(
         "MOV R0, #0\n"
@@ -2556,7 +2556,7 @@ TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_ZERO_FLAG) {
 /**
  * @brief Tests an SMLAL operation negative flag behaviour
  */
-TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_NEGATIVE_FLAG) {
+TEST_F(TestCPU_ARM_DataInstructions_SMLAL, SMLAL_NEGATIVE_FLAG) {
     // N = true
     writeProgramToMemory(
         "MOV R0, #0\n"
@@ -2587,13 +2587,13 @@ TEST_F(TestCPUDataInstructions_SMLAL, SMLAL_NEGATIVE_FLAG) {
 // ==================================================================================================
 // SWP
 // ==================================================================================================
-class TestCPUDataInstructions_SWP : public TestCPUDataInstructions {
+class TestCPU_ARM_DataInstructions_SWP : public TestCPU_ARM_DataInstructions {
 protected:
-    TestCPUDataInstructions_SWP() {}
-    ~TestCPUDataInstructions_SWP() {}
+    TestCPU_ARM_DataInstructions_SWP() {}
+    ~TestCPU_ARM_DataInstructions_SWP() {}
 
-    void SetUp() override { TestCPUDataInstructions::SetUp(); }
-    void TearDown() override { TestCPUDataInstructions::TearDown(); }
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
 };
 /**
  * @brief Tests SWP (Swap Word) instruction.
@@ -2603,7 +2603,7 @@ protected:
  * Rd = Mem[Rn]
  * Mem[Rn] = Rm
  */
-TEST_F(TestCPUDataInstructions_SWP, SWP_WORD) {
+TEST_F(TestCPU_ARM_DataInstructions_SWP, SWP_WORD) {
     uint32_t baseAddress = MAIN_RAM_START + 0x400;
     uint32_t memoryValue = 0x11223344;
     uint32_t registerValue = 0xAABBCCDD;
@@ -2638,7 +2638,7 @@ TEST_F(TestCPUDataInstructions_SWP, SWP_WORD) {
  * Rd = Mem8[Rn]
  * Mem8[Rn] = Rm[7:0]
  */
-TEST_F(TestCPUDataInstructions_SWP, SWPB_BYTE) {
+TEST_F(TestCPU_ARM_DataInstructions_SWP, SWPB_BYTE) {
     uint32_t baseAddress = MAIN_RAM_START + 0x500;
     uint8_t memoryValue = 0x44;
     uint32_t registerValue = 0xAABBCCDD;  // only lowest byte (0xDD) used

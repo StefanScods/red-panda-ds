@@ -9,13 +9,13 @@
 /**
  * @brief Test fixture for the CPU's instructions in the branch category.
  */
-class TestCPUBranchInstructions : public testing::Test {
+class TestCPU_ARM_BranchInstructions : public testing::Test {
 protected:
     Interconnect bus;
     ARM7TDMI arm7;
     ARM946ES arm9;
-    TestCPUBranchInstructions() {}
-    ~TestCPUBranchInstructions() {}
+    TestCPU_ARM_BranchInstructions() {}
+    ~TestCPU_ARM_BranchInstructions() {}
 
     void SetUp() override {
         bus.init();
@@ -29,19 +29,19 @@ protected:
 // ==================================================================================================
 // Branch
 // ==================================================================================================
-class TestCPUBranchInstructions_B : public TestCPUBranchInstructions {
+class TestCPU_ARM_BranchInstructions_B : public TestCPU_ARM_BranchInstructions {
 protected:
-    TestCPUBranchInstructions_B() {}
-    ~TestCPUBranchInstructions_B() {}
+    TestCPU_ARM_BranchInstructions_B() {}
+    ~TestCPU_ARM_BranchInstructions_B() {}
 
-    void SetUp() override { TestCPUBranchInstructions::SetUp(); }
+    void SetUp() override { TestCPU_ARM_BranchInstructions::SetUp(); }
 
-    void TearDown() override { TestCPUBranchInstructions::TearDown(); }
+    void TearDown() override { TestCPU_ARM_BranchInstructions::TearDown(); }
 };
 /**
  * @brief Tests a Branch operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, B_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, B_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
@@ -57,7 +57,7 @@ TEST_F(TestCPUBranchInstructions_B, B_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch EQ operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BEQ_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BEQ_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -88,7 +88,7 @@ TEST_F(TestCPUBranchInstructions_B, BEQ_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch NE operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BNE_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BNE_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -119,7 +119,7 @@ TEST_F(TestCPUBranchInstructions_B, BNE_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch CS operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BCS_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BCS_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -152,7 +152,7 @@ TEST_F(TestCPUBranchInstructions_B, BCS_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch CC operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BCC_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BCC_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -185,7 +185,7 @@ TEST_F(TestCPUBranchInstructions_B, BCC_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch MI operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BMI_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BMI_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -218,7 +218,7 @@ TEST_F(TestCPUBranchInstructions_B, BMI_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch PL operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BPL_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BPL_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -251,7 +251,7 @@ TEST_F(TestCPUBranchInstructions_B, BPL_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch VS operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BVS_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BVS_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -284,7 +284,7 @@ TEST_F(TestCPUBranchInstructions_B, BVS_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch VC operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BVC_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BVC_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -317,7 +317,7 @@ TEST_F(TestCPUBranchInstructions_B, BVC_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch HI operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BHI_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BHI_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -350,7 +350,7 @@ TEST_F(TestCPUBranchInstructions_B, BHI_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch LS operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BLS_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BLS_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -383,7 +383,7 @@ TEST_F(TestCPUBranchInstructions_B, BLS_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch GE operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BGE_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BGE_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -416,7 +416,7 @@ TEST_F(TestCPUBranchInstructions_B, BGE_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch LT operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BLT_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BLT_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -449,7 +449,7 @@ TEST_F(TestCPUBranchInstructions_B, BLT_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch GT operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BGT_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BGT_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -482,7 +482,7 @@ TEST_F(TestCPUBranchInstructions_B, BGT_IMMEDIATE) {
 /**
  * @brief Tests a conditional Branch LE operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_B, BLE_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_B, BLE_IMMEDIATE) {
     // Test branch is executed.
     writeProgramToMemory(
         "MOV R1, #0\n"
@@ -516,19 +516,19 @@ TEST_F(TestCPUBranchInstructions_B, BLE_IMMEDIATE) {
 // ==================================================================================================
 // Branch Link
 // ==================================================================================================
-class TestCPUBranchInstructions_BL : public TestCPUBranchInstructions {
+class TestCPU_ARM_BranchInstructions_BL : public TestCPU_ARM_BranchInstructions {
 protected:
-    TestCPUBranchInstructions_BL() {}
-    ~TestCPUBranchInstructions_BL() {}
+    TestCPU_ARM_BranchInstructions_BL() {}
+    ~TestCPU_ARM_BranchInstructions_BL() {}
 
-    void SetUp() override { TestCPUBranchInstructions::SetUp(); }
+    void SetUp() override { TestCPU_ARM_BranchInstructions::SetUp(); }
 
-    void TearDown() override { TestCPUBranchInstructions::TearDown(); }
+    void TearDown() override { TestCPU_ARM_BranchInstructions::TearDown(); }
 };
 /**
  * @brief Tests a Branch Link operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_BL, BL_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_BL, BL_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
@@ -543,19 +543,19 @@ TEST_F(TestCPUBranchInstructions_BL, BL_IMMEDIATE) {
 // ==================================================================================================
 // Branch Exchange
 // ==================================================================================================
-class TestCPUBranchInstructions_BX : public TestCPUBranchInstructions {
+class TestCPU_ARM_BranchInstructions_BX : public TestCPU_ARM_BranchInstructions {
 protected:
-    TestCPUBranchInstructions_BX() {}
-    ~TestCPUBranchInstructions_BX() {}
+    TestCPU_ARM_BranchInstructions_BX() {}
+    ~TestCPU_ARM_BranchInstructions_BX() {}
 
-    void SetUp() override { TestCPUBranchInstructions::SetUp(); }
+    void SetUp() override { TestCPU_ARM_BranchInstructions::SetUp(); }
 
-    void TearDown() override { TestCPUBranchInstructions::TearDown(); }
+    void TearDown() override { TestCPU_ARM_BranchInstructions::TearDown(); }
 };
 /**
  * @brief Tests a Branch Exchange operation using a register.
  */
-TEST_F(TestCPUBranchInstructions_BX, BX_REG) {
+TEST_F(TestCPU_ARM_BranchInstructions_BX, BX_REG) {
     uint32_t target = MAIN_RAM_START + 0x200;
     arm9.writeReg(3, target);
     arm9.setPC(MAIN_RAM_START);
@@ -568,7 +568,7 @@ TEST_F(TestCPUBranchInstructions_BX, BX_REG) {
 /**
  * @brief Tests a Branch Exchange operation using a register to THUMB mode.
  */
-TEST_F(TestCPUBranchInstructions_BX, BX_REG_TO_THUMB) {
+TEST_F(TestCPU_ARM_BranchInstructions_BX, BX_REG_TO_THUMB) {
     uint32_t target = MAIN_RAM_START + 0x200;
     arm9.writeReg(3, target | 1);
     arm9.setPC(MAIN_RAM_START);
@@ -581,19 +581,19 @@ TEST_F(TestCPUBranchInstructions_BX, BX_REG_TO_THUMB) {
 // ==================================================================================================
 // Branch Link and Exchange
 // ==================================================================================================
-class TestCPUBranchInstructions_BLX : public TestCPUBranchInstructions {
+class TestCPU_ARM_BranchInstructions_BLX : public TestCPU_ARM_BranchInstructions {
 protected:
-    TestCPUBranchInstructions_BLX() {}
-    ~TestCPUBranchInstructions_BLX() {}
+    TestCPU_ARM_BranchInstructions_BLX() {}
+    ~TestCPU_ARM_BranchInstructions_BLX() {}
 
-    void SetUp() override { TestCPUBranchInstructions::SetUp(); }
+    void SetUp() override { TestCPU_ARM_BranchInstructions::SetUp(); }
 
-    void TearDown() override { TestCPUBranchInstructions::TearDown(); }
+    void TearDown() override { TestCPU_ARM_BranchInstructions::TearDown(); }
 };
 /**
  * @brief Tests a Branch Link and Exchange operation using an immediate.
  */
-TEST_F(TestCPUBranchInstructions_BLX, BLX_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
@@ -608,7 +608,7 @@ TEST_F(TestCPUBranchInstructions_BLX, BLX_IMMEDIATE) {
 /**
  * @brief Tests a Branch Link and Exchange operation using an immediate not aligned to 4.
  */
-TEST_F(TestCPUBranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
+TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
@@ -623,7 +623,7 @@ TEST_F(TestCPUBranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
 /**
  * @brief Tests a Branch Link and Exchange operation using a register.
  */
-TEST_F(TestCPUBranchInstructions_BLX, BLX_REG) {
+TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_REG) {
     uint32_t target = MAIN_RAM_START + 0x200;
     arm9.writeReg(3, target);
     arm9.setPC(MAIN_RAM_START);
@@ -637,7 +637,7 @@ TEST_F(TestCPUBranchInstructions_BLX, BLX_REG) {
 /**
  * @brief Tests a Branch Link and Exchange operation using a register not aligned to 4.
  */
-TEST_F(TestCPUBranchInstructions_BLX, BLX_THUMB_ALIGN_REG) {
+TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_THUMB_ALIGN_REG) {
     uint32_t target = MAIN_RAM_START + 0x200;
     arm9.writeReg(3, target | 1);
     arm9.setPC(MAIN_RAM_START);
