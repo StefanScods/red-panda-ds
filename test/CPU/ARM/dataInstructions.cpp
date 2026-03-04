@@ -6,8 +6,6 @@
 #include "../src/utils/armEncode.h"
 #include "commonTest.h"
 
-// TODO Handle ARM9 only commands.
-
 /**
  * @brief Test fixture for the CPU's instructions in the data category.
  */
@@ -2664,4 +2662,421 @@ TEST_F(TestCPU_ARM_DataInstructions_SWP, SWPB_BYTE) {
 
     // Memory should contain low byte of Rm
     ASSERT_EQ(bus.read8ARM7(baseAddress), 0xDD);
+}
+
+// ==================================================================================================
+// QADD
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_QADD : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_QADD() {}
+    ~TestCPU_ARM_DataInstructions_QADD() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests QADD causing no saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QADD, QADD_NO_SATURATION) {
+    arm9.writeReg(1, 10);
+    arm9.writeReg(2, 20);
+
+    writeProgramToMemory("QADD R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), 30);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Tests QADD causing max saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QADD, QADD_MAX_SATURATION) {
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, 1);
+
+    writeProgramToMemory("QADD R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Tests QADD causing min saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QADD, QADD_MIN_SATURATION) {
+    arm9.writeReg(1, INT32_MIN);
+    arm9.writeReg(2, -1);
+
+    writeProgramToMemory("QADD R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Tests QADD causing no saturation (max bound).
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QADD, QADD_MAX_NO_SATURATION) {
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QADD R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Tests QADD causing no saturation (min bound).
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QADD, QADD_MIN_NO_SATURATION) {
+    arm9.writeReg(1, INT32_MIN);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QADD R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+// ==================================================================================================
+// QSUB
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_QSUB : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_QSUB() {}
+    ~TestCPU_ARM_DataInstructions_QSUB() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests QSUB causing no saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QSUB, QSUB_NO_SATURATION) {
+    arm9.writeReg(1, 50);
+    arm9.writeReg(2, 20);
+
+    writeProgramToMemory("QSUB R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), 30);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Tests QSUB causing max saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QSUB, QSUB_MAX_SATURATION) {
+    // INT32_MAX - (-1) -> overflow -> saturate to INT32_MAX
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, -1);
+
+    writeProgramToMemory("QSUB R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Tests QSUB causing min saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QSUB, QSUB_MIN_SATURATION) {
+    // INT32_MIN - 1 -> overflow -> saturate to INT32_MIN
+    arm9.writeReg(1, INT32_MIN);
+    arm9.writeReg(2, 1);
+
+    writeProgramToMemory("QSUB R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Tests QSUB causing no saturation (max bound).
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QSUB, QSUB_MAX_NO_SATURATION) {
+    // INT32_MAX - 0 -> no overflow
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QSUB R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Tests QSUB causing no saturation (min bound).
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QSUB, QSUB_MIN_NO_SATURATION) {
+    // INT32_MIN - 0 -> no overflow
+    arm9.writeReg(1, INT32_MIN);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QSUB R0, R1, R2", MAIN_RAM_START, &bus,
+                         /*arm7=*/arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+// ==================================================================================================
+// QDADD
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_QDADD : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_QDADD() {}
+    ~TestCPU_ARM_DataInstructions_QDADD() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Normal operation: doubling does not overflow, sum does not overflow
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_NO_SATURATION) {
+    arm9.writeReg(1, 10);
+    arm9.writeReg(2, 20);  // 20*2=40, +10=50
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), 50);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Doubling alone causes saturation.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_DOUBLE_SATURATION) {
+    arm9.writeReg(1, 0);
+    arm9.writeReg(2, INT32_MAX / 2 + 1);  // 2*(INT32_MAX/2+1) = overflow
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief  Addition after doubling causes saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_ADD_SATURATION) {
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, 1);  // 2*1 + INT32_MAX = overflow
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Both operands zero – edge case, no saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_ZERO_NO_SATURATION) {
+    arm9.writeReg(1, 0);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), 0);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Max values, doubling + addition triggers saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_MAX_VALUES) {
+    arm9.writeReg(1, INT32_MAX - 1);
+    arm9.writeReg(2, INT32_MAX / 2);  // 2*(INT32_MAX/2) + INT32_MAX-1 > MAX
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Min values, doubling negative + addition triggers negative saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_MIN_VALUES) {
+    arm9.writeReg(1, INT32_MIN + 1);
+    arm9.writeReg(2, INT32_MIN / 2);  // 2*(INT32_MIN/2) + INT32_MIN+1 < MIN
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Negative doubling without saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_NEGATIVE_NO_SATURATION) {
+    arm9.writeReg(1, -10);
+    arm9.writeReg(2, -20);  // -20*2 = -40, -40 + -10 = -50
+
+    writeProgramToMemory("QDADD R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), -50);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Check Q flag sticky: first saturate, then normal operation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDADD, QDADD_Q_FLAG_STICKY) {
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, 1);
+
+    writeProgramToMemory(
+        "QDADD R0, R1, R2\n"
+        "QDADD R0, R1, R2",
+        MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);  // saturate
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+
+    arm9.fetchAndExecute(1);  // normal operation, Q remains set
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+// ==================================================================================================
+// QDSUB
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_QDSUB : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_QDSUB() {}
+    ~TestCPU_ARM_DataInstructions_QDSUB() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Normal operation: no saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_NO_SATURATION) {
+    arm9.writeReg(1, 50);
+    arm9.writeReg(2, 10);  // 10*2=20, 50-20=30
+
+    writeProgramToMemory("QDSUB R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), 30);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Doubling alone triggers saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_DOUBLE_SATURATION) {
+    arm9.writeReg(1, 0);
+    arm9.writeReg(2, INT32_MIN / 2 - 1);  // 2*INT32_MIN/2-1 < MIN
+
+    writeProgramToMemory("QDSUB R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Subtraction after doubling triggers saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_SUB_SATURATION) {
+    arm9.writeReg(1, INT32_MIN + 1);
+    arm9.writeReg(2, 2);  // 2*2 =4, INT32_MIN+1 - 4 < MIN
+
+    writeProgramToMemory("QDSUB R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+}
+/**
+ * @brief Negative doubling without saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_NEGATIVE_NO_SATURATION) {
+    arm9.writeReg(1, -50);
+    arm9.writeReg(2, -10);  // -10*2=-20, -50-(-20)=-30
+
+    writeProgramToMemory("QDSUB R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), -30);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Max operands, no saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_MAX_NO_SATURATION) {
+    arm9.writeReg(1, INT32_MAX);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QDSUB R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MAX);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Min operands, no saturation
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_MIN_NO_SATURATION) {
+    arm9.writeReg(1, INT32_MIN);
+    arm9.writeReg(2, 0);
+
+    writeProgramToMemory("QDSUB R0, R1, R2", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+
+    EXPECT_EQ(arm9.readReg(0), INT32_MIN);
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 0);
+}
+/**
+ * @brief Q flag sticky behavior
+ */
+TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_Q_FLAG_STICKY) {
+    arm9.writeReg(1, INT32_MIN);
+    arm9.writeReg(2, 2);  // first instruction saturates
+
+    writeProgramToMemory(
+        "QDSUB R0, R1, R2\n"
+        "QDSUB R0, R1, R2",
+        MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);  // saturate
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
+
+    arm9.fetchAndExecute(1);  // no saturation, Q still set
+    EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
 }

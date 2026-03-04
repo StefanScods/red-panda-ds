@@ -1623,30 +1623,72 @@ cycles ARM::ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int
 // ==================================================================================================
 // ==================================================================================================
 // QUAD
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/QADD?lang=en
 // ==================================================================================================
 cycles ARM::ARM_QADD(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 12, 15);
+    // Operand Resigners.
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    int64_t operand1 = (int32_t)(*activeRegs[Rm]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rn]);
+    *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 + operand2, 32);
+    fixupIfTargetingPC(Rd);
+    return 1;
 }
 // ==================================================================================================
 // QSUB
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/QSUB?lang=en
 // ==================================================================================================
 cycles ARM::ARM_QSUB(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 12, 15);
+    // Operand Resigners.
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    int64_t operand1 = (int32_t)(*activeRegs[Rm]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rn]);
+    *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 - operand2, 32);
+    fixupIfTargetingPC(Rd);
+    return 1;
 }
 // ==================================================================================================
 // QDADD
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/QDADD?lang=en
 // ==================================================================================================
 cycles ARM::ARM_QDADD(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 12, 15);
+    // Operand Resigners.
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    int64_t operand1 = (int32_t)(*activeRegs[Rm]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rn]);
+    int64_t doubled = signedSaturatedQ(2 * operand2, 32);
+    *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 + doubled, 32);
+    fixupIfTargetingPC(Rd);
+    return 1;
 }
 // ==================================================================================================
 // QDSUB
 // ==================================================================================================
 cycles ARM::ARM_QDSUB(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    // Destination Register.
+    uint8_t Rd = readBits(instruct, 12, 15);
+    // Operand Resigners.
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    int64_t operand1 = (int32_t)(*activeRegs[Rm]);
+    int64_t operand2 = (int32_t)(*activeRegs[Rn]);
+    int64_t doubled = signedSaturatedQ(2 * operand2, 32);
+    *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 - doubled, 32);
+    fixupIfTargetingPC(Rd);
+    return 1;
 }
 // ==================================================================================================
 // Other.
+// ==================================================================================================
 // ==================================================================================================
 // SWP
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/SWP--SWPB?lang=en

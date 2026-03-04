@@ -185,20 +185,6 @@ public:
     virtual cycles cycle();
 
     /**
-     * @brief Updates PC + performs any processing after PC has been updated.
-     *
-     * @param dest The new address to branch to.
-     */
-    void branch(uint32_t dest);
-
-    /**
-     * @brief Call after updating an arbitrary reg to ensure writes to PC are handled correctly.
-     *
-     * @param destReg The register being updated.No op if dest register is not the PC.
-     */
-    void fixupIfTargetingPC(uint32_t destReg);
-
-    /**
      * @brief Keep cycling until the next instuction is executed. Cycle behaviour may not be
      * correct so use for testing.
      *
@@ -285,6 +271,31 @@ public:
      * @return `bool`
      */
     bool checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics condition);
+
+    /**
+     * @brief Updates PC + performs any processing after PC has been updated.
+     *
+     * @param dest The new address to branch to.
+     */
+    void branch(uint32_t dest);
+
+    /**
+     * @brief Call after updating an arbitrary reg to ensure writes to PC are handled correctly.
+     *
+     * @param destReg The register being updated. No op if dest register is not the PC.
+     */
+    void fixupIfTargetingPC(uint32_t destReg);
+    /**
+     * @brief Check if the passed operand saturates the given bitwidth. If saturated, returns the
+     * saturated value and sets the Q flag. If the value does not saturate, the operand will return
+     * and the Q flag will be untouched (remain 0 or 1).
+     *
+     * @param operand Value to check saturation.
+     * @param bitSize The number of bits implementing the integer.
+     *
+     * @return `int64_t`
+     */
+    int64_t signedSaturatedQ(int64_t operand, uint8_t bitSize);
 
     // =============================================================================================
     // ARM Instruction set.

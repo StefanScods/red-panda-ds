@@ -1,5 +1,7 @@
 #include "cpu.h"
 
+#include <cmath>
+
 #include "interconnect.h"
 
 // Control print statements.
@@ -316,6 +318,22 @@ void ARM::branch(uint32_t dest) {
 void ARM::fixupIfTargetingPC(uint32_t destReg) {
     if (destReg != PC_REGISTER_NUM) return;
     branch(pc());
+}
+// ==================================================================================================
+// https://developer.arm.com/documentation/ddi0487/maa/-Part-J-Architectural-Pseudocode/-Chapter-J1-A-profile-Architecture-Pseudocode/-J1-3-Shared-pseudocode/-J1-3-672-SignedSatQ?lang=en
+int64_t ARM::signedSaturatedQ(int64_t operand, uint8_t bitSize) {
+    int64_t max = ((int64_t)std::pow(2, bitSize - 1)) - 1;
+    int64_t min = -((int64_t)std::pow(2, bitSize - 1));
+    if (operand > max) {
+        setFlag(Q_FLAG, 1);
+        return max;
+    }
+    if (operand < min) {
+        setFlag(Q_FLAG, 1);
+        return min;
+    }
+    // Do not clear the Q Flag.
+    return operand;
 }
 // ==================================================================================================
 bool ARM::checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics condition) {
