@@ -24,6 +24,8 @@ cycles ARM::ARM_B(uint32_t instruct) {
 }
 // ==================================================================================================
 // Branch Link and Exchange
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BLX--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BX?lang=en
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BL--BLX--immediate-?lang=en//
 // ==================================================================================================
 cycles ARM::ARM_BL(uint32_t instruct) {
@@ -46,10 +48,15 @@ cycles ARM::ARM_BLX_IMM(uint32_t instruct) {
 }
 // ==================================================================================================
 cycles ARM::ARM_BLX_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    lr() = pc() - 4;  // Point to the previous instruction.
+    uint8_t Rm = readBits(instruct, 0, 3);
+    branch(*activeRegs[Rm]);
+    return 1;
 }
 // ==================================================================================================
 cycles ARM::ARM_BX(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    branch(*activeRegs[Rm]);
+    return 1;
 }
 // ==================================================================================================

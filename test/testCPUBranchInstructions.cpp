@@ -541,6 +541,44 @@ TEST_F(TestCPUBranchInstructions_BL, BL_IMMEDIATE) {
 }
 
 // ==================================================================================================
+// Branch Exchange
+// ==================================================================================================
+class TestCPUBranchInstructions_BX : public TestCPUBranchInstructions {
+protected:
+    TestCPUBranchInstructions_BX() {}
+    ~TestCPUBranchInstructions_BX() {}
+
+    void SetUp() override { TestCPUBranchInstructions::SetUp(); }
+
+    void TearDown() override { TestCPUBranchInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a Branch Exchange operation using a register.
+ */
+TEST_F(TestCPUBranchInstructions_BX, BX_REG) {
+    uint32_t target = MAIN_RAM_START + 0x200;
+    arm9.writeReg(3, target);
+    arm9.setPC(MAIN_RAM_START);
+
+    writeProgramToMemory("BX R3", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.fetchAndExecute(1);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readFlag(T_BIT), 0);
+}
+/**
+ * @brief Tests a Branch Exchange operation using a register to THUMB mode.
+ */
+TEST_F(TestCPUBranchInstructions_BX, BX_REG_TO_THUMB) {
+    uint32_t target = MAIN_RAM_START + 0x200;
+    arm9.writeReg(3, target | 1);
+    arm9.setPC(MAIN_RAM_START);
+
+    writeProgramToMemory("BX R3", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.fetchAndExecute(1);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
+}
+// ==================================================================================================
 // Branch Link and Exchange
 // ==================================================================================================
 class TestCPUBranchInstructions_BLX : public TestCPUBranchInstructions {
@@ -580,5 +618,33 @@ TEST_F(TestCPUBranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
     arm9.fetchAndExecute(3);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 10);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
+    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
+}
+/**
+ * @brief Tests a Branch Link and Exchange operation using a register.
+ */
+TEST_F(TestCPUBranchInstructions_BLX, BLX_REG) {
+    uint32_t target = MAIN_RAM_START + 0x200;
+    arm9.writeReg(3, target);
+    arm9.setPC(MAIN_RAM_START);
+
+    writeProgramToMemory("BLX R3", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.fetchAndExecute(1);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 4);
+    ASSERT_EQ(arm9.readFlag(T_BIT), 0);
+}
+/**
+ * @brief Tests a Branch Link and Exchange operation using a register not aligned to 4.
+ */
+TEST_F(TestCPUBranchInstructions_BLX, BLX_THUMB_ALIGN_REG) {
+    uint32_t target = MAIN_RAM_START + 0x200;
+    arm9.writeReg(3, target | 1);
+    arm9.setPC(MAIN_RAM_START);
+
+    writeProgramToMemory("BLX R3", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.fetchAndExecute(1);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 4);
     ASSERT_EQ(arm9.readFlag(T_BIT), 1);
 }
