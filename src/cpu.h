@@ -13,11 +13,11 @@ class Interconnect;
 #define NO_INSTRUCT 0b11101100000000000000000000000000
 
 #define NUM_OF_STANDARD_REGISTERS 16
-#define NUM_OF_FIQ_REGISTERS 8
-#define NUM_OF_SVC_REGISTERS 3
-#define NUM_OF_ABT_REGISTERS 3
-#define NUM_OF_IRQ_REGISTERS 3
-#define NUM_OF_UND_REGISTERS 3
+#define NUM_OF_FIQ_REGISTERS 7
+#define NUM_OF_SVC_REGISTERS 2
+#define NUM_OF_ABT_REGISTERS 2
+#define NUM_OF_IRQ_REGISTERS 2
+#define NUM_OF_UND_REGISTERS 2
 
 #define INSTUCTION_PIPELINE_LENGTH 3
 
@@ -31,8 +31,16 @@ class Interconnect;
 #define V_FLAG 28
 // Cumulative saturation Flag
 #define Q_FLAG 27
+// Disable IRQ interrupts
+#define I_BIT 7
+// Disable FIQ interrupts
+#define F_BIT 6
 // Thumb execution state bit
 #define T_BIT 5
+// Mode upper bound
+#define MODE_UPPER_BIT 4
+// Mode lower bound
+#define MODE_LOWER_BIT 0
 
 #define SP_REGISTER_NUM 13
 #define LR_REGISTER_NUM 14
@@ -60,6 +68,18 @@ enum ConditionMnemonics : uint8_t {
     SPECIAL = 0b1111
 };
 }
+// https://developer.arm.com/documentation/ddi0406/c/System-Level-Architecture/The-System-Level-Programmers--Model/ARM-processor-modes-and-ARM-core-registers/Program-Status-Registers--PSRs-?lang=en#CIHBFGJG
+namespace ProcessorModes {
+enum ProcessorModes : uint8_t {
+    User = 0b10000,
+    FIQ = 0b10001,
+    IRQ = 0b10010,
+    Supervisor = 0b10011,
+    Abort = 0b10111,
+    Undefined = 0b11011,
+    System = 0b11111,
+};
+}
 
 extern std::vector<std::string> g_regNames;
 
@@ -75,17 +95,23 @@ protected:
     uint32_t reg[NUM_OF_STANDARD_REGISTERS];
     uint32_t cpsr;
     // Banked registers.
+    uint32_t spsrFIQ;
     uint32_t regFIQ[NUM_OF_FIQ_REGISTERS];
+    uint32_t spsrSVC;
     uint32_t regSVC[NUM_OF_SVC_REGISTERS];
+    uint32_t spsrABT;
     uint32_t regABT[NUM_OF_ABT_REGISTERS];
+    uint32_t spsrIRQ;
     uint32_t regIRQ[NUM_OF_IRQ_REGISTERS];
+    uint32_t spsrUND;
     uint32_t regUND[NUM_OF_UND_REGISTERS];
 
-    // TODO!!! Handle swaping regs.
+    // Active registers.
     uint32_t* activeRegs[NUM_OF_STANDARD_REGISTERS] = {
         &(reg[0]),  &(reg[1]),  &(reg[2]),  &(reg[3]), &(reg[4]),  &(reg[5]),
         &(reg[6]),  &(reg[7]),  &(reg[8]),  &(reg[9]), &(reg[10]), &(reg[11]),
         &(reg[12]), &(reg[13]), &(reg[14]), &(reg[15])};
+    uint32_t* spsr = nullptr;
 
     // Program counter maps to the 15th standard register in all modes.
     inline uint32_t& pc() { return *activeRegs[PC_REGISTER_NUM]; }
@@ -195,35 +221,94 @@ public:
     cycles fetchAndExecute(int numExecutions = 1);
 
     /**
+     * @brief Clear the instruction pipeline.
+     */
+    void clearInstructionPipeline();
+
+    /**
      * @brief Debug function to force PC to a value.
      * @param value
      */
-    void setPC(uint32_t value) { pc() = value; }
+    void setPC(uint32_t value) {
+        pc() = value;
+        clearInstructionPipeline();
+    }
 
     /**
-     * @brief Debug function to read a register value.
+     * @brief Read a register value.
      * @param regNum (0-15)
      */
     uint32_t readReg(uint32_t regNum) const { return *activeRegs[regNum]; }
 
     /**
-     * @brief Debug function to read a cpu flag value.
-     * @param flagBit
-     */
-    bool readFlag(uint32_t flagBit) const { return readBit(cpsr, flagBit); }
-
-    /**
-     * @brief Debug function to write to a register.
+     * @brief Write to a register.
      * @param regNum (0-15)
      * @param data Data to write
      */
     void writeReg(uint32_t regNum, uint32_t data) { *activeRegs[regNum] = data; }
 
     /**
-     * @brief Debug function to write to a cpu flag value.
+     * @brief Read a cpu flag value.
+     * @param flagBit
+     */
+    bool readFlag(uint32_t flagBit) const { return readBit(cpsr, flagBit); }
+
+    /**
+     * @brief Write to a cpu flag value.
      * @param flagBit
      */
     void setFlag(uint32_t flagBit, bool data) { writeBit(cpsr, data, flagBit); }
+
+    /**
+     * @brief Get the current processor mode.
+     *
+     * @return `ProcessorModes::ProcessorModes`
+     */
+    ProcessorModes::ProcessorModes getProcessorMode() {
+        return ProcessorModes::ProcessorModes(cpsr & 0x1F);
+    }
+    /**
+     * @brief Set the current processor mode.
+     *
+     * @param mode Mode to switch too.
+     */
+    void setProcessorMode(ProcessorModes::ProcessorModes mode);
+
+    /**
+     * @brief Write to the SPSR. Will do nothing if SPSR is not
+     * supported in the current mode.
+     *
+     * @param data The data to write.
+     */
+    void setSPSR(uint32_t data) {
+        if (spsr == nullptr) return;
+        *spsr = data;
+    }
+
+    /**
+     * @brief Read from the SPSR. Will always return 0 if SPSR is
+     *  not supported in the current mode.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readSPSR() {
+        if (spsr == nullptr) return 0;
+        return *spsr;
+    }
+
+    /**
+     * @brief Write to the CPSR.
+     *
+     * @param data The data to write.
+     */
+    void setCPSR(uint32_t data);
+
+    /**
+     * @brief Read from the CPSR
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readCPSR() { return cpsr; }
 
     /**
      * @brief Read the bus.
@@ -273,6 +358,11 @@ public:
     bool checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics condition);
 
     /**
+     * @brief Update the CPU after a processor mode change has occurred.
+     */
+    void handleProcessorModeChange();
+
+    /**
      * @brief Updates PC + performs any processing after PC has been updated.
      *
      * @param dest The new address to branch to.
@@ -285,6 +375,7 @@ public:
      * @param destReg The register being updated. No op if dest register is not the PC.
      */
     void fixupIfTargetingPC(uint32_t destReg);
+
     /**
      * @brief Check if the passed operand saturates the given bitwidth. If saturated, returns the
      * saturated value and sets the Q flag. If the value does not saturate, the operand will return
@@ -403,6 +494,7 @@ public:
     cycles ARM_MRS(uint32_t instruct);
     cycles ARM_MSR_REG(uint32_t instruct);
     cycles ARM_MSR_IMM(uint32_t instruct);
+    cycles ARM_MSR(bool readSPSR, uint32_t value, uint32_t maskBits);
     cycles ARM_CLZ(uint32_t instruct);
     cycles ARM_QADD(uint32_t instruct);
     cycles ARM_QSUB(uint32_t instruct);

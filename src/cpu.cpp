@@ -40,6 +40,7 @@ void ARM::reset() {
     cpsr = 0;
 
     // Fast interrupt Registers.
+    spsrFIQ = 0;
     regFIQ[0] = 0;
     regFIQ[1] = 0;
     regFIQ[2] = 0;
@@ -47,27 +48,26 @@ void ARM::reset() {
     regFIQ[4] = 0;
     regFIQ[5] = 0;
     regFIQ[6] = 0;
-    regFIQ[7] = 0;
 
     // Supervisor Registers.
+    spsrSVC = 0;
     regSVC[0] = 0;
     regSVC[1] = 0;
-    regSVC[2] = 0;
 
     // Abort Registers.
+    spsrABT = 0;
     regABT[0] = 0;
     regABT[1] = 0;
-    regABT[2] = 0;
 
     // Interrupt Registers.
+    spsrIRQ = 0;
     regIRQ[0] = 0;
     regIRQ[1] = 0;
-    regIRQ[2] = 0;
 
     // Undefined Registers.
+    spsrUND = 0;
     regUND[0] = 0;
     regUND[1] = 0;
-    regUND[2] = 0;
 
     // Control vars.
     currentCycle = 0;
@@ -75,12 +75,12 @@ void ARM::reset() {
     targetCycle = 0;
 
     // CPU instruction Pipeline.
-    instuctionPipeLine[0] = NO_INSTRUCT;
-    instuctionPipeLine[1] = NO_INSTRUCT;
-    instuctionPipeLine[2] = NO_INSTRUCT;
+    clearInstructionPipeline();
 
     previousCodeAddr = 0;
     previousDataAddr = 0;
+
+    setProcessorMode(ProcessorModes::User);
 }
 // ==================================================================================================
 cycles ARM::execute() {
@@ -299,6 +299,91 @@ cycles ARM::THUMB_UNDEFINED_INST(uint32_t instruct) {
     return 1;
 }
 // ==================================================================================================
+void ARM::setProcessorMode(ProcessorModes::ProcessorModes mode) {
+    uint8_t currentMode = readBits(cpsr, MODE_LOWER_BIT, MODE_UPPER_BIT);
+    if (currentMode == mode) return;
+    writeBits(cpsr, (uint32_t)mode, MODE_LOWER_BIT, MODE_UPPER_BIT);
+    handleProcessorModeChange();
+}
+// ==================================================================================================
+void ARM::handleProcessorModeChange() {
+    uint8_t currentMode = readBits(cpsr, MODE_LOWER_BIT, MODE_UPPER_BIT);
+    // 0 - 8 are always left unchanged. Same With PC (15).
+    switch (currentMode) {
+        // System and user use the same registers.
+        case ProcessorModes::System:
+        case ProcessorModes::User: {
+            spsr = nullptr;
+            activeRegs[8] = &reg[8];
+            activeRegs[9] = &reg[9];
+            activeRegs[10] = &reg[10];
+            activeRegs[11] = &reg[11];
+            activeRegs[12] = &reg[12];
+            activeRegs[13] = &reg[13];
+            activeRegs[14] = &reg[14];
+            break;
+        }
+        case ProcessorModes::FIQ: {
+            spsr = &spsrFIQ;
+            activeRegs[8] = &regFIQ[0];
+            activeRegs[9] = &regFIQ[1];
+            activeRegs[10] = &regFIQ[2];
+            activeRegs[11] = &regFIQ[3];
+            activeRegs[12] = &regFIQ[4];
+            activeRegs[13] = &regFIQ[5];
+            activeRegs[14] = &regFIQ[6];
+            break;
+        }
+        case ProcessorModes::IRQ: {
+            spsr = &spsrIRQ;
+            activeRegs[8] = &reg[8];
+            activeRegs[9] = &reg[9];
+            activeRegs[10] = &reg[10];
+            activeRegs[11] = &reg[11];
+            activeRegs[12] = &reg[12];
+            activeRegs[13] = &regIRQ[0];
+            activeRegs[14] = &regIRQ[1];
+            break;
+        }
+        case ProcessorModes::Supervisor: {
+            spsr = &spsrSVC;
+            activeRegs[8] = &reg[8];
+            activeRegs[9] = &reg[9];
+            activeRegs[10] = &reg[10];
+            activeRegs[11] = &reg[11];
+            activeRegs[12] = &reg[12];
+            activeRegs[13] = &regSVC[0];
+            activeRegs[14] = &regSVC[0];
+            break;
+        }
+        case ProcessorModes::Abort: {
+            spsr = &spsrABT;
+            activeRegs[8] = &reg[8];
+            activeRegs[9] = &reg[9];
+            activeRegs[10] = &reg[10];
+            activeRegs[11] = &reg[11];
+            activeRegs[12] = &reg[12];
+            activeRegs[13] = &regABT[0];
+            activeRegs[14] = &regABT[1];
+            break;
+        }
+        case ProcessorModes::Undefined: {
+            spsr = &spsrUND;
+            activeRegs[8] = &reg[8];
+            activeRegs[9] = &reg[9];
+            activeRegs[10] = &reg[10];
+            activeRegs[11] = &reg[11];
+            activeRegs[12] = &reg[12];
+            activeRegs[13] = &regUND[0];
+            activeRegs[14] = &regUND[1];
+            break;
+        }
+        default: {
+            LogError("Unsupported Processor Mode: " << PrintHex(currentMode) << "!");
+        }
+    }
+}
+// ==================================================================================================
 void ARM::branch(uint32_t dest) {
     // Determine if we are going to thumb mode.
     bool thumb = readBit(dest, 0);
@@ -309,10 +394,24 @@ void ARM::branch(uint32_t dest) {
     LogDebug("Moving PC to: " << PrintHex(dest & pcMask) << "!");
     LogDebug("Thumb mode after branch: " << thumb << "!");
     pc() = dest & pcMask;
+    clearInstructionPipeline();
+}
+// ==================================================================================================
+void ARM::clearInstructionPipeline() {
     // Clear the instuction pipeline.
     instuctionPipeLine[0] = NO_INSTRUCT;
     instuctionPipeLine[1] = NO_INSTRUCT;
     instuctionPipeLine[2] = NO_INSTRUCT;
+}
+// ==================================================================================================
+void ARM::setCPSR(uint32_t data) {
+    bool modeSwitch = readBits(data, MODE_LOWER_BIT, MODE_UPPER_BIT) != getProcessorMode();
+    bool thumbChange = readBit(data, T_BIT) != readBit(cpsr, T_BIT);
+    cpsr = data & 0xF80000FF;  // Protect reserved bits.
+    if (modeSwitch) handleProcessorModeChange();
+    if (thumbChange) {
+        clearInstructionPipeline();
+    }
 }
 // ==================================================================================================
 void ARM::fixupIfTargetingPC(uint32_t destReg) {

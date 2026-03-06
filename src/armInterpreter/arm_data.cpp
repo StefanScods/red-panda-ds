@@ -1716,24 +1716,84 @@ cycles ARM::ARM_SWPB(uint32_t instruct) {
 }
 // ==================================================================================================
 // MRS
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/MRS?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/MRS?lang=en
 // ==================================================================================================
 cycles ARM::ARM_MRS(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool R = readBit(instruct, 22);
+    uint32_t Rd = readBits(instruct, 12, 15);
+    uint32_t dataRead = 0;
+    if (R) {
+        if (spsr == nullptr) {
+            LogError("Cannot read from SPSR in current processor Mode!");
+            return 1;
+        }
+        dataRead = *spsr;
+    } else {
+        dataRead = cpsr;
+    }
+    *activeRegs[Rd] = dataRead;
+    fixupIfTargetingPC(Rd);
+    return 1;
 }
 // ==================================================================================================
 // MSR
 // ==================================================================================================
 cycles ARM::ARM_MSR_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool R = readBit(instruct, 22);
+    uint32_t Rn = readBits(instruct, 0, 3);
+    uint32_t maskBits = readBits(instruct, 16, 19);
+    return ARM_MSR(R, *activeRegs[Rn], maskBits);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/MSR--immediate-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/MSR--immediate-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/MSR--immediate-?lang=en
 cycles ARM::ARM_MSR_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool R = readBit(instruct, 22);
+    uint32_t imm12 = readBits(instruct, 0, 11);
+    u32AndBool immDecoded = ARMExpandImm_C(imm12, 0);
+    uint32_t maskBits = readBits(instruct, 16, 19);
+    return ARM_MSR(R, immDecoded.data_u32, maskBits);
+}
+// ==================================================================================================
+cycles ARM::ARM_MSR(bool readSPSR, uint32_t value, uint32_t maskBits) {
+    uint32_t mask = 0;
+    if (readBit(maskBits, 0)) mask |= 0x000000FF;
+    if (readBit(maskBits, 1)) mask |= 0x0000FF00;
+    if (readBit(maskBits, 2)) mask |= 0x00FF0000;
+    if (readBit(maskBits, 3)) mask |= 0xFF000000;
+    // Handle processor modes.
+    if (getProcessorMode() == ProcessorModes::User) {
+        mask &= 0xFF000000;  // Only support writing to the flags in user mode.
+    }
+    if (readSPSR) {
+        if (spsr == nullptr) {
+            LogError("Cannot write to SPSR in current processor Mode!");
+            return 1;
+        }
+        *spsr = value & mask;
+    } else {
+        setCPSR(value & mask);
+    }
+    return 1;
 }
 // ==================================================================================================
 // CLZ
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/CLZ?lang=en
 // ==================================================================================================
 cycles ARM::ARM_CLZ(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    uint8_t Rd = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    uint32_t data = *activeRegs[Rm];
+    uint32_t count = 0;
+    // Count leading zeros.
+    while ((!readBit(data, 31)) && count < 32) {
+        count++;
+        data <<= 1;
+    }
+    *activeRegs[Rd] = (count);
+    fixupIfTargetingPC(Rd);
+    return 1;
 }
 // ==================================================================================================

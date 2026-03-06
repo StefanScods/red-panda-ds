@@ -1078,9 +1078,9 @@ cycles ARM::ARM_dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) 
         // LDRSH (Immediate)
         case 0b0101011111:
             return ARM_LDRSH_IMM(instruct);
-        // MRS
+        // MSR (Register)
         case 0b0101100000:
-            return ARM_MRS(instruct);
+            return ARM_MSR_REG(instruct);
         // CLZ
         case 0b0101100001:
             return ARM_CLZ(instruct);
@@ -1847,7 +1847,7 @@ cycles ARM::ARM_dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) 
         case 0b1100001101:
         case 0b1100001110:
         case 0b1100001111:
-            ARM_UNDEFINED_INST(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // TES (Immediate)
         case 0b1100010000:
         case 0b1100010001:
@@ -1883,7 +1883,7 @@ cycles ARM::ARM_dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) 
         case 0b1100101101:
         case 0b1100101110:
         case 0b1100101111:
-            ARM_MSR_IMM(instruct);
+            return ARM_MSR_IMM(instruct);
         // TEQ (Immediate)
         case 0b1100110000:
         case 0b1100110001:
@@ -1919,7 +1919,7 @@ cycles ARM::ARM_dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) 
         case 0b1101001101:
         case 0b1101001110:
         case 0b1101001111:
-            ARM_UNDEFINED_INST(instruct);
+            return ARM_UNDEFINED_INST(instruct);
         // CMP (Immediate)
         case 0b1101010000:
         case 0b1101010001:
@@ -1955,7 +1955,7 @@ cycles ARM::ARM_dataProcessingDecodeAndExecute(uint32_t instruct, uint8_t cond) 
         case 0b1101101101:
         case 0b1101101110:
         case 0b1101101111:
-            ARM_MSR_IMM(instruct);
+            return ARM_MSR_IMM(instruct);
         // CMN (Immediate)
         case 0b1101110000:
         case 0b1101110001:

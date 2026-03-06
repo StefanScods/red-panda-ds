@@ -3080,3 +3080,192 @@ TEST_F(TestCPU_ARM_DataInstructions_QDSUB, QDSUB_Q_FLAG_STICKY) {
     arm9.fetchAndExecute(1);  // no saturation, Q still set
     EXPECT_EQ(arm9.readFlag(Q_FLAG), 1);
 }
+// ==================================================================================================
+// MRS
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_MRS : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_MRS() {}
+    ~TestCPU_ARM_DataInstructions_MRS() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+// ==================================================================================================
+/**
+ * @brief Tests MRS reading CPSR's flag bits.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MRS, MRS_CPSR_FLAG_BITS) {
+    uint32_t cpsr = 0xF8000000;
+    arm9.setCPSR(cpsr);
+
+    writeProgramToMemory("MRS R0, CPSR", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(0), cpsr);
+}
+// ==================================================================================================
+/**
+ * @brief Tests MRS reading CPSR's mode bits.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MRS, MRS_CPSR_MODE_BITS) {
+    uint32_t cpsr = 0x00000013;  // Supervisor mode
+    arm9.setCPSR(cpsr);
+
+    writeProgramToMemory("MRS R0, CPSR", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(0), cpsr);
+}
+// ==================================================================================================
+/**
+ * @brief Tests MRS reading SPSR.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MRS, MRS_SPSR) {
+    uint32_t spsr = 0xF80000FF;
+    arm9.setProcessorMode(ProcessorModes::IRQ);
+    arm9.setSPSR(spsr);
+
+    writeProgramToMemory("MRS R1, SPSR", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(1), spsr);
+}
+// ==================================================================================================
+// MSR
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_MSR : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_MSR() {}
+    ~TestCPU_ARM_DataInstructions_MSR() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests MSR writing CPSR's flag bits.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_CPSR_FLAG_BITS) {
+    arm9.setProcessorMode(ProcessorModes::Supervisor);
+    uint32_t flagBits = 0xF8000000;
+    arm9.writeReg(0, 0xFFFFFFFF);
+    writeProgramToMemory("MSR CPSR_f, R0", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readCPSR() & flagBits, flagBits);
+}
+/**
+ * @brief Tests MSR writing CPSR's mode bits.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_CPSR_MODE_BITS) {
+    arm9.setProcessorMode(ProcessorModes::IRQ);
+    arm9.writeReg(0, ProcessorModes::Supervisor);
+    writeProgramToMemory("MSR CPSR_c, R0", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.getProcessorMode(), ProcessorModes::Supervisor);
+}
+/**
+ * @brief Tests MSR writing all of CPSR's bits.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_CPSR_FULL_BITS) {
+    arm9.setProcessorMode(ProcessorModes::IRQ);
+    uint32_t test = 0xF8000000 | ProcessorModes::Supervisor;
+    arm9.writeReg(0, test);
+    writeProgramToMemory("MSR CPSR_fsxc, R0", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readCPSR(), test);
+}
+/**
+ * @brief Tests MSR writing CPSR's flag bits via an immediate.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_CPSR_FLAG_BITS_IMM) {
+    arm9.setProcessorMode(ProcessorModes::IRQ);
+    writeProgramToMemory("MSR CPSR_fsxc, #0xFF000000", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readCPSR(), 0xF8000000);
+}
+/**
+ * @brief Tests MSR only writes to the flag bits in user mode..
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_USER_MODE_PROTECTION) {
+    arm9.setProcessorMode(ProcessorModes::User);
+    uint32_t test = 0xF8000000 | ProcessorModes::Supervisor;
+    arm9.writeReg(0, test);
+    writeProgramToMemory("MSR CPSR_fsxc, R0", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readCPSR(), 0xF8000000);
+}
+/**
+ * @brief Tests MSR writing all of SPSR's bits.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_SPSR) {
+    arm9.setProcessorMode(ProcessorModes::IRQ);
+    arm9.writeReg(1, 0xAAAAAAAA);
+    writeProgramToMemory("MSR SPSR_fsxc, R1", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readSPSR(), 0xAAAAAAAA);
+}
+/**
+ * @brief Tests MSR writing all of SPSR's bits using an immediate.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_MSR, MSR_SPSR_IMM) {
+    arm9.setProcessorMode(ProcessorModes::IRQ);
+    writeProgramToMemory("MSR SPSR_fsxc, #0xFF000000", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readSPSR(), 0xFF000000);
+}
+// ==================================================================================================
+// CLZ
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_CLZ : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_CLZ() {}
+    ~TestCPU_ARM_DataInstructions_CLZ() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests CLZ on data with 32 leading zeros.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_CLZ, CLZ_ALL_ZEROS) {
+    arm9.writeReg(1, 0x00000000);
+    writeProgramToMemory("CLZ R0, R1", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(0), 32);
+}
+/**
+ * @brief Tests CLZ on data with no leading zeros.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_CLZ, CLZ_ALL_ONES) {
+    arm9.writeReg(1, 0xFFFFFFFF);
+    writeProgramToMemory("CLZ R0, R1", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(0), 0);
+}
+/**
+ * @brief Tests CLZ on data with 8 leading zeros.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_CLZ, CLZ_8_LEADING) {
+    arm9.writeReg(1, 0x00FFFFFF);
+    writeProgramToMemory("CLZ R0, R1", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(0), 8);
+
+    arm9.writeReg(1, 0x00800000);
+    writeProgramToMemory("CLZ R0, R1", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+    arm9.fetchAndExecute(1);
+    EXPECT_EQ(arm9.readReg(0), 8);
+}
