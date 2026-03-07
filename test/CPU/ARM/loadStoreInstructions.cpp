@@ -541,6 +541,93 @@ TEST_F(TestCPU_ARM_LoadAndStoreInstructions_STM, STMIA_MULTI_NO_WRITE_BACK) {
     // Assert base register updated
     ASSERT_EQ(arm7.readReg(8), base);
 }
+/**
+ * @brief Tests STMDB User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_STM, STMDB_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x200;
+    std::vector<uint32_t> values = {0x11111111, 0x22222222, 0x33333333, 0x44444444};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    for (size_t i = 8; i < 8 + values.size(); i++) arm7.writeReg(i, values[i - 8]);
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Execute the test code.
+    writeProgramToMemory("STMDB R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert memory contents in descending order
+    for (size_t i = 0; i < values.size(); i++)
+        ASSERT_EQ(bus.read32ARM7(base - (i + 1) * 4), values[values.size() - i - 1]);
+}
+/**
+ * @brief Tests STMDA User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_STM, STMDA_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x300;
+    std::vector<uint32_t> values = {0x55555555, 0x66666666, 0x77777777, 0x88888888};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    for (size_t i = 8; i < 8 + values.size(); i++) arm7.writeReg(i, values[i - 8]);
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Execute the test code.
+    writeProgramToMemory("STMDA R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert memory contents in descending order
+    for (size_t i = 0; i < values.size(); i++)
+        ASSERT_EQ(bus.read32ARM7(base - (i * 4)), values[values.size() - i - 1]);
+}
+/**
+ * @brief Tests STMIB User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_STM, STMIB_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+    std::vector<uint32_t> values = {0x99999999, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    for (size_t i = 8; i < 8 + values.size(); i++) arm7.writeReg(i, values[i - 8]);
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Execute the test code.
+    writeProgramToMemory("STMIB R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert memory contents in ascending order
+    for (size_t i = 0; i < values.size(); i++)
+        ASSERT_EQ(bus.read32ARM7(base + (i + 1) * 4), values[i]);
+}
+/**
+ * @brief Tests STMIA User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_STM, STMIA_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+    std::vector<uint32_t> values = {0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF, 0x00000000};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    for (size_t i = 8; i < 8 + values.size(); i++) arm7.writeReg(i, values[i - 8]);
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Execute the test code.
+    writeProgramToMemory("STMIA R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert memory contents in ascending order
+    for (size_t i = 0; i < values.size(); i++) ASSERT_EQ(bus.read32ARM7(base + i * 4), values[i]);
+}
 // ==================================================================================================
 // LDM
 // ==================================================================================================
@@ -755,4 +842,102 @@ TEST_F(TestCPU_ARM_LoadAndStoreInstructions_LDM, LDMIA_MULTI_NO_WRITE_BACK) {
 
     // Assert base register updated
     ASSERT_EQ(arm7.readReg(8), base);
+}
+/**
+ * @brief Tests LDMDB User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_LDM, LDMDB_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x600;
+    std::vector<uint32_t> values = {0xAAAA0001, 0xBBBB0002, 0xCCCC0003, 0xDDDD0004};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Write values to memory in descending order
+    for (size_t i = 0; i < values.size(); i++) bus.write32ARM7(base - (i + 1) * 4, values[i]);
+
+    // Execute the test code.
+    writeProgramToMemory("LDMDB R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert registers loaded correctly
+    arm7.setProcessorMode(ProcessorModes::User);
+    for (size_t i = 8; i < 8 + values.size(); i++)
+        ASSERT_EQ(arm7.readReg(i), values[values.size() - i + 7]);
+}
+/**
+ * @brief Tests LDMDA User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_LDM, LDMDA_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x700;
+    std::vector<uint32_t> values = {0x11110001, 0x22220002, 0x33330003, 0x44440004};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Write values to memory in descending order
+    for (size_t i = 0; i < values.size(); i++) bus.write32ARM7(base - (i * 4), values[i]);
+
+    // Execute the test code.
+    writeProgramToMemory("LDMDA R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert registers loaded correctly
+    arm7.setProcessorMode(ProcessorModes::User);
+    for (size_t i = 8; i < 8 + values.size(); i++)
+        ASSERT_EQ(arm7.readReg(i), values[values.size() - i + 7]);
+}
+/**
+ * @brief Tests LDMIB User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_LDM, LDMIB_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x800;
+    std::vector<uint32_t> values = {0x99990001, 0xAAAA0002, 0xBBBB0003, 0xCCCC0004};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Write values to memory in ascending order
+    for (size_t i = 0; i < values.size(); i++) bus.write32ARM7(base + ((i + 1) * 4), values[i]);
+
+    // Execute the test code.
+    writeProgramToMemory("LDMIB R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert registers loaded correctly
+    arm7.setProcessorMode(ProcessorModes::User);
+    for (size_t i = 8; i < 8 + values.size(); i++) ASSERT_EQ(arm7.readReg(i), values[i - 8]);
+}
+/**
+ * @brief Tests LDMIA User on multiple registers.
+ */
+TEST_F(TestCPU_ARM_LoadAndStoreInstructions_LDM, LDMIA_USER_MULTI) {
+    uint32_t base = MAIN_RAM_START + 0x900;
+    std::vector<uint32_t> values = {0xDDDD0001, 0xEEEE0002, 0xFFFF0003, 0x00010004};
+
+    // Set a default value to the regs.
+    arm7.reset();
+    arm7.setProcessorMode(ProcessorModes::IRQ);
+    arm7.writeReg(0, base);  // R0 as base
+    arm7.setPC(MAIN_RAM_START);
+
+    // Write values to memory in ascending order
+    for (size_t i = 0; i < values.size(); i++) bus.write32ARM7(base + i * 4, values[i]);
+
+    // Execute the test code.
+    writeProgramToMemory("LDMIA R0, {R8-R11}^\n", MAIN_RAM_START, &bus, arm7.isARM7());
+    arm7.fetchAndExecute();
+
+    // Assert registers loaded correctly
+    arm7.setProcessorMode(ProcessorModes::User);
+    for (size_t i = 8; i < 8 + values.size(); i++) ASSERT_EQ(arm7.readReg(i), values[i - 8]);
 }

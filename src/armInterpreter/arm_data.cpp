@@ -1429,6 +1429,10 @@ cycles ARM::ARM_SMLAWB(uint32_t instruct) {
     int64_t result = operand1 * operand2 + addend;
     *activeRegs[Rd] = (result >> 16);
     fixupIfTargetingPC(Rd);
+    // Set Q Flag.
+    if ((result >> 16) != ((int32_t)*activeRegs[Rd])) {
+        setFlag(Q_FLAG, 1);
+    }
     return 1;
 }
 cycles ARM::ARM_SMLAWT(uint32_t instruct) {
@@ -1447,13 +1451,21 @@ cycles ARM::ARM_SMLAWT(uint32_t instruct) {
     int64_t result = operand1 * operand2 + addend;
     *activeRegs[Rd] = (result >> 16);
     fixupIfTargetingPC(Rd);
+    // Set Q Flag.
+    if ((result >> 16) != ((int32_t)*activeRegs[Rd])) {
+        setFlag(Q_FLAG, 1);
+    }
     return 1;
 }
 cycles ARM::ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend) {
     // Note: Only supported by the DS's arm9 core.
-    int32_t result = opp1 * opp2 + addend;
+    int64_t result = (int64_t)opp1 * (int64_t)opp2 + (int64_t)addend;
     *activeRegs[desReg] = result;
     fixupIfTargetingPC(desReg);
+    // Set Q Flag.
+    if (result != ((int32_t)result)) {
+        setFlag(Q_FLAG, 1);
+    }
     return 1;
 }
 // ==================================================================================================
@@ -1520,6 +1532,7 @@ cycles ARM::ARM_SMULWB(uint32_t instruct) {
     int64_t result = operand1 * operand2;
     *activeRegs[Rd] = (result >> 16);
     fixupIfTargetingPC(Rd);
+    // Q Overflow cannot occur here.
     return 1;
 }
 cycles ARM::ARM_SMULWT(uint32_t instruct) {
@@ -1535,6 +1548,7 @@ cycles ARM::ARM_SMULWT(uint32_t instruct) {
     int64_t result = operand1 * operand2;
     *activeRegs[Rd] = (result >> 16);
     fixupIfTargetingPC(Rd);
+    // Q Overflow cannot occur here.
     return 1;
 }
 cycles ARM::ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2) {
@@ -1542,6 +1556,7 @@ cycles ARM::ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2) {
     int32_t result = opp1 * opp2;
     *activeRegs[desReg] = result;
     fixupIfTargetingPC(desReg);
+    // Q Overflow cannot occur here.
     return 1;
 }
 // ==================================================================================================
@@ -1615,6 +1630,7 @@ cycles ARM::ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int
     *activeRegs[desRegLow] = (int32_t)(result);
     fixupIfTargetingPC(desRegHigh);
     fixupIfTargetingPC(desRegLow);
+    // Q Overflow cannot occur here.
     return 1;
 }
 // ==================================================================================================

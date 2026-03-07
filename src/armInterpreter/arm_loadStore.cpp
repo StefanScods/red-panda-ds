@@ -10,7 +10,6 @@
 #include "logger.h"
 
 // TODO!!! Handle T instructions - privilege vs unprivilege access
-// TODO!!! Handle special reg case - maybe sp
 
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Load-store-word-and-unsigned-byte?lang=en
 
@@ -122,7 +121,7 @@ cycles ARM::ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pr
     return payload.numCycles;
 }
 // ==================================================================================================
-// hhttps://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRBT?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRBT?lang=en
 // ==================================================================================================
 cycles ARM::ARM_LDRBT(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool add) {
     LogDebug("Executing LDRBT");
@@ -212,8 +211,30 @@ cycles ARM::ARM_STMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
     return 1;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/STM--User-registers-?lang=en
 cycles ARM::ARM_STM_USER_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    uint32_t Rn = readBits(instruct, 16, 19);
+    bool wordHigher = readBit(instruct, 24);
+    bool increment = readBit(instruct, 23);
+    uint32_t numStores = 0;
+    cycles totalCycles = 0;
+    // Align the base address to 4.
+    uint32_t targetAddress = (*activeRegs[Rn] & ~(0b11));
+    // Acount for inc / dec before.
+    if (wordHigher) targetAddress = increment ? (targetAddress + 4) : (targetAddress - 4);
+    // Determine how to loop based increment.
+    for (int32_t i = increment ? 0 : PC_REGISTER_NUM; increment ? (i <= PC_REGISTER_NUM) : (i >= 0);
+         increment ? i += 1 : i -= 1) {
+        bool shouldStore = instruct & (0b1 << i);
+        if (!shouldStore) continue;
+        // Store to the target address.
+        LogDebug("Storing User R" << i << " to memory address " << PrintHex(targetAddress) << "");
+        busPayload payload = writeBus(targetAddress, reg[i], 32);
+        totalCycles += payload.numCycles;
+        targetAddress = increment ? (targetAddress + 4) : (targetAddress - 4);
+        numStores++;
+    }
+    return 1;
 }
 // ==================================================================================================
 // LDM
@@ -315,8 +336,45 @@ cycles ARM::ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
     return 1;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/LDM--User-registers-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/LDM--exception-return-?lang=en
 cycles ARM::ARM_LDM_USER_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    uint32_t Rn = readBits(instruct, 16, 19);
+    bool wordHigher = readBit(instruct, 24);
+    bool increment = readBit(instruct, 23);
+    bool writeback = readBit(instruct, 21) && readBit(instruct, 15);
+    uint32_t numLoads = 0;
+    cycles totalCycles = 0;
+    // Align the base address to 4.
+    uint32_t baseAddress = *activeRegs[Rn];
+    uint32_t targetAddress = (baseAddress & ~(0b11));
+    // Acount for inc / dec before.
+    if (wordHigher) targetAddress = increment ? (targetAddress + 4) : (targetAddress - 4);
+    // Determine how to loop based increment.
+    for (int32_t i = increment ? 0 : PC_REGISTER_NUM; increment ? (i <= PC_REGISTER_NUM) : (i >= 0);
+         increment ? i += 1 : i -= 1) {
+        bool shouldLoad = instruct & (0b1 << i);
+        if (!shouldLoad) continue;
+        // Load from the target address.
+        LogDebug("Loading User R" << i << " from memory address " << PrintHex(targetAddress) << "");
+        busPayload payload = readBus(targetAddress, 32);
+        reg[i] = payload.data;
+        totalCycles += payload.numCycles;
+        if (i == PC_REGISTER_NUM) {
+            // Branch and restore CPSR.
+            branch(payload.data);
+            assert(spsr != nullptr && "ARM_LDM_USER_REG() called in user mode!");
+            setCPSR(*spsr);
+        }
+        targetAddress = increment ? (targetAddress + 4) : (targetAddress - 4);
+        numLoads++;
+    }
+    if (writeback) {
+        *activeRegs[Rn] =
+            increment ? (baseAddress + (4 * numLoads)) : (baseAddress - (4 * numLoads));
+        fixupIfTargetingPC(Rn);
+    }
+    return 1;
 }
 // ==================================================================================================
 // STRH
