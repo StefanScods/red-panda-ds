@@ -169,7 +169,9 @@ cycles ARM::ARM_STMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
         *activeRegs[baseReg] = baseAddress + (4 * numStores);
         fixupIfTargetingPC(baseReg);
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 cycles ARM::ARM_STMDA(uint32_t instruct) {
@@ -208,7 +210,9 @@ cycles ARM::ARM_STMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
         *activeRegs[baseReg] = baseAddress - (4 * numStores);
         fixupIfTargetingPC(baseReg);
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 // https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/STM--User-registers-?lang=en
@@ -234,7 +238,9 @@ cycles ARM::ARM_STM_USER_REG(uint32_t instruct) {
         targetAddress = increment ? (targetAddress + 4) : (targetAddress - 4);
         numStores++;
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 // LDM
@@ -285,7 +291,9 @@ cycles ARM::ARM_LDMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
         *activeRegs[baseReg] = baseAddress + (4 * numLoads);
         fixupIfTargetingPC(baseReg);
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 cycles ARM::ARM_LDMDA(uint32_t instruct) {
@@ -333,7 +341,9 @@ cycles ARM::ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wba
         *activeRegs[baseReg] = baseAddress - (4 * numLoads);
         fixupIfTargetingPC(baseReg);
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 // https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/LDM--User-registers-?lang=en
@@ -374,7 +384,9 @@ cycles ARM::ARM_LDM_USER_REG(uint32_t instruct) {
             increment ? (baseAddress + (4 * numLoads)) : (baseAddress - (4 * numLoads));
         fixupIfTargetingPC(Rn);
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 // STRH
@@ -415,7 +427,9 @@ cycles ARM::ARM_STRH(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pr
         *activeRegs[baseReg] = offset_address;
         fixupIfTargetingPC(baseReg);
     }
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================
 // STRD
@@ -457,7 +471,10 @@ cycles ARM::ARM_STRD(uint32_t srcReg1, uint32_t srcReg2, uint32_t baseReg, uint3
         *activeRegs[baseReg] = offset_address;
         fixupIfTargetingPC(baseReg);
     }
-    return 1;
+    cycles totalCycles = payload1.numCycles + payload2.numCycles;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 // LDRH
@@ -501,7 +518,9 @@ cycles ARM::ARM_LDRH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pr
     }
     *activeRegs[desReg] = payload.data;
     fixupIfTargetingPC(desReg);
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================
 // LDRD
@@ -548,7 +567,10 @@ cycles ARM::ARM_LDRD(uint32_t desReg1, uint32_t desReg2, uint32_t baseReg, uint3
     fixupIfTargetingPC(desReg1);
     *activeRegs[desReg2] = payload2.data;
     fixupIfTargetingPC(desReg2);
-    return 1;
+    cycles totalCycles = payload1.numCycles + payload2.numCycles;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) totalCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return totalCycles;
 }
 // ==================================================================================================
 // LDRSB
@@ -593,7 +615,9 @@ cycles ARM::ARM_LDRSB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool p
     uint32_t data = payload.data | (readBit(payload.data, 7) ? 0xFFFFFF00 : 0x0);
     *activeRegs[desReg] = data;
     fixupIfTargetingPC(desReg);
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================
 // LDRSH
@@ -638,6 +662,8 @@ cycles ARM::ARM_LDRSH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool p
     uint32_t data = payload.data | (readBit(payload.data, 15) ? 0xFFFF0000 : 0x0);
     *activeRegs[desReg] = data;
     fixupIfTargetingPC(desReg);
-    return 1;
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================

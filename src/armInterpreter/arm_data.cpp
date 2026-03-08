@@ -71,7 +71,7 @@ cycles ARM::ARM_AND_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_AND(Rd, operand1, operand2, carry, S);
+    return ARM_AND(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_AND_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -147,7 +147,7 @@ cycles ARM::ARM_EOR_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_EOR(Rd, operand1, operand2, carry, S);
+    return ARM_EOR(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_EOR_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -224,7 +224,7 @@ cycles ARM::ARM_SUB_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_SUB(Rd, operand1, operand2, S);
+    return ARM_SUB(Rd, operand1, operand2, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_SUB_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -301,7 +301,7 @@ cycles ARM::ARM_RSB_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_RSB(Rd, operand1, operand2, S);
+    return ARM_RSB(Rd, operand1, operand2, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_RSB_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -378,7 +378,7 @@ cycles ARM::ARM_ADD_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ADD(Rd, operand1, operand2, S);
+    return ARM_ADD(Rd, operand1, operand2, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_ADD_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -455,7 +455,7 @@ cycles ARM::ARM_ADC_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ADC(Rd, operand1, operand2, carry, S);
+    return ARM_ADC(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_ADC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -532,7 +532,7 @@ cycles ARM::ARM_SBC_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_SBC(Rd, operand1, operand2, carry, S);
+    return ARM_SBC(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_SBC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -609,7 +609,7 @@ cycles ARM::ARM_RSC_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_RSC(Rd, operand1, operand2, carry, S);
+    return ARM_RSC(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_RSC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -673,7 +673,7 @@ cycles ARM::ARM_TST_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_TST(operand1, operand2, carry);
+    return ARM_TST(operand1, operand2, carry) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_TST_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -733,7 +733,7 @@ cycles ARM::ARM_TEQ_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_TEQ(operand1, operand2, carry);
+    return ARM_TEQ(operand1, operand2, carry) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_TEQ_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -794,7 +794,7 @@ cycles ARM::ARM_CMP_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_CMP(operand1, operand2);
+    return ARM_CMP(operand1, operand2) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_CMP_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -855,7 +855,7 @@ cycles ARM::ARM_CMN_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_CMN(operand1, operand2);
+    return ARM_CMN(operand1, operand2) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_CMN_IMM(uint32_t instruct) {
     // 1st Operand Register.
@@ -927,7 +927,7 @@ cycles ARM::ARM_ORR_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_ORR(Rd, operand1, operand2, carry, S);
+    return ARM_ORR(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_ORR_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -996,7 +996,7 @@ cycles ARM::ARM_MOV_REG_SHIFT(uint32_t instruct) {
     // Data processing arguments.
     uint32_t operand = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_MOV(Rd, operand, carry, S);
+    return ARM_MOV(Rd, operand, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_MOV_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1069,7 +1069,7 @@ cycles ARM::ARM_BIC_REG_SHIFT(uint32_t instruct) {
     uint32_t operand1 = *activeRegs[Rn];
     uint32_t operand2 = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_BIC(Rd, operand1, operand2, carry, S);
+    return ARM_BIC(Rd, operand1, operand2, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_BIC_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1139,7 +1139,7 @@ cycles ARM::ARM_MVN_REG_SHIFT(uint32_t instruct) {
     // Data processing arguments.;
     uint32_t operand = operandShifted.data_u32;
     bool carry = operandShifted.data_bool;
-    return ARM_MVN(Rd, operand, carry, S);
+    return ARM_MVN(Rd, operand, carry, S) + 1;  // Shifts have an additional 1I penalty.
 }
 cycles ARM::ARM_MVN_IMM(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1184,7 +1184,20 @@ cycles ARM::ARM_MUL(uint32_t instruct) {
     }
     *activeRegs[Rd] = result;
     fixupIfTargetingPC(Rd);
-    return 1;
+    cycles numCycles = 1;
+    // On ARM7, the number of cycles depends on operand2.
+    if (!arm9) {
+        if (operand2 & 0xFF000000) {
+            numCycles = 4;
+        } else if (operand2 & 0x00FF0000) {
+            numCycles = 3;
+        } else if (operand2 & 0x0000FF00) {
+            numCycles = 2;
+        } else {
+            numCycles = 1;
+        }
+    }
+    return numCycles;
 }
 cycles ARM::ARM_MLA(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1208,7 +1221,20 @@ cycles ARM::ARM_MLA(uint32_t instruct) {
     }
     *activeRegs[Rd] = result;
     fixupIfTargetingPC(Rd);
-    return 1;
+    cycles numCycles = 1;
+    // On ARM7, the number of cycles depends on operand2.
+    if (!arm9) {
+        if (operand2 & 0xFF000000) {
+            numCycles = 4;
+        } else if (operand2 & 0x00FF0000) {
+            numCycles = 3;
+        } else if (operand2 & 0x0000FF00) {
+            numCycles = 2;
+        } else {
+            numCycles = 1;
+        }
+    }
+    return numCycles + 1;  // One addition cycle to perform the addition.
 }
 cycles ARM::ARM_UMAAL(uint32_t instruct) {
     // Note: Not supported by the DS's arm7 or arm9 cores.
@@ -1222,14 +1248,27 @@ cycles ARM::ARM_UMAAL(uint32_t instruct) {
     uint64_t operand2 = *activeRegs[Rm];
     uint64_t addend1 = *activeRegs[RdHi];
     uint64_t addend2 = *activeRegs[RdLo];
-    uint64_t result = operand1 * operand2 + addend1 + addend2;
+    uint64_t result = operand1 * operand2 + (addend1 + addend2);
     // Save the result.
     LogDebug(result);
     *activeRegs[RdHi] = (uint32_t)(result >> 32);
     *activeRegs[RdLo] = (uint32_t)(result);
     fixupIfTargetingPC(RdHi);
     fixupIfTargetingPC(RdLo);
-    return 1;
+    cycles numCycles = 1;
+    // On ARM7, the number of cycles depends on operand2.
+    if (!arm9) {
+        if (operand2 & 0xFF000000) {
+            numCycles = 4;
+        } else if (operand2 & 0x00FF0000) {
+            numCycles = 3;
+        } else if (operand2 & 0x0000FF00) {
+            numCycles = 2;
+        } else {
+            numCycles = 1;
+        }
+    }
+    return numCycles + 2;  // Two addition cycles to perform the addition.
 }
 cycles ARM::ARM_MLS(uint32_t instruct) {
     // Note: Not supported by the DS's arm7 or arm9 cores.
@@ -1271,7 +1310,20 @@ cycles ARM::ARM_UMULL(uint32_t instruct) {
     *activeRegs[RdLo] = (uint32_t)(result);
     fixupIfTargetingPC(RdHi);
     fixupIfTargetingPC(RdLo);
-    return 1;
+    cycles numCycles = 1;
+    // On ARM7, the number of cycles depends on operand2.
+    if (!arm9) {
+        if (operand2 & 0xFF000000) {
+            numCycles = 4;
+        } else if (operand2 & 0x00FF0000) {
+            numCycles = 3;
+        } else if (operand2 & 0x0000FF00) {
+            numCycles = 2;
+        } else {
+            numCycles = 1;
+        }
+    }
+    return numCycles + 1;  // One addition cycle.
 }
 cycles ARM::ARM_UMLAL(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1297,7 +1349,20 @@ cycles ARM::ARM_UMLAL(uint32_t instruct) {
     *activeRegs[RdLo] = (uint32_t)(result);
     fixupIfTargetingPC(RdHi);
     fixupIfTargetingPC(RdLo);
-    return 1;
+    cycles numCycles = 1;
+    // On ARM7, the number of cycles depends on operand2.
+    if (!arm9) {
+        if (operand2 & 0xFF000000) {
+            numCycles = 4;
+        } else if (operand2 & 0x00FF0000) {
+            numCycles = 3;
+        } else if (operand2 & 0x0000FF00) {
+            numCycles = 2;
+        } else {
+            numCycles = 1;
+        }
+    }
+    return numCycles + 2;  // Two addition cycles.
 }
 cycles ARM::ARM_SMULL(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1321,7 +1386,18 @@ cycles ARM::ARM_SMULL(uint32_t instruct) {
     *activeRegs[RdLo] = (int32_t)(result);
     fixupIfTargetingPC(RdHi);
     fixupIfTargetingPC(RdLo);
-    return 1;
+    // Number of cycles depends on operand2.
+    cycles numCycles = 0;
+    if (operand2 & 0xFF000000) {
+        numCycles = 4;
+    } else if (operand2 & 0x00FF0000) {
+        numCycles = 3;
+    } else if (operand2 & 0x0000FF00) {
+        numCycles = 2;
+    } else {
+        numCycles = 1;
+    }
+    return numCycles + 1;  // One addition cycle.
 }
 cycles ARM::ARM_SMLAL(uint32_t instruct) {
     // S - Set Condition Codes
@@ -1348,7 +1424,18 @@ cycles ARM::ARM_SMLAL(uint32_t instruct) {
     *activeRegs[RdLo] = (int32_t)(result);
     fixupIfTargetingPC(RdHi);
     fixupIfTargetingPC(RdLo);
-    return 1;
+    // Number of cycles depends on operand2.
+    cycles numCycles = 0;
+    if (operand2 & 0xFF000000) {
+        numCycles = 4;
+    } else if (operand2 & 0x00FF0000) {
+        numCycles = 3;
+    } else if (operand2 & 0x0000FF00) {
+        numCycles = 2;
+    } else {
+        numCycles = 1;
+    }
+    return numCycles + 2;  // Two addition cycles.
 }
 // ==================================================================================================
 // Halfword multiply and multiply accumulate
@@ -1433,7 +1520,7 @@ cycles ARM::ARM_SMLAWB(uint32_t instruct) {
     if ((result >> 16) != ((int32_t)*activeRegs[Rd])) {
         setFlag(Q_FLAG, 1);
     }
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 cycles ARM::ARM_SMLAWT(uint32_t instruct) {
     // Note: Only supported by the DS's arm9 core.
@@ -1455,7 +1542,7 @@ cycles ARM::ARM_SMLAWT(uint32_t instruct) {
     if ((result >> 16) != ((int32_t)*activeRegs[Rd])) {
         setFlag(Q_FLAG, 1);
     }
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 cycles ARM::ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend) {
     // Note: Only supported by the DS's arm9 core.
@@ -1466,7 +1553,7 @@ cycles ARM::ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend
     if (result != ((int32_t)result)) {
         setFlag(Q_FLAG, 1);
     }
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // SMUL
@@ -1533,7 +1620,7 @@ cycles ARM::ARM_SMULWB(uint32_t instruct) {
     *activeRegs[Rd] = (result >> 16);
     fixupIfTargetingPC(Rd);
     // Q Overflow cannot occur here.
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 cycles ARM::ARM_SMULWT(uint32_t instruct) {
     // Note: Only supported by the DS's arm9 core.
@@ -1549,7 +1636,7 @@ cycles ARM::ARM_SMULWT(uint32_t instruct) {
     *activeRegs[Rd] = (result >> 16);
     fixupIfTargetingPC(Rd);
     // Q Overflow cannot occur here.
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 cycles ARM::ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2) {
     // Note: Only supported by the DS's arm9 core.
@@ -1557,7 +1644,7 @@ cycles ARM::ARM_SMUL(uint32_t desReg, int32_t opp1, int32_t opp2) {
     *activeRegs[desReg] = result;
     fixupIfTargetingPC(desReg);
     // Q Overflow cannot occur here.
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // SMLAL
@@ -1631,7 +1718,7 @@ cycles ARM::ARM_SMLAL(uint32_t desRegLow, uint32_t desRegHigh, int64_t opp1, int
     fixupIfTargetingPC(desRegHigh);
     fixupIfTargetingPC(desRegLow);
     // Q Overflow cannot occur here.
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // Saturating addition and subtraction
@@ -1651,7 +1738,7 @@ cycles ARM::ARM_QADD(uint32_t instruct) {
     int64_t operand2 = (int32_t)(*activeRegs[Rn]);
     *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 + operand2, 32);
     fixupIfTargetingPC(Rd);
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // QSUB
@@ -1667,7 +1754,7 @@ cycles ARM::ARM_QSUB(uint32_t instruct) {
     int64_t operand2 = (int32_t)(*activeRegs[Rn]);
     *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 - operand2, 32);
     fixupIfTargetingPC(Rd);
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // QDADD
@@ -1684,7 +1771,7 @@ cycles ARM::ARM_QDADD(uint32_t instruct) {
     int64_t doubled = signedSaturatedQ(2 * operand2, 32);
     *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 + doubled, 32);
     fixupIfTargetingPC(Rd);
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // QDSUB
@@ -1700,7 +1787,7 @@ cycles ARM::ARM_QDSUB(uint32_t instruct) {
     int64_t doubled = signedSaturatedQ(2 * operand2, 32);
     *activeRegs[Rd] = (int32_t)signedSaturatedQ(operand1 - doubled, 32);
     fixupIfTargetingPC(Rd);
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // Other.
@@ -1717,7 +1804,7 @@ cycles ARM::ARM_SWP(uint32_t instruct) {
     busPayload dataWrite = writeBus(*activeRegs[Rn], *activeRegs[Rt2]);
     *activeRegs[Rt] = dataRead.data;
     fixupIfTargetingPC(Rt);
-    return 1;
+    return dataRead.numCycles + dataWrite.numCycles;
 }
 // ==================================================================================================
 cycles ARM::ARM_SWPB(uint32_t instruct) {
@@ -1728,7 +1815,7 @@ cycles ARM::ARM_SWPB(uint32_t instruct) {
     busPayload dataWrite = writeBus(*activeRegs[Rn], (*activeRegs[Rt2] & 0xFF), 8);
     *activeRegs[Rt] = (dataRead.data & 0xFF);
     fixupIfTargetingPC(Rt);
-    return 1;
+    return dataRead.numCycles + dataWrite.numCycles;
 }
 // ==================================================================================================
 // MRS
@@ -1750,7 +1837,7 @@ cycles ARM::ARM_MRS(uint32_t instruct) {
     }
     *activeRegs[Rd] = dataRead;
     fixupIfTargetingPC(Rd);
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // MSR
@@ -1792,7 +1879,7 @@ cycles ARM::ARM_MSR(bool readSPSR, uint32_t value, uint32_t maskBits) {
     } else {
         setCPSR(value & mask);
     }
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
 // CLZ
@@ -1810,6 +1897,6 @@ cycles ARM::ARM_CLZ(uint32_t instruct) {
     }
     *activeRegs[Rd] = (count);
     fixupIfTargetingPC(Rd);
-    return 1;
+    return 1;  // Only one I Cycle.
 }
 // ==================================================================================================

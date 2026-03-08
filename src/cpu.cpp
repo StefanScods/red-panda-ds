@@ -402,6 +402,9 @@ void ARM::clearInstructionPipeline() {
     instuctionPipeLine[0] = NO_INSTRUCT;
     instuctionPipeLine[1] = NO_INSTRUCT;
     instuctionPipeLine[2] = NO_INSTRUCT;
+    // Reset the previous instruction to force a non-consecutive read.
+    uint32_t previousCodeAddr = 0;
+    uint32_t previousDataAddr = 0;
 }
 // ==================================================================================================
 void ARM::setCPSR(uint32_t data) {

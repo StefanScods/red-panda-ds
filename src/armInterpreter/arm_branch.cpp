@@ -20,7 +20,8 @@ cycles ARM::ARM_B(uint32_t instruct) {
     uint32_t imm24 = readBits(instruct, 0, 23);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
     branch(pc() + offset);
-    return 1;
+    return 1;  // An instruction prefetch occurs at the same time as the data operation. Branch will
+               // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
 // Branch Link and Exchange
@@ -34,7 +35,8 @@ cycles ARM::ARM_BL(uint32_t instruct) {
     uint32_t imm24 = readBits(instruct, 0, 23);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6;
     branch(pc() + offset);
-    return 1;
+    return 1;  // An instruction prefetch occurs at the same time as the data operation.Branch will
+               // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
 cycles ARM::ARM_BLX_IMM(uint32_t instruct) {
@@ -44,19 +46,22 @@ cycles ARM::ARM_BLX_IMM(uint32_t instruct) {
     bool H = readBit(instruct, 24);
     int32_t offset = ((int32_t)(imm24 << 8)) >> 6 | (H << 1);
     branch(pc() + offset + 1);  // Offset by + 1 to enter thumb mode.
-    return 1;
+    return 1;  // An instruction prefetch occurs at the same time as the data operation. Branch will
+               // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
 cycles ARM::ARM_BLX_REG(uint32_t instruct) {
     lr() = pc() - 4;  // Point to the previous instruction.
     uint8_t Rm = readBits(instruct, 0, 3);
     branch(*activeRegs[Rm]);
-    return 1;
+    return 1;  // An instruction prefetch occurs at the same time as the data operation. Branch will
+               // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
 cycles ARM::ARM_BX(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 0, 3);
     branch(*activeRegs[Rm]);
-    return 1;
+    return 1;  // An instruction prefetch occurs at the same time as the data operation. Branch will
+               // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
