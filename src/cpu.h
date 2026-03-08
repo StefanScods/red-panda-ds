@@ -515,16 +515,28 @@ public:
     cycles ARM_LDRBT(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool add);
     cycles ARM_STRH_REG(uint32_t instruct);
     cycles ARM_STRH_IMM(uint32_t instruct);
+    cycles ARM_STRH(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                    bool wback);
     cycles ARM_STRD_REG(uint32_t instruct);
     cycles ARM_STRD_IMM(uint32_t instruct);
+    cycles ARM_STRD(uint32_t srcReg1, uint32_t srcReg2, uint32_t baseReg, uint32_t offset, bool pre,
+                    bool add, bool wback);
     cycles ARM_LDRH_REG(uint32_t instruct);
     cycles ARM_LDRH_IMM(uint32_t instruct);
+    cycles ARM_LDRH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                    bool wback);
     cycles ARM_LDRD_REG(uint32_t instruct);
     cycles ARM_LDRD_IMM(uint32_t instruct);
+    cycles ARM_LDRD(uint32_t desReg1, uint32_t desReg2, uint32_t baseReg, uint32_t offset, bool pre,
+                    bool add, bool wback);
     cycles ARM_LDRSB_REG(uint32_t instruct);
     cycles ARM_LDRSB_IMM(uint32_t instruct);
+    cycles ARM_LDRSB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                     bool wback);
     cycles ARM_LDRSH_REG(uint32_t instruct);
     cycles ARM_LDRSH_IMM(uint32_t instruct);
+    cycles ARM_LDRSH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                     bool wback);
     cycles ARM_STMIA(uint32_t instruct);
     cycles ARM_STMIB(uint32_t instruct);
     cycles ARM_STMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback);

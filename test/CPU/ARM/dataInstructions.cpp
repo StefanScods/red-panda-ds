@@ -3269,3 +3269,733 @@ TEST_F(TestCPU_ARM_DataInstructions_CLZ, CLZ_8_LEADING) {
     arm9.fetchAndExecute(1);
     EXPECT_EQ(arm9.readReg(0), 8);
 }
+// ==================================================================================================
+// STRH
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_STRH : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_STRH() {}
+    ~TestCPU_ARM_DataInstructions_STRH() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests STRH with register offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRH, STRH_REG_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+    arm9.writeReg(0, 0x12345678);
+
+    writeProgramToMemory("STRH R0, [R1, R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read16ARM9(base + 4), 0x5678);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests STRH register offset with subtraction.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRH, STRH_REG_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+    arm9.writeReg(0, 0xABCD1234);
+
+    writeProgramToMemory("STRH R0, [R1, -R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read16ARM9(base - 4), 0x1234);
+}
+/**
+ * @brief Tests STRH register offset with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRH, STRH_REG_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x600;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 8);
+    arm9.writeReg(0, 0xCAFEBEEF);
+
+    writeProgramToMemory("STRH R0, [R1, R2]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read16ARM9(base + 8), 0xBEEF);
+    EXPECT_EQ(arm9.readReg(1), base + 8);
+}
+/**
+ * @brief Tests STRH with immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRH, STRH_IMM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x700;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(0, 0xDEADBEEF);
+
+    writeProgramToMemory("STRH R0, [R1, #6]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read16ARM9(base + 6), 0xBEEF);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests STRH immediate negative offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRH, STRH_IMM_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x800;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(0, 0xFACEB00C);
+
+    writeProgramToMemory("STRH R0, [R1, #-2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read16ARM9(base - 2), 0xB00C);
+}
+/**
+ * @brief Tests STRH immediate with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRH, STRH_IMM_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x900;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(0, 0x11223344);
+
+    writeProgramToMemory("STRH R0, [R1, #10]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read16ARM9(base + 10), 0x3344);
+    EXPECT_EQ(arm9.readReg(1), base + 10);
+}
+// ==================================================================================================
+// STRD
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_STRD : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_STRD() {}
+    ~TestCPU_ARM_DataInstructions_STRD() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests STRD with register offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRD, STRD_REG_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x1000;
+
+    arm9.writeReg(0, 0xAAAABBBB);
+    arm9.writeReg(1, 0xCCCCDDDD);
+    arm9.writeReg(2, base);
+    arm9.writeReg(3, 8);
+
+    writeProgramToMemory("STRD R0, R1, [R2, R3]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read32ARM9(base + 8), 0xAAAABBBB);
+    EXPECT_EQ(bus.read32ARM9(base + 12), 0xCCCCDDDD);
+}
+/**
+ * @brief Tests STRD with immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRD, STRD_IMM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x1100;
+
+    arm9.writeReg(4, base);
+
+    arm9.writeReg(0, 0x11112222);
+    arm9.writeReg(1, 0x33334444);
+
+    writeProgramToMemory("STRD R0, R1, [R4, #8]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read32ARM9(base + 8), 0x11112222);
+    EXPECT_EQ(bus.read32ARM9(base + 12), 0x33334444);
+
+    EXPECT_EQ(arm9.readReg(4), base);
+}
+/**
+ * @brief Tests STRD with negative immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRD, STRD_IMM_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x1200;
+
+    arm9.writeReg(4, base);
+
+    arm9.writeReg(0, 0xAAAABBBB);
+    arm9.writeReg(1, 0xCCCCDDDD);
+
+    writeProgramToMemory("STRD R0, R1, [R4, #-8]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read32ARM9(base - 8), 0xAAAABBBB);
+    EXPECT_EQ(bus.read32ARM9(base - 4), 0xCCCCDDDD);
+}
+/**
+ * @brief Tests STRD immediate offset with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_STRD, STRD_IMM_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x1300;
+
+    arm9.writeReg(5, base);
+
+    arm9.writeReg(0, 0xDEADBEEF);
+    arm9.writeReg(1, 0xCAFEBABE);
+
+    writeProgramToMemory("STRD R0, R1, [R5, #16]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(bus.read32ARM9(base + 16), 0xDEADBEEF);
+    EXPECT_EQ(bus.read32ARM9(base + 20), 0xCAFEBABE);
+
+    EXPECT_EQ(arm9.readReg(5), base + 16);
+}
+// ==================================================================================================
+// LDRH
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_LDRH : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_LDRH() {}
+    ~TestCPU_ARM_DataInstructions_LDRH() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests LDRH with register offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRH, LDRH_REG_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+
+    bus.write16ARM9(base + 4, 0x5678);
+
+    writeProgramToMemory("LDRH R0, [R1, R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00005678);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests LDRH register offset with subtraction.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRH, LDRH_REG_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+
+    bus.write16ARM9(base - 4, 0x1234);
+
+    writeProgramToMemory("LDRH R0, [R1, -R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00001234);
+}
+/**
+ * @brief Tests LDRH register offset with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRH, LDRH_REG_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x600;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 8);
+
+    bus.write16ARM9(base + 8, 0xBEEF);
+
+    writeProgramToMemory("LDRH R0, [R1, R2]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x0000BEEF);
+    EXPECT_EQ(arm9.readReg(1), base + 8);
+}
+/**
+ * @brief Tests LDRH with immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRH, LDRH_IMM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x700;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base + 6, 0xCAFE);
+
+    writeProgramToMemory("LDRH R0, [R1, #6]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x0000CAFE);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests LDRH immediate negative offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRH, LDRH_IMM_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x800;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base - 2, 0xB00C);
+
+    writeProgramToMemory("LDRH R0, [R1, #-2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x0000B00C);
+}
+/**
+ * @brief Tests LDRH immediate with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRH, LDRH_IMM_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x900;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base + 10, 0x3344);
+
+    writeProgramToMemory("LDRH R0, [R1, #10]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00003344);
+    EXPECT_EQ(arm9.readReg(1), base + 10);
+}
+// ==================================================================================================
+// LDRD
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_LDRD : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_LDRD() {}
+    ~TestCPU_ARM_DataInstructions_LDRD() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests LDRD with register offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRD, LDRD_REG_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 8);
+
+    bus.write32ARM9(base + 8, 0x11112222);
+    bus.write32ARM9(base + 12, 0x33334444);
+
+    writeProgramToMemory("LDRD R0, R1, [R1, R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x11112222);
+    EXPECT_EQ(arm9.readReg(1), 0x33334444);
+}
+/**
+ * @brief Tests LDRD register offset with subtraction.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRD, LDRD_REG_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 8);
+
+    bus.write32ARM9(base - 8, 0xAAAABBBB);
+    bus.write32ARM9(base - 4, 0xCCCCDDDD);
+
+    writeProgramToMemory("LDRD R0, R1, [R1, -R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0xAAAABBBB);
+    EXPECT_EQ(arm9.readReg(1), 0xCCCCDDDD);
+}
+/**
+ * @brief Tests LDRD register offset with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRD, LDRD_REG_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x600;
+
+    arm9.writeReg(2, base);
+    arm9.writeReg(3, 8);
+
+    bus.write32ARM9(base + 8, 0xCAFEBABE);
+    bus.write32ARM9(base + 12, 0xDEADBEEF);
+
+    writeProgramToMemory("LDRD R0, R1, [R2, R3]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0xCAFEBABE);
+    EXPECT_EQ(arm9.readReg(1), 0xDEADBEEF);
+    EXPECT_EQ(arm9.readReg(2), base + 8);
+}
+/**
+ * @brief Tests LDRD with immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRD, LDRD_IMM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x700;
+
+    arm9.writeReg(2, base);
+
+    bus.write32ARM9(base + 8, 0x11111111);
+    bus.write32ARM9(base + 12, 0x22222222);
+
+    writeProgramToMemory("LDRD R0, R1, [R2, #8]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x11111111);
+    EXPECT_EQ(arm9.readReg(1), 0x22222222);
+    EXPECT_EQ(arm9.readReg(2), base);
+}
+/**
+ * @brief Tests LDRD immediate negative offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRD, LDRD_IMM_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x800;
+
+    arm9.writeReg(2, base);
+
+    bus.write32ARM9(base - 8, 0xABABABAB);
+    bus.write32ARM9(base - 4, 0xCDCDCDCD);
+
+    writeProgramToMemory("LDRD R0, R1, [R2, #-8]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0xABABABAB);
+    EXPECT_EQ(arm9.readReg(1), 0xCDCDCDCD);
+}
+/**
+ * @brief Tests LDRD immediate with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRD, LDRD_IMM_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x900;
+
+    arm9.writeReg(2, base);
+
+    bus.write32ARM9(base + 16, 0x01020304);
+    bus.write32ARM9(base + 20, 0xAABBCCDD);
+
+    writeProgramToMemory("LDRD R0, R1, [R2, #16]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x01020304);
+    EXPECT_EQ(arm9.readReg(1), 0xAABBCCDD);
+    EXPECT_EQ(arm9.readReg(2), base + 16);
+}
+// ==================================================================================================
+// LDRSB
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_LDRSB : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_LDRSB() {}
+    ~TestCPU_ARM_DataInstructions_LDRSB() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests LDRSB with register offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_REG_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+
+    bus.write8ARM9(base + 4, 0x7F);
+
+    writeProgramToMemory("LDRSB R0, [R1, R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x0000007F);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests LDRSB register offset with subtraction.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_REG_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+
+    bus.write8ARM9(base - 4, 0x20);
+
+    writeProgramToMemory("LDRSB R0, [R1, -R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00000020);
+}
+/**
+ * @brief Tests LDRSB register offset with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_REG_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x600;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 8);
+
+    bus.write8ARM9(base + 8, 0x55);
+
+    writeProgramToMemory("LDRSB R0, [R1, R2]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00000055);
+    EXPECT_EQ(arm9.readReg(1), base + 8);
+}
+/**
+ * @brief Tests LDRSB with immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_IMM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x700;
+
+    arm9.writeReg(1, base);
+
+    bus.write8ARM9(base + 6, 0x33);
+
+    writeProgramToMemory("LDRSB R0, [R1, #6]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00000033);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests LDRSB immediate negative offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_IMM_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x800;
+
+    arm9.writeReg(1, base);
+
+    bus.write8ARM9(base - 2, 0x11);
+
+    writeProgramToMemory("LDRSB R0, [R1, #-2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00000011);
+}
+/**
+ * @brief Tests LDRSB immediate with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_IMM_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x900;
+
+    arm9.writeReg(1, base);
+
+    bus.write8ARM9(base + 10, 0x44);
+
+    writeProgramToMemory("LDRSB R0, [R1, #10]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00000044);
+    EXPECT_EQ(arm9.readReg(1), base + 10);
+}
+/**
+ * @brief Tests LDRSB sign extension (negative value).
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSB, LDRSB_SIGN_EXTEND) {
+    uint32_t base = MAIN_RAM_START + 0xA00;
+
+    arm9.writeReg(1, base);
+
+    bus.write8ARM9(base + 2, 0x80);  // -128
+
+    writeProgramToMemory("LDRSB R0, [R1, #2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0xFFFFFF80);
+}
+// ==================================================================================================
+// LDRSH
+// ==================================================================================================
+class TestCPU_ARM_DataInstructions_LDRSH : public TestCPU_ARM_DataInstructions {
+protected:
+    TestCPU_ARM_DataInstructions_LDRSH() {}
+    ~TestCPU_ARM_DataInstructions_LDRSH() {}
+
+    void SetUp() override { TestCPU_ARM_DataInstructions::SetUp(); }
+    void TearDown() override { TestCPU_ARM_DataInstructions::TearDown(); }
+};
+/**
+ * @brief Tests LDRSH with register offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_REG_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+
+    bus.write16ARM9(base + 4, 0x7FFF);
+
+    writeProgramToMemory("LDRSH R0, [R1, R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00007FFF);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests LDRSH register offset with subtraction.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_REG_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 4);
+
+    bus.write16ARM9(base - 4, 0x1234);
+
+    writeProgramToMemory("LDRSH R0, [R1, -R2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00001234);
+}
+/**
+ * @brief Tests LDRSH register offset with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_REG_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x600;
+
+    arm9.writeReg(1, base);
+    arm9.writeReg(2, 8);
+
+    bus.write16ARM9(base + 8, 0x1111);
+
+    writeProgramToMemory("LDRSH R0, [R1, R2]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00001111);
+    EXPECT_EQ(arm9.readReg(1), base + 8);
+}
+/**
+ * @brief Tests LDRSH with immediate offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_IMM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x700;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base + 6, 0x2222);
+
+    writeProgramToMemory("LDRSH R0, [R1, #6]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00002222);
+    EXPECT_EQ(arm9.readReg(1), base);
+}
+/**
+ * @brief Tests LDRSH immediate negative offset.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_IMM_NEG_OFFSET) {
+    uint32_t base = MAIN_RAM_START + 0x800;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base - 2, 0x3333);
+
+    writeProgramToMemory("LDRSH R0, [R1, #-2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00003333);
+}
+/**
+ * @brief Tests LDRSH immediate with writeback.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_IMM_WRITEBACK) {
+    uint32_t base = MAIN_RAM_START + 0x900;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base + 10, 0x4444);
+
+    writeProgramToMemory("LDRSH R0, [R1, #10]!", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0x00004444);
+    EXPECT_EQ(arm9.readReg(1), base + 10);
+}
+/**
+ * @brief Tests LDRSH sign extension.
+ */
+TEST_F(TestCPU_ARM_DataInstructions_LDRSH, LDRSH_SIGN_EXTEND) {
+    uint32_t base = MAIN_RAM_START + 0xA00;
+
+    arm9.writeReg(1, base);
+
+    bus.write16ARM9(base + 2, 0x8000);  // -32768
+
+    writeProgramToMemory("LDRSH R0, [R1, #2]", MAIN_RAM_START, &bus, arm9.isARM7());
+    arm9.setPC(MAIN_RAM_START);
+
+    arm9.fetchAndExecute();
+
+    EXPECT_EQ(arm9.readReg(0), 0xFFFF8000);
+}

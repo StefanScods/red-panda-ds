@@ -379,61 +379,265 @@ cycles ARM::ARM_LDM_USER_REG(uint32_t instruct) {
 // ==================================================================================================
 // STRH
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRH--register-?lang=en
 cycles ARM::ARM_STRH_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_STRH(Rt, Rn, *activeRegs[Rm], P, U, writeback);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRH--immediate--ARM-?lang=en
 cycles ARM::ARM_STRH_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t imm4High = readBits(instruct, 8, 11);
+    uint8_t imm4Low = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_STRH(Rt, Rn, imm4High << 4 | imm4Low, P, U, writeback);
+}
+// ==================================================================================================
+cycles ARM::ARM_STRH(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                     bool wback) {
+    LogDebug("Executing STRH");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t offset_address = add ? address + offset : address - offset;
+    uint32_t targetAddress = pre ? offset_address : address;
+    busPayload payload = writeBus(targetAddress, *activeRegs[srcReg], 16);
+    if (wback) {
+        *activeRegs[baseReg] = offset_address;
+        fixupIfTargetingPC(baseReg);
+    }
+    return 1;
 }
 // ==================================================================================================
 // STRD
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRD--register-?lang=en
 cycles ARM::ARM_STRD_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_STRD(Rt, Rt + 1, Rn, *activeRegs[Rm], P, U, writeback);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRD--immediate-?lang=en
 cycles ARM::ARM_STRD_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t imm4High = readBits(instruct, 8, 11);
+    uint8_t imm4Low = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_STRD(Rt, Rt + 1, Rn, imm4High << 4 | imm4Low, P, U, writeback);
+}
+// ==================================================================================================
+cycles ARM::ARM_STRD(uint32_t srcReg1, uint32_t srcReg2, uint32_t baseReg, uint32_t offset,
+                     bool pre, bool add, bool wback) {
+    LogDebug("Executing STRD");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t offset_address = add ? address + offset : address - offset;
+    uint32_t targetAddress = pre ? offset_address : address;
+    busPayload payload1 = writeBus(targetAddress, *activeRegs[srcReg1], 32);
+    busPayload payload2 = writeBus(targetAddress + 4, *activeRegs[srcReg2], 32);
+    if (wback) {
+        *activeRegs[baseReg] = offset_address;
+        fixupIfTargetingPC(baseReg);
+    }
+    return 1;
 }
 // ==================================================================================================
 // LDRH
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRH--register-?lang=en
 cycles ARM::ARM_LDRH_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRH(Rt, Rn, *activeRegs[Rm], P, U, writeback);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRH--immediate--ARM-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRH--literal-?lang=en
 cycles ARM::ARM_LDRH_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t imm4High = readBits(instruct, 8, 11);
+    uint8_t imm4Low = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRH(Rt, Rn, imm4High << 4 | imm4Low, P, U, writeback);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                     bool wback) {
+    LogDebug("Executing LDRH");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t offset_address = add ? address + offset : address - offset;
+    uint32_t targetAddress = pre ? offset_address : address;
+    busPayload payload = readBus(targetAddress, 16);
+    if (wback) {
+        *activeRegs[baseReg] = offset_address;
+        fixupIfTargetingPC(baseReg);
+    }
+    *activeRegs[desReg] = payload.data;
+    fixupIfTargetingPC(desReg);
+    return 1;
 }
 // ==================================================================================================
 // LDRD
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRD--register-?lang=en
 cycles ARM::ARM_LDRD_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRD(Rt, Rt + 1, Rn, *activeRegs[Rm], P, U, writeback);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRD--immediate-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRD--literal-?lang=en
 cycles ARM::ARM_LDRD_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t imm4High = readBits(instruct, 8, 11);
+    uint8_t imm4Low = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRD(Rt, Rt + 1, Rn, imm4High << 4 | imm4Low, P, U, writeback);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRD(uint32_t desReg1, uint32_t desReg2, uint32_t baseReg, uint32_t offset,
+                     bool pre, bool add, bool wback) {
+    LogDebug("Executing LDRD");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t offset_address = add ? address + offset : address - offset;
+    uint32_t targetAddress = pre ? offset_address : address;
+    busPayload payload1 = readBus(targetAddress, 32);
+    busPayload payload2 = readBus(targetAddress + 4, 32);
+    if (wback) {
+        *activeRegs[baseReg] = offset_address;
+        fixupIfTargetingPC(baseReg);
+    }
+    *activeRegs[desReg1] = payload1.data;
+    fixupIfTargetingPC(desReg1);
+    *activeRegs[desReg2] = payload2.data;
+    fixupIfTargetingPC(desReg2);
+    return 1;
 }
 // ==================================================================================================
 // LDRSB
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSB--register-?lang=en
 cycles ARM::ARM_LDRSB_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRSB(Rt, Rn, *activeRegs[Rm], P, U, writeback);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSB--immediate-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSB--literal-?lang=en
 cycles ARM::ARM_LDRSB_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t imm4High = readBits(instruct, 8, 11);
+    uint8_t imm4Low = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRSB(Rt, Rn, imm4High << 4 | imm4Low, P, U, writeback);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRSB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                      bool wback) {
+    LogDebug("Executing LDRSB");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t offset_address = add ? address + offset : address - offset;
+    uint32_t targetAddress = pre ? offset_address : address;
+    busPayload payload = readBus(targetAddress, 8);
+    if (wback) {
+        *activeRegs[baseReg] = offset_address;
+        fixupIfTargetingPC(baseReg);
+    }
+    uint32_t data = payload.data | (readBit(payload.data, 7) ? 0xFFFFFF00 : 0x0);
+    *activeRegs[desReg] = data;
+    fixupIfTargetingPC(desReg);
+    return 1;
 }
 // ==================================================================================================
 // LDRSH
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSH--register-?lang=en
 cycles ARM::ARM_LDRSH_REG(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t Rm = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRSH(Rt, Rn, *activeRegs[Rm], P, U, writeback);
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSH--immediate-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSH--literal-?lang=en
 cycles ARM::ARM_LDRSH_IMM(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    bool P = readBit(instruct, 24);
+    bool U = readBit(instruct, 23);
+    bool W = readBit(instruct, 21);
+    uint8_t Rn = readBits(instruct, 16, 19);
+    uint8_t Rt = readBits(instruct, 12, 15);
+    uint8_t imm4High = readBits(instruct, 8, 11);
+    uint8_t imm4Low = readBits(instruct, 0, 3);
+    bool writeback = P == 0 || W;
+    return ARM_LDRSH(Rt, Rn, imm4High << 4 | imm4Low, P, U, writeback);
+}
+// ==================================================================================================
+cycles ARM::ARM_LDRSH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre, bool add,
+                      bool wback) {
+    LogDebug("Executing LDRSB");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t offset_address = add ? address + offset : address - offset;
+    uint32_t targetAddress = pre ? offset_address : address;
+    busPayload payload = readBus(targetAddress, 16);
+    if (wback) {
+        *activeRegs[baseReg] = offset_address;
+        fixupIfTargetingPC(baseReg);
+    }
+    uint32_t data = payload.data | (readBit(payload.data, 15) ? 0xFFFF0000 : 0x0);
+    *activeRegs[desReg] = data;
+    fixupIfTargetingPC(desReg);
+    return 1;
 }
 // ==================================================================================================
