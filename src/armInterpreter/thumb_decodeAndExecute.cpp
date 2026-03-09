@@ -15,7 +15,6 @@
 // ==================================================================================================
 cycles ARM::THUMB_shiftAddSubtractMoveCompareDecodeAndExecute(uint32_t instruct) {
     uint8_t opcode = readBits(instruct, 9, 13);
-    std::cout << PrintHex(opcode) << " " << PrintHex(0b10000) << " ";
     switch (opcode) {
         // LSL (immediate)
         case 0b00000:
