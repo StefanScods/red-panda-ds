@@ -120,7 +120,6 @@ busPayload ARM946ES::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 }
 // ==================================================================================================
 cycles ARM946ES::cycle() {
-    bool thumbMode = readBit(cpsr, T_BIT);
     cycles cyclesRan = 0;
     while (currentCycle < targetCycle) {
         // Perform fetches and executes in parallel.
@@ -134,8 +133,8 @@ cycles ARM946ES::cycle() {
             }
         }
         if (fetchCooldown == 0) {
-            bool shouldFetch = thumbMode ? instuctionPipeLine[1] == NO_INSTRUCT
-                                         : instuctionPipeLine[2] == NO_INSTRUCT;
+            bool shouldFetch = getThumbMode() ? instuctionPipeLine[1] == NO_INSTRUCT
+                                              : instuctionPipeLine[2] == NO_INSTRUCT;
             // Instruction pipeline has space, fetch a new instuction.
             if (shouldFetch) {
                 fetchCooldown = fetch();

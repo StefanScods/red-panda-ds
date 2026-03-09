@@ -275,6 +275,20 @@ public:
     void setProcessorMode(ProcessorModes::ProcessorModes mode);
 
     /**
+     * @brief Get whether the processor is in thumb mode.
+     *
+     * @return `bool`
+     */
+    bool getThumbMode() { return readBit(cpsr, T_BIT); }
+
+    /**
+     * @brief Set the processor's thumb mode.
+     *
+     * @param mode `True` if targeting thumb mode.
+     */
+    void setThumbMode(bool thumb) { return writeBit(cpsr, thumb, T_BIT); }
+
+    /**
      * @brief Write to the SPSR. Will do nothing if SPSR is not
      * supported in the current mode.
      *
@@ -585,32 +599,40 @@ public:
     cycles THUMB_MOV_REG_HIGH(uint32_t instruct);
     cycles THUMB_MOV_REG_LOW(uint32_t instruct);
     cycles THUMB_MOV_IMM(uint32_t instruct);
+    cycles THUMB_MOV(uint32_t desReg, uint32_t srcValue, bool carry, bool setFlags);
     cycles THUMB_AND_REG(uint32_t instruct);
     cycles THUMB_EOR_REG(uint32_t instruct);
     cycles THUMB_LSL_REG(uint32_t instruct);
     cycles THUMB_LSL_IMM(uint32_t instruct);
+    cycles THUMB_LSL(uint32_t desReg, uint32_t operand, uint8_t amount, bool carry);
     cycles THUMB_LSR_REG(uint32_t instruct);
     cycles THUMB_LSR_IMM(uint32_t instruct);
+    cycles THUMB_LSR(uint32_t desReg, uint32_t operand, uint8_t amount, bool carry);
     cycles THUMB_ASR_REG(uint32_t instruct);
     cycles THUMB_ASR_IMM(uint32_t instruct);
+    cycles THUMB_ASR(uint32_t desReg, uint32_t operand, uint8_t amount, bool carry);
     cycles THUMB_ADD_REG(uint32_t instruct);
     cycles THUMB_ADD_REG_HIGH(uint32_t instruct);
     cycles THUMB_ADD_REG_LOW(uint32_t instruct);
-    cycles THUMB_ADD_3IMM(uint32_t instruct);
+    cycles THUMB_ADD_IMM3(uint32_t instruct);
     cycles THUMB_ADD_IMM(uint32_t instruct);
-    cycles THUMB_ADD_SP_IMM(uint32_t instruct);
+    cycles THUMB_ADD_SP_IMM7(uint32_t instruct);
+    cycles THUMB_ADD_SP_IMM8(uint32_t instruct);
+    cycles THUMB_ADD(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
     cycles THUMB_SBC_REG(uint32_t instruct);
-    cycles THUMB_ASC_REG(uint32_t instruct);
+    cycles THUMB_ADC_REG(uint32_t instruct);
     cycles THUMB_SUB_IMM(uint32_t instruct);
     cycles THUMB_SUB_REG(uint32_t instruct);
-    cycles THUMB_SUB_3IMM(uint32_t instruct);
-    cycles THUMB_SUB_SP_IMM(uint32_t instruct);
+    cycles THUMB_SUB_IMM3(uint32_t instruct);
+    cycles THUMB_SUB_SP_IMM7(uint32_t instruct);
+    cycles THUMB_SUB(uint32_t desReg, uint32_t opp1, uint32_t opp2, bool carry, bool setFlags);
     cycles THUMB_ROR_REG(uint32_t instruct);
     cycles THUMB_TST_REG(uint32_t instruct);
     cycles THUMB_RSB_REG(uint32_t instruct);
     cycles THUMB_CMP_REG(uint32_t instruct);
     cycles THUMB_CMP_REG_HIGH(uint32_t instruct);
     cycles THUMB_CMP_IMM(uint32_t instruct);
+    cycles THUMB_CMP(uint32_t opp1, uint32_t opp2);
     cycles THUMB_CMN_REG(uint32_t instruct);
     cycles THUMB_ORR_REG(uint32_t instruct);
     cycles THUMB_MUL(uint32_t instruct);

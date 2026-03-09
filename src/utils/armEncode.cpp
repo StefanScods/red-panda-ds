@@ -5,9 +5,11 @@
 
 #include "armEncode.h"
 
+#include <regex>
+
 #include "interconnect.h"
 
-#define LOG_LEVEL 1
+#define LOG_LEVEL 2
 #include "logger.h"
 
 // ==================================================================================================
@@ -17,11 +19,11 @@ void cleanUpEncodeTemps(std::filesystem::path tempDir) {
     }
 }
 // ==================================================================================================
-std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7) {
+std::vector<Encoding> armEncodeASM(std::string instructions, bool arm7) {
     LogDebugPrefixed("Assembling:\n===============================\n"
                          << instructions,
                      "ASM Encode");
-    std::vector<uint32_t> encodings;
+    std::vector<Encoding> encodings;
 
     // Create directory to hold all the temporaries.
     std::filesystem::path tempDir = "asm_temp";
@@ -58,36 +60,45 @@ std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7) {
         return encodings;
     }
 
-    bool foundText = false;
+    LogDebugPrefixed("Created Assembly Dump:\n==========================================",
+                     "ASM Encode");
+    bool armMode = true;
+    uint32_t prevAddress = 0;
     std::string line;
-    int count = 0;
-    std::string substring = "<.text>:";
     // Re-read the dump and extract the asm encodings.
     std::ifstream dumpFile(outputObjectDumpFile);
     while (std::getline(dumpFile, line)) {
-        if (!foundText && line.find(substring) != std::string::npos) {
-            foundText = true;
-        } else if (foundText) {
-            // Find "num: encoding    instuction"
-            substring = ":	";
-            size_t pos = line.find(substring);
-            // Ran out of instructions.
-            if (pos == std::string::npos) break;
-            // Remove everything other than the encoding.
-            std::string after = line.substr(pos + substring.length());
-            pos = after.find(' ');
-            if (pos == std::string::npos) {
-                LogErrorPrefixed("Could not extract encoding for line " << count << "!",
-                                 "ASM Encode");
-                dumpFile.close();
-                cleanUpEncodeTemps();
-                return encodings;
+        LogDebugPrefixed(line, "ASM Encode");
+        std::string nopString = "...";
+        if (line.find(nopString) != std::string::npos) {
+            // Detected a switch to thumb encoding.
+            if (armMode) {
+                // Set the last instruction to thumb mode as well.
+                encodings.back().arm = false;
+                armMode = false;
             }
-            after = after.substr(0, pos);
-            // Append the encoding.
-            encodings.push_back(std::stoul(after, nullptr, 16));
-            count++;
+            continue;
         }
+        // Regex to match the "address: encoding    instuction" lines.
+        std::regex pattern(R"(\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]+))");
+        std::smatch match;
+        if (!std::regex_search(line, match, pattern)) continue;
+        uint32_t instruction = std::stoul(match[2], nullptr, 16);
+        uint32_t address = std::stoul(match[1], nullptr, 16);
+        // Detect switches in encodings.
+        if (armMode && (address - prevAddress) == THUMB_MODE_INST_SIZE) {
+            // Set the last instruction to thumb mode as well.
+            encodings.back().arm = false;
+            armMode = false;
+        }
+        if (!armMode && (address - prevAddress) == ARM_MODE_INST_SIZE) {
+            // Set the last instruction to thumb mode as well.
+            encodings.back().arm = true;
+            armMode = true;
+        }
+        // Add the new instruction.
+        encodings.emplace_back(instruction, address, armMode);
+        prevAddress = address;
     }
 
     dumpFile.close();
@@ -98,17 +109,25 @@ std::vector<uint32_t> armEncodeASM(std::string instructions, bool arm7) {
 // ==================================================================================================
 void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus,
                           bool arm7) {
-    std::vector<uint32_t> instuctionEncodings = armEncodeASM(program, arm7);
+    std::vector<Encoding> instuctionEncodings = armEncodeASM(program, arm7);
     LogDebug("Writing program to 0x" << std::hex << startAddress << std::dec << "...");
-    for (int i = 0; i < instuctionEncodings.size(); i++) {
-        uint32_t address = startAddress + i * ARM_WORD_SIZE;
-        LogDebug("Writing instuction to " << PrintHex(instuctionEncodings[i]) << " to "
+    uint32_t bytesWritten = 0;
+    for (const Encoding& encoding : instuctionEncodings) {
+        uint32_t address = startAddress + encoding.address;
+        LogDebug("Writing instuction to " << PrintHex(encoding.instruction)
+                                          << (encoding.arm ? " (ARM)" : " (THUMB)") << " to "
                                           << PrintHex(address) << "...");
-        arm7 ? bus->write32ARM7(address, instuctionEncodings[i])
-             : bus->write32ARM9(address, instuctionEncodings[i]);
+        if (encoding.arm) {
+            arm7 ? bus->write32ARM7(address, encoding.instruction)
+                 : bus->write32ARM9(address, encoding.instruction);
+            bytesWritten += ARM_MODE_INST_SIZE;
+        } else {
+            arm7 ? bus->write16ARM7(address, encoding.instruction)
+                 : bus->write16ARM9(address, encoding.instruction);
+            bytesWritten += THUMB_MODE_INST_SIZE;
+        }
     }
     LogDebug("Finished writing program! - " << instuctionEncodings.size() << " instructions - "
-                                            << instuctionEncodings.size() * ARM_WORD_SIZE
-                                            << " byte(s)");
+                                            << bytesWritten << " byte(s)");
 }
 // ==================================================================================================

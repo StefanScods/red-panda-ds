@@ -15,6 +15,7 @@
 // ==================================================================================================
 cycles ARM::THUMB_shiftAddSubtractMoveCompareDecodeAndExecute(uint32_t instruct) {
     uint8_t opcode = readBits(instruct, 9, 13);
+    std::cout << PrintHex(opcode) << " " << PrintHex(0b10000) << " ";
     switch (opcode) {
         // LSL (immediate)
         case 0b00000:
@@ -42,10 +43,10 @@ cycles ARM::THUMB_shiftAddSubtractMoveCompareDecodeAndExecute(uint32_t instruct)
             return THUMB_SUB_REG(instruct);
         // ADD (3-bit immediate)
         case 0b01110:
-            return THUMB_ADD_3IMM(instruct);
+            return THUMB_ADD_IMM3(instruct);
         // SUB (3-bit immediate)
         case 0b01111:
-            return THUMB_SUB_3IMM(instruct);
+            return THUMB_SUB_IMM3(instruct);
         // MOV (immediate)
         case 0b10000:
         case 0b10001:
@@ -99,7 +100,7 @@ cycles ARM::THUMB_dataProcessingDecodeAndExecute(uint32_t instruct) {
             return THUMB_ASR_REG(instruct);
         // ADC (register)
         case 0b0101:
-            return THUMB_ASC_REG(instruct);
+            return THUMB_ADC_REG(instruct);
         // SBC (register)
         case 0b0110:
             return THUMB_SBC_REG(instruct);
@@ -140,7 +141,7 @@ cycles ARM::THUMB_dataProcessingDecodeAndExecute(uint32_t instruct) {
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding/Special-data-instructions-and-branch-and-exchange?lang=en
 // ==================================================================================================
 cycles ARM::THUMB_specialDataAndBranchDecodeAndExecute(uint32_t instruct) {
-    uint8_t opcode = readBits(instruct, 9, 13);
+    uint8_t opcode = readBits(instruct, 6, 9);
     switch (opcode) {
         // ADD (Low Registers)
         case 0b0000:
@@ -264,10 +265,10 @@ cycles ARM::THUMB_miscDecodeAndExecute(uint32_t instruct) {
     switch (opcode) {
         // ADD (SP plus immediate)
         case 0b00000:
-            return THUMB_ADD_SP_IMM(instruct);
+            return THUMB_ADD_SP_IMM7(instruct);
         // SUB (SP minus immediate)
         case 0b00001:
-            return THUMB_SUB_SP_IMM(instruct);
+            return THUMB_SUB_SP_IMM7(instruct);
         // CBNZ -> Unsupported on DS's arm7 and arm9 cores.
         case 0b00010:
         case 0b00011:

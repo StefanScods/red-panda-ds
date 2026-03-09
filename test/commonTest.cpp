@@ -9,7 +9,7 @@ std::vector<InstructionTestCase> genInstuctionTestCase(std::vector<std::string> 
                                                        std::vector<uint32_t> expectedVals,
                                                        bool skipPC) {
     std::vector<InstructionTestCase> returnValue;
-    std::vector<uint32_t> instuctionEncodings;
+    std::vector<Encoding> instuctionEncodings;
     std::string instructionStr = "";
     assert(instruction.size() == expectedVals.size());
     for (int i = 0; i < g_regNames.size() - skipPC; i++) {
@@ -23,7 +23,7 @@ std::vector<InstructionTestCase> genInstuctionTestCase(std::vector<std::string> 
     int count = 0;
     for (uint8_t i = 0; i < g_regNames.size() - skipPC; i++) {
         for (int j = 0; j < instruction.size(); j++) {
-            returnValue.push_back({instuctionEncodings[count], i, expectedVals[j]});
+            returnValue.push_back({instuctionEncodings[count].instruction, i, expectedVals[j]});
             count++;
         }
     }

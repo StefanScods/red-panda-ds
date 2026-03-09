@@ -5,7 +5,7 @@
 #include "interconnect.h"
 
 // Control print statements.
-#define LOG_LEVEL 2
+#define LOG_LEVEL 1
 #include "logger.h"
 // ==================================================================================================
 std::vector<std::string> g_regNames = {"r0", "r1", "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
@@ -84,8 +84,8 @@ void ARM::reset() {
 }
 // ==================================================================================================
 cycles ARM::execute() {
-    bool thumbMode = readBit(cpsr, T_BIT);
-    return thumbMode ? THUMB_execute() : ARM_execute();
+    LogDebug("Executing in " << (getThumbMode() ? "THUMB" : "ARM") << " mode!");
+    return getThumbMode() ? THUMB_execute() : ARM_execute();
 }
 // ==================================================================================================
 cycles ARM::ARM_execute() {
@@ -139,7 +139,6 @@ cycles ARM::THUMB_execute() {
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding?lang=en
     switch (opCode) {
         // Shift (immediate), add, subtract, move, and compare
-        // Data-processing
         case 0b000000:
         case 0b000001:
         case 0b000010:
@@ -156,6 +155,8 @@ cycles ARM::THUMB_execute() {
         case 0b001101:
         case 0b001110:
         case 0b001111:
+            return THUMB_shiftAddSubtractMoveCompareDecodeAndExecute(nextInstruction);
+        // Data-processing
         case 0b010000:
             return THUMB_dataProcessingDecodeAndExecute(nextInstruction);
         // Special data instructions and branch and exchange
@@ -194,7 +195,7 @@ cycles ARM::THUMB_execute() {
         // Generate SP-relative address,
         case 0b101010:
         case 0b101011:
-            return THUMB_ADD_SP_IMM(nextInstruction);
+            return THUMB_ADD_SP_IMM8(nextInstruction);
         // Miscellaneous 16-bit instructions
         case 0b101100:
         case 0b101101:
@@ -236,10 +237,9 @@ cycles ARM::THUMB_execute() {
 cycles ARM::fetch() {
     // Fetch the next 32 bits and increment PC.
     LogDebug("Fetching instruction at: " << PrintHex(pc()) << "...");
-    bool thumbMode = readBit(cpsr, T_BIT);
     busPayload readResult = readBus(pc(), 32, true);
     LogDebug("Fetched instruction: " << PrintHex(readResult.data) << "!");
-    if (thumbMode) {
+    if (getThumbMode()) {
         // Fill two stages of the pipeline with half words.
         instuctionPipeLine[1] = readResult.data & 0xFFFF;
         instuctionPipeLine[2] = readResult.data >> 8;
@@ -258,7 +258,6 @@ cycles ARM::cycle() {
 // ==================================================================================================
 cycles ARM::fetchAndExecute(int numExecutions) {
     cycles cycleCount = 0;
-    bool thumbMode = readBit(cpsr, T_BIT);
     while (numExecutions) {
         instuctionPipeLine[0] = instuctionPipeLine[1];
         instuctionPipeLine[1] = instuctionPipeLine[2];
@@ -269,7 +268,7 @@ cycles ARM::fetchAndExecute(int numExecutions) {
         }
         // Fetch the next instruction.
         // (Always if not in thumb. When in thumb, instuctionPipeLine[1] is empty).
-        bool shouldFetch = !thumbMode || instuctionPipeLine[1] != NO_INSTRUCT;
+        bool shouldFetch = !getThumbMode() || instuctionPipeLine[1] == NO_INSTRUCT;
         cycles fetchCycles = 0;
         if (shouldFetch) {
             fetchCycles = fetch();
@@ -387,7 +386,7 @@ void ARM::handleProcessorModeChange() {
 void ARM::branch(uint32_t dest) {
     // Determine if we are going to thumb mode.
     bool thumb = readBit(dest, 0);
-    writeBit(cpsr, thumb, T_BIT);
+    setThumbMode(thumb);
     // Mask the bottom bit (thumb mode) or bottom 2 bits (arm mode).
     uint32_t pcMask = thumb ? ~(0b1) : ~(0b11);
     LogDebug("Branching - PC currently at: " << PrintHex(pc()) << "...");
@@ -409,7 +408,7 @@ void ARM::clearInstructionPipeline() {
 // ==================================================================================================
 void ARM::setCPSR(uint32_t data) {
     bool modeSwitch = readBits(data, MODE_LOWER_BIT, MODE_UPPER_BIT) != getProcessorMode();
-    bool thumbChange = readBit(data, T_BIT) != readBit(cpsr, T_BIT);
+    bool thumbChange = readBit(data, T_BIT) != getThumbMode();
     cpsr = data & 0xF80000FF;  // Protect reserved bits.
     if (modeSwitch) handleProcessorModeChange();
     if (thumbChange) {

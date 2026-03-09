@@ -563,7 +563,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BX, BX_REG) {
     writeProgramToMemory("BX R3", MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.fetchAndExecute(1);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
-    ASSERT_EQ(arm9.readFlag(T_BIT), 0);
+    ASSERT_EQ(arm9.getThumbMode(), 0);
 }
 /**
  * @brief Tests a Branch Exchange operation using a register to THUMB mode.
@@ -576,7 +576,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BX, BX_REG_TO_THUMB) {
     writeProgramToMemory("BX R3", MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.fetchAndExecute(1);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
-    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
+    ASSERT_EQ(arm9.getThumbMode(), 1);
 }
 // ==================================================================================================
 // Branch Link and Exchange
@@ -603,7 +603,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_IMMEDIATE) {
     arm9.fetchAndExecute(3);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 8);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
-    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
+    ASSERT_EQ(arm9.getThumbMode(), 1);
 }
 /**
  * @brief Tests a Branch Link and Exchange operation using an immediate not aligned to 4.
@@ -618,7 +618,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
     arm9.fetchAndExecute(3);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 10);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 12);
-    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
+    ASSERT_EQ(arm9.getThumbMode(), 1);
 }
 /**
  * @brief Tests a Branch Link and Exchange operation using a register.
@@ -632,7 +632,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_REG) {
     arm9.fetchAndExecute(1);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 4);
-    ASSERT_EQ(arm9.readFlag(T_BIT), 0);
+    ASSERT_EQ(arm9.getThumbMode(), 0);
 }
 /**
  * @brief Tests a Branch Link and Exchange operation using a register not aligned to 4.
@@ -646,5 +646,5 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_THUMB_ALIGN_REG) {
     arm9.fetchAndExecute(1);
     ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 4);
-    ASSERT_EQ(arm9.readFlag(T_BIT), 1);
+    ASSERT_EQ(arm9.getThumbMode(), 1);
 }
