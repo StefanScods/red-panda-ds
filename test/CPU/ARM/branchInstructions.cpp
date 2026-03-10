@@ -45,7 +45,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, B_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
-        "B .-4\n"
+        "B .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -62,7 +62,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BEQ_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOVs R0, #0\n"
-        "Beq .-4\n"
+        "Beq .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -76,7 +76,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BEQ_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOVs R0, #1\n"
-        "Beq .-4\n"
+        "Beq .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -93,7 +93,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BNE_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOVs R0, #1\n"
-        "Bne .-4\n"
+        "Bne .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -107,7 +107,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BNE_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOVs R0, #0\n"
-        "Bne .-4\n"
+        "Bne .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -125,7 +125,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BCS_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #0\n"
-        "Bcs .-4\n"
+        "Bcs .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -140,7 +140,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BCS_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #1\n"
-        "Bcs .-4\n"
+        "Bcs .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -158,7 +158,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BCC_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #1\n"
-        "Bcc .-4\n"
+        "Bcc .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -173,7 +173,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BCC_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #0\n"
-        "Bcc .-4\n"
+        "Bcc .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -191,7 +191,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BMI_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #1\n"
-        "Bmi .-4\n"
+        "Bmi .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -206,7 +206,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BMI_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #0\n"
-        "Bmi .-4\n"
+        "Bmi .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -224,7 +224,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BPL_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #0\n"
-        "Bpl .-4\n"
+        "Bpl .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -239,7 +239,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BPL_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #1\n"
-        "Bpl .-4\n"
+        "Bpl .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -257,7 +257,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BVS_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0x7FFFFFFF\n"
         "ADDS R0, R0, #1\n"
-        "Bvs .-4\n"
+        "Bvs .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -272,7 +272,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BVS_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "ADDS R0, R0, #1\n"
-        "Bvs .-4\n"
+        "Bvs .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -290,7 +290,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BVC_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "ADDS R0, R0, #1\n"
-        "Bvc .-4\n"
+        "Bvc .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -305,7 +305,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BVC_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0x7FFFFFFF\n"
         "ADDS R0, R0, #1\n"
-        "Bvc .-4\n"
+        "Bvc .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -323,7 +323,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BHI_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #2\n"
         "CMP R0, #1\n"
-        "Bhi .-4\n"
+        "Bhi .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -338,7 +338,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BHI_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #2\n"
-        "Bhi .-4\n"
+        "Bhi .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -356,7 +356,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BLS_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #2\n"
-        "Bls .-4\n"
+        "Bls .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -371,7 +371,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BLS_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #2\n"
         "CMP R0, #1\n"
-        "Bls .-4\n"
+        "Bls .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -389,7 +389,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BGE_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #0\n"
-        "Bge .-4\n"
+        "Bge .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -404,7 +404,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BGE_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #1\n"
-        "Bge .-4\n"
+        "Bge .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -422,7 +422,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BLT_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #0\n"
         "CMP R0, #1\n"
-        "Blt .-4\n"
+        "Blt .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -437,7 +437,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BLT_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #0\n"
-        "Blt .-4\n"
+        "Blt .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -455,7 +455,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BGT_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #2\n"
         "CMP R0, #1\n"
-        "Bgt .-4\n"
+        "Bgt .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -470,7 +470,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BGT_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #2\n"
-        "Bgt .-4\n"
+        "Bgt .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -488,7 +488,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BLE_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #1\n"
         "CMP R0, #2\n"
-        "Ble .-4\n"
+        "Ble .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -503,7 +503,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_B, BLE_IMMEDIATE) {
         "MOV R1, #0\n"
         "MOV R0, #2\n"
         "CMP R0, #1\n"
-        "Ble .-4\n"
+        "Ble .\n"
         "MOV R1, #255",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
@@ -532,7 +532,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BL, BL_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
-        "BL .-4",
+        "BL .",
         MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.setPC(MAIN_RAM_START);
     arm7.fetchAndExecute(3);
@@ -562,7 +562,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BX, BX_REG) {
 
     writeProgramToMemory("BX R3", MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.fetchAndExecute(1);
-    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target);
     ASSERT_EQ(arm9.getThumbMode(), 0);
 }
 /**
@@ -575,7 +575,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BX, BX_REG_TO_THUMB) {
 
     writeProgramToMemory("BX R3", MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.fetchAndExecute(1);
-    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target);
     ASSERT_EQ(arm9.getThumbMode(), 1);
 }
 // ==================================================================================================
@@ -597,7 +597,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
-        "BLX .-4",
+        "BLX .",
         MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.setPC(MAIN_RAM_START);
     arm9.fetchAndExecute(3);
@@ -612,7 +612,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_THUMB_ALIGN_IMMEDIATE) {
     writeProgramToMemory(
         "MOV R1, #0\n"
         "MOV R0, #0\n"
-        "BLX .-2",
+        "BLX .+2",
         MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.setPC(MAIN_RAM_START);
     arm9.fetchAndExecute(3);
@@ -630,7 +630,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_REG) {
 
     writeProgramToMemory("BLX R3", MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.fetchAndExecute(1);
-    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 4);
     ASSERT_EQ(arm9.getThumbMode(), 0);
 }
@@ -644,7 +644,7 @@ TEST_F(TestCPU_ARM_BranchInstructions_BLX, BLX_THUMB_ALIGN_REG) {
 
     writeProgramToMemory("BLX R3", MAIN_RAM_START, &bus, arm9.isARM7());
     arm9.fetchAndExecute(1);
-    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target + 4);
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), target);
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 4);
     ASSERT_EQ(arm9.getThumbMode(), 1);
 }

@@ -333,11 +333,10 @@ TEST_F(TestCPU_ARM_LoadAndStoreInstructions_POP, POP_ALL) {
     writeProgramToMemory("POP {R0-R15}\n", MAIN_RAM_START, &bus, arm7.isARM7());
     arm7.fetchAndExecute();
     // Assert each register has the expected value
-    for (uint32_t i = 0; i < PC_REGISTER_NUM; i++) {
+    for (uint32_t i = 0; i <= PC_REGISTER_NUM; i++) {
         if (i == SP_REGISTER_NUM) continue;
         ASSERT_EQ(arm7.readReg(i), values[i]);
     }
-    ASSERT_EQ(arm7.readReg(PC_REGISTER_NUM), 0x02000F04);
     ASSERT_EQ(arm7.readReg(SP_REGISTER_NUM), SPLocation + 16 * 4);
 }
 // ==================================================================================================

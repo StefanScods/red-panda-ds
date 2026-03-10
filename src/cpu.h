@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include <cstdint>
+#include <queue>
 
 #include "types.h"
 #include "utils.h"
@@ -126,11 +127,13 @@ protected:
     cycles cyclesElapsed = 0;
     cycles currentCycle = 0;
     cycles targetCycle = 0;
+    bool justBranched = false;
 
     // Used to keep track of sequencial vs non sequencial accesss.
     uint32_t previousCodeAddr = 0;
     uint32_t previousDataAddr = 0;
 
+    std::queue<uint32_t> instructionQueue;
     uint32_t instuctionPipeLine[INSTUCTION_PIPELINE_LENGTH];
 
     // Cycle timing map.
@@ -224,6 +227,11 @@ public:
      * @brief Clear the instruction pipeline.
      */
     void clearInstructionPipeline();
+
+    /**
+     * @brief Move the instruction pipeline by one stage.
+     */
+    void advanceInstructionPipeline();
 
     /**
      * @brief Debug function to force PC to a value.
@@ -380,8 +388,9 @@ public:
      * @brief Updates PC + performs any processing after PC has been updated.
      *
      * @param dest The new address to branch to.
+     * @param exchange If the processor should change modes after a branch.
      */
-    void branch(uint32_t dest);
+    void branch(uint32_t dest, bool exchange = true);
 
     /**
      * @brief Call after updating an arbitrary reg to ensure writes to PC are handled correctly.

@@ -122,23 +122,18 @@ busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 cycles ARM7TDMI::cycle() {
     cycles cyclesRan = 0;
     while (currentCycle < targetCycle) {
+        // Clear just branched indicator.
+        justBranched = false;
         // Perform fetches and executes in parallel.
         if (executeCooldown == 0) {
-            // Move pipeline.
-            instuctionPipeLine[0] = instuctionPipeLine[1];
-            instuctionPipeLine[1] = instuctionPipeLine[2];
-            instuctionPipeLine[2] = NO_INSTRUCT;
+            advanceInstructionPipeline();
             if (instuctionPipeLine[0] != NO_INSTRUCT) {
                 executeCooldown = execute();
             }
         }
-        if (fetchCooldown == 0) {
-            bool shouldFetch = getThumbMode() ? instuctionPipeLine[1] == NO_INSTRUCT
-                                              : instuctionPipeLine[2] == NO_INSTRUCT;
+        if (fetchCooldown == 0 && instuctionPipeLine[2] == NO_INSTRUCT) {
             // Instruction pipeline has space, fetch a new instuction.
-            if (shouldFetch) {
-                fetchCooldown = fetch();
-            }
+            fetchCooldown = fetch();
         }
 
         // Determine how much to progress the CPU's cycle counter.

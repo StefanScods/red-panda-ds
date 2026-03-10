@@ -73,6 +73,7 @@ void ARM::reset() {
     currentCycle = 0;
     cyclesElapsed = 0;
     targetCycle = 0;
+    justBranched = false;
 
     // CPU instruction Pipeline.
     clearInstructionPipeline();
@@ -135,7 +136,6 @@ cycles ARM::THUMB_execute() {
     }
     // Decode and execute the instuction.
     uint8_t opCode = readBits(nextInstruction, 10, 15);
-    uint8_t bit9 = readBit(nextInstruction, 9);
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding?lang=en
     switch (opCode) {
         // Shift (immediate), add, subtract, move, and compare
@@ -235,20 +235,28 @@ cycles ARM::THUMB_execute() {
 }
 // ==================================================================================================
 cycles ARM::fetch() {
-    // Fetch the next 32 bits and increment PC.
-    LogDebug("Fetching instruction at: " << PrintHex(pc()) << "...");
-    busPayload readResult = readBus(pc(), 32, true);
-    LogDebug("Fetched instruction: " << PrintHex(readResult.data) << "!");
-    if (getThumbMode()) {
-        // Fill two stages of the pipeline with half words.
-        instuctionPipeLine[1] = readResult.data & 0xFFFF;
-        instuctionPipeLine[2] = readResult.data >> 8;
-    } else {
-        instuctionPipeLine[2] = readResult.data;
+    if (justBranched) return 1;
+    cycles cycleCount = 1;
+    if (instructionQueue.empty()) {
+        // Fetch the next 32 bits and increment PC.
+        LogDebug("Fetching instruction at: " << PrintHex(pc()) << "...");
+        busPayload readResult = readBus(pc(), 32, true);
+        cycleCount = readResult.numCycles;
+        if (getThumbMode()) {
+            // Fill the instruction queue with half words.
+            instructionQueue.push(readResult.data & 0xFFFF);
+            instructionQueue.push(readResult.data >> 16);
+        } else {
+            instructionQueue.push(readResult.data);
+        }
     }
-    pc() += 4;
+    // Get the next instruction onto the pipeline.
+    instuctionPipeLine[2] = instructionQueue.front();
+    instructionQueue.pop();
+    LogDebug("Fetched instruction: " << PrintHex(instuctionPipeLine[2]) << "!");
+    pc() += getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE;
     // Get the fetch cooldown.
-    return readResult.numCycles;
+    return cycleCount;
 }
 // ==================================================================================================
 cycles ARM::cycle() {
@@ -259,20 +267,16 @@ cycles ARM::cycle() {
 cycles ARM::fetchAndExecute(int numExecutions) {
     cycles cycleCount = 0;
     while (numExecutions) {
-        instuctionPipeLine[0] = instuctionPipeLine[1];
-        instuctionPipeLine[1] = instuctionPipeLine[2];
+        justBranched = false;
+        advanceInstructionPipeline();
         cycles exeCycles = 0;
         if (instuctionPipeLine[0] != NO_INSTRUCT) {
             exeCycles = execute();
             numExecutions--;
         }
         // Fetch the next instruction.
-        // (Always if not in thumb. When in thumb, instuctionPipeLine[1] is empty).
-        bool shouldFetch = !getThumbMode() || instuctionPipeLine[1] == NO_INSTRUCT;
-        cycles fetchCycles = 0;
-        if (shouldFetch) {
-            fetchCycles = fetch();
-        }
+        cycles fetchCycles = fetch();
+
         cycleCount += std::max(exeCycles, fetchCycles);
     }
     return cycleCount;
@@ -383,15 +387,17 @@ void ARM::handleProcessorModeChange() {
     }
 }
 // ==================================================================================================
-void ARM::branch(uint32_t dest) {
-    // Determine if we are going to thumb mode.
-    bool thumb = readBit(dest, 0);
-    setThumbMode(thumb);
+void ARM::branch(uint32_t dest, bool exchange) {
+    justBranched = true;
+    if (exchange) {  // Determine if we are going to thumb mode.
+        bool thumb = readBit(dest, 0);
+        setThumbMode(thumb);
+        LogDebug("Thumb mode after branch: " << thumb << "!");
+    }
     // Mask the bottom bit (thumb mode) or bottom 2 bits (arm mode).
-    uint32_t pcMask = thumb ? ~(0b1) : ~(0b11);
+    uint32_t pcMask = getThumbMode() ? ~(0b1) : ~(0b11);
     LogDebug("Branching - PC currently at: " << PrintHex(pc()) << "...");
     LogDebug("Moving PC to: " << PrintHex(dest & pcMask) << "!");
-    LogDebug("Thumb mode after branch: " << thumb << "!");
     pc() = dest & pcMask;
     clearInstructionPipeline();
 }
@@ -401,9 +407,19 @@ void ARM::clearInstructionPipeline() {
     instuctionPipeLine[0] = NO_INSTRUCT;
     instuctionPipeLine[1] = NO_INSTRUCT;
     instuctionPipeLine[2] = NO_INSTRUCT;
+    while (!instructionQueue.empty()) {
+        instructionQueue.pop();
+    }
     // Reset the previous instruction to force a non-consecutive read.
     uint32_t previousCodeAddr = 0;
     uint32_t previousDataAddr = 0;
+}
+// ==================================================================================================
+void ARM::advanceInstructionPipeline() {
+    // Move pipeline.
+    instuctionPipeLine[0] = instuctionPipeLine[1];
+    instuctionPipeLine[1] = instuctionPipeLine[2];
+    instuctionPipeLine[2] = NO_INSTRUCT;
 }
 // ==================================================================================================
 void ARM::setCPSR(uint32_t data) {
@@ -503,6 +519,7 @@ bool ARM::checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics conditio
         case ConditionMnemonics::SPECIAL:
             return true;  // Unconditional execution.
         default:
+            LogError("Unknown condition mnemonic" << condition << "!");
             return false;
     }
     return false;

@@ -81,6 +81,7 @@ inline void writeBit(T& data, bool value, uint8_t pos) {
  */
 template <typename T = uint32_t>
 inline uint32_t readBits(T data, uint8_t rangeStart, uint8_t rangeEnd) {
+    assert(rangeStart < rangeEnd);
     uint8_t size = rangeEnd - rangeStart + 1;
     return (data >> rangeStart) & (uint32_t)((uint64_t)(1 << size) - 1);
 }
@@ -96,6 +97,7 @@ inline uint32_t readBits(T data, uint8_t rangeStart, uint8_t rangeEnd) {
  */
 template <typename T = uint32_t>
 inline void writeBits(T& data, T value, uint8_t rangeStart, uint8_t rangeEnd) {
+    assert(rangeStart < rangeEnd);
     uint8_t size = rangeEnd - rangeStart + 1;
     data =
         ((data) & ~(((uint32_t)((uint64_t)(1 << size) - 1)) << rangeStart)) | (value << rangeStart);
