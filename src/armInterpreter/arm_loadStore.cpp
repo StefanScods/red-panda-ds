@@ -57,7 +57,7 @@ cycles ARM::ARM_STRB(uint32_t srcReg, uint32_t baseReg, uint32_t offset, bool pr
         fixupIfTargetingPC(baseReg);
     }
     // Add an additional 1N cycle for arm7.
-    if (!arm9) payload.numCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
     return payload.numCycles;
 }
 // ==================================================================================================
@@ -115,7 +115,7 @@ cycles ARM::ARM_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pr
         fixupIfTargetingPC(baseReg);
     }
     // Add an additional 1N + 1I cycles
-    payload.numCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24] + 1;
+    payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24] + 1;
     *activeRegs[desReg] = payload.data;
     fixupIfTargetingPC(desReg);
     return payload.numCycles;

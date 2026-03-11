@@ -12,38 +12,112 @@
 // ==================================================================================================
 // STR
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STR--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STR--immediate--Thumb-?lang=en
 cycles ARM::THUMB_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing STR");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = writeBus(targetAddress, *activeRegs[srcReg], 32);
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRH--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRH--immediate--Thumb-?lang=en
 cycles ARM::THUMB_STRH(uint32_t srcReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing STRH");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = writeBus(targetAddress, *activeRegs[srcReg], 16);
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRB--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/STRB--immediate--Thumb-?lang=en
 cycles ARM::THUMB_STRB(uint32_t srcReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing STRB");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = writeBus(targetAddress, *activeRegs[srcReg], 8);
+    // Add an additional 1N cycle for arm7.
+    if (!arm9) payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24];
+    return payload.numCycles;
 }
 // ==================================================================================================
 // LDR
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDR--register--Thumb-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDR--immediate--Thumb-?lang=en
 cycles ARM::THUMB_LDR(uint32_t desReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing LDR");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = readBus(targetAddress, 32);
+    *activeRegs[desReg] = payload.data;
+    fixupIfTargetingPC(desReg);
+    // Add an additional 1N + 1I cycles
+    payload.numCycles += data_nonSequencial32BitAccessTimings[(targetAddress) >> 24] + 1;
+    return payload.numCycles;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRH--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRH--immediate--Thumb-?lang=en
 cycles ARM::THUMB_LDRH(uint32_t desReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing LDRH");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = readBus(targetAddress, 16);
+    *activeRegs[desReg] = payload.data;
+    fixupIfTargetingPC(desReg);
+    // Add an additional 1N + 1I cycles
+    payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24] + 1;
+    return payload.numCycles;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRB--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRB--immediate--Thumb-?lang=en
 cycles ARM::THUMB_LDRB(uint32_t desReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing LDRB");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = readBus(targetAddress, 8);
+    *activeRegs[desReg] = payload.data;
+    fixupIfTargetingPC(desReg);
+    // Add an additional 1N + 1I cycles
+    payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24] + 1;
+    return payload.numCycles;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSH--register-?lang=en
 cycles ARM::THUMB_LDRSH(uint32_t desReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing LDRSH");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = readBus(targetAddress, 16);
+    uint32_t data = payload.data | (readBit(payload.data, 15) ? 0xFFFF0000 : 0x0);
+    *activeRegs[desReg] = data;
+    fixupIfTargetingPC(desReg);
+    // Add an additional 1N + 1I cycles
+    payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24] + 1;
+    return payload.numCycles;
 }
 // ==================================================================================================
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/LDRSB--register-?lang=en
 cycles ARM::THUMB_LDRSB(uint32_t desReg, uint32_t baseReg, uint32_t offset) {
-    return ARM_UNDEFINED_INST(0);
+    LogDebug("Executing LDRB");
+    uint32_t address = *activeRegs[baseReg];
+    uint32_t targetAddress = address + offset;
+    busPayload payload = readBus(targetAddress, 8);
+    uint32_t data = payload.data | (readBit(payload.data, 7) ? 0xFFFFFF00 : 0x0);
+    *activeRegs[desReg] = data;
+    fixupIfTargetingPC(desReg);
+    // Add an additional 1N + 1I cycles
+    payload.numCycles += data_nonSequencial16BitAccessTimings[(targetAddress) >> 24] + 1;
+    return payload.numCycles;
 }
 // ==================================================================================================
 // STM

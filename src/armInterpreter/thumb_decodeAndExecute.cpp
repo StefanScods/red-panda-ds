@@ -226,28 +226,28 @@ cycles ARM::THUMB_loadStoreDecodeAndExecute(uint32_t instruct) {
         case 0b0110: {
             uint8_t Rt = readBits(instruct, 0, 2);
             uint8_t Rn = readBits(instruct, 3, 5);
-            uint8_t offset = readBits(instruct, 6, 8) << 2;
-            return readBit(instruct, 13) ? THUMB_LDR(Rt, Rn, offset) : THUMB_STR(Rt, Rn, offset);
+            uint32_t offset = readBits(instruct, 6, 8) << 2;
+            return readBit(instruct, 11) ? THUMB_LDR(Rt, Rn, offset) : THUMB_STR(Rt, Rn, offset);
         }
         // Byte store with immediate offset.
         case 0b0111: {
             uint8_t Rt = readBits(instruct, 0, 2);
             uint8_t Rn = readBits(instruct, 3, 5);
-            uint8_t offset = readBits(instruct, 6, 8) << 2;
-            return readBit(instruct, 13) ? THUMB_LDRB(Rt, Rn, offset) : THUMB_STRB(Rt, Rn, offset);
+            uint32_t offset = readBits(instruct, 6, 8);
+            return readBit(instruct, 11) ? THUMB_LDRB(Rt, Rn, offset) : THUMB_STRB(Rt, Rn, offset);
         }
         // Half word store with immediate offset.
         case 0b1000: {
             uint8_t Rt = readBits(instruct, 0, 2);
             uint8_t Rn = readBits(instruct, 3, 5);
-            uint8_t offset = readBits(instruct, 6, 8) << 2;
-            return readBit(instruct, 13) ? THUMB_LDRH(Rt, Rn, offset) : THUMB_STRH(Rt, Rn, offset);
+            uint32_t offset = readBits(instruct, 6, 8) << 1;
+            return readBit(instruct, 11) ? THUMB_LDRH(Rt, Rn, offset) : THUMB_STRH(Rt, Rn, offset);
         }
         // Word store with SP + immediate offset.
         case 0b1001: {
             uint8_t Rt = readBits(instruct, 8, 10);
-            uint8_t offset = readBits(instruct, 0, 7) << 2;
-            return readBit(instruct, 13) ? THUMB_LDR(Rt, SP_REGISTER_NUM, offset)
+            uint32_t offset = readBits(instruct, 0, 7) << 2;
+            return readBit(instruct, 11) ? THUMB_LDR(Rt, SP_REGISTER_NUM, offset)
                                          : THUMB_STR(Rt, SP_REGISTER_NUM, offset);
         }
         default:

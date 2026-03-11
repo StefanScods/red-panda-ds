@@ -31,12 +31,10 @@ ARM946ES::~ARM946ES() {
 busPayload ARM946ES::readBus(uint32_t address, uint32_t size, bool codeRead) {
     uint32_t& previousAddr = codeRead ? previousCodeAddr : previousDataAddr;
     /**
-     * A sequential cycle requests a transfer to or from an address which is either the
-     * same, one word, or one halfword greater than the address used in the preceding
-     * cycle
+     * A sequential cycle requests a transfer to or from an address which is one word, or one
+     * halfword greater than the address used in the preceding cycle
      */
-    bool sequencial =
-        address == previousAddr || address == previousAddr + 4 || address == previousAddr + 2;
+    bool sequencial = address == previousAddr + 4 || address == previousAddr + 2;
     uint8_t memRegion = (address) >> 24;
 
     // Preform the read and determine the cycle map to read.
@@ -80,12 +78,10 @@ busPayload ARM946ES::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     // Writes always relate to the previous data.
     uint32_t& previousAddr = previousDataAddr;
     /**
-     * A sequential cycle requests a transfer to or from an address which is either the
-     * same, one word, or one halfword greater than the address used in the preceding
-     * cycle
+     * A sequential cycle requests a transfer to or from an address which is one word, or one
+     * halfword greater than the address used in the preceding cycle
      */
-    bool sequencial =
-        address == previousAddr || address == previousAddr + 4 || address == previousAddr + 2;
+    bool sequencial = address == previousAddr + 4 || address == previousAddr + 2;
     uint8_t memRegion = (address) >> 24;
 
     // Preform the read and determine the cycle map to read.
