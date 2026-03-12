@@ -147,11 +147,11 @@ cycles ARM::ARM_STMIB(uint32_t instruct) {
 // ==================================================================================================
 cycles ARM::ARM_STMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback) {
     LogDebug("Executing STM with base R" << baseReg);
-    uint32_t baseAddress = *activeRegs[baseReg];
+    // Align the base address to 4.
+    uint32_t baseAddress = (*activeRegs[baseReg]) & ~(0b11);
     uint32_t numStores = 0;
     cycles totalCycles = 0;
-    // Align the base address to 4.
-    uint32_t targetAddress = (baseAddress & ~(0b11));
+    uint32_t targetAddress = baseAddress;
     // Acount for inc / dec before.
     if (pre) targetAddress = targetAddress + 4;
     for (int i = 0; i <= PC_REGISTER_NUM; i++) {
@@ -188,11 +188,11 @@ cycles ARM::ARM_STMDB(uint32_t instruct) {
 // ==================================================================================================
 cycles ARM::ARM_STMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback) {
     LogDebug("Executing STM with base R" << baseReg);
-    uint32_t baseAddress = *activeRegs[baseReg];
+    // Align the base address to 4.
+    uint32_t baseAddress = (*activeRegs[baseReg]) & ~(0b11);
     uint32_t numStores = 0;
     cycles totalCycles = 0;
-    // Align the base address to 4.
-    uint32_t targetAddress = (baseAddress & ~(0b11));
+    uint32_t targetAddress = baseAddress;
     // Acount for inc / dec before.
     if (pre) targetAddress = targetAddress - 4;
     for (int i = PC_REGISTER_NUM; i >= 0; i--) {
@@ -260,11 +260,11 @@ cycles ARM::ARM_LDMIB(uint32_t instruct) {
 // ==================================================================================================
 cycles ARM::ARM_LDMI(uint32_t baseReg, uint32_t registerList, bool pre, bool wback) {
     LogDebug("Executing LDM with base R" << baseReg);
-    uint32_t baseAddress = *activeRegs[baseReg];
+    // Align the base address to 4.
+    uint32_t baseAddress = (*activeRegs[baseReg]) & ~(0b11);
     uint32_t numLoads = 0;
     cycles totalCycles = 0;
-    // Align the base address to 4.
-    uint32_t targetAddress = (baseAddress & ~(0b11));
+    uint32_t targetAddress = baseAddress;
     // Acount for inc / dec before.
     if (pre) targetAddress = targetAddress + 4;
     for (int i = 0; i < PC_REGISTER_NUM; i++) {
@@ -310,11 +310,11 @@ cycles ARM::ARM_LDMDB(uint32_t instruct) {
 // ==================================================================================================
 cycles ARM::ARM_LDMD(uint32_t baseReg, uint32_t registerList, bool pre, bool wback) {
     LogDebug("Executing LDM with base R" << baseReg);
-    uint32_t baseAddress = *activeRegs[baseReg];
+    // Align the base address to 4.
+    uint32_t baseAddress = (*activeRegs[baseReg]) & ~(0b11);
     uint32_t numLoads = 0;
     cycles totalCycles = 0;
-    // Align the base address to 4.
-    uint32_t targetAddress = (baseAddress & ~(0b11));
+    uint32_t targetAddress = baseAddress;
     // Acount for inc / dec before.
     if (pre) targetAddress = targetAddress - 4;
     if (readBit(registerList, PC_REGISTER_NUM)) {
@@ -356,8 +356,8 @@ cycles ARM::ARM_LDM_USER_REG(uint32_t instruct) {
     uint32_t numLoads = 0;
     cycles totalCycles = 0;
     // Align the base address to 4.
-    uint32_t baseAddress = *activeRegs[Rn];
-    uint32_t targetAddress = (baseAddress & ~(0b11));
+    uint32_t baseAddress = (*activeRegs[Rn]) & ~(0b11);
+    uint32_t targetAddress = baseAddress;
     // Acount for inc / dec before.
     if (wordHigher) targetAddress = increment ? (targetAddress + 4) : (targetAddress - 4);
     // Determine how to loop based increment.

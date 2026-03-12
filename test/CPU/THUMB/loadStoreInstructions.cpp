@@ -263,7 +263,23 @@ TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_LDR, LDR_SP_PLUS_OFFSET) {
 
     EXPECT_EQ(arm7.readReg(0), 0xABCD1234);
 }
+/**
+ * @brief Test LDR with a PC + offset as the target.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_LDR, LDR_PC_BASE_IMM_OFFSET) {
+    bus.write32ARM7(MAIN_RAM_START + 0x3FC + 4, 0xABCD1234);
 
+    writeProgramToMemory(
+        ".thumb\n"
+        "LDR R2, [PC, #0x3FC]\n"
+        ".align 2",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(arm7.readReg(2), 0xABCD1234);
+}
 // ==================================================================================================
 // LDRH
 // ==================================================================================================
@@ -466,4 +482,235 @@ TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_LDRSH, LDRSH_REGISTER_OFFSET_NEGAT
     arm7.fetchAndExecute(1);
 
     EXPECT_EQ(arm7.readReg(0), 0xFFFF8000);
+}
+// ==================================================================================================
+// STM
+// ==================================================================================================
+class TestCPU_THUMB_LoadAndStoreInstructions_STM : public TestCPU_THUMB_LoadAndStoreInstructions {
+protected:
+    TestCPU_THUMB_LoadAndStoreInstructions_STM() {}
+    ~TestCPU_THUMB_LoadAndStoreInstructions_STM() {}
+
+    void SetUp() override { TestCPU_THUMB_LoadAndStoreInstructions::SetUp(); }
+    void TearDown() override { TestCPU_THUMB_LoadAndStoreInstructions::TearDown(); }
+};
+/**
+ * @brief Test STM.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STM, STM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x200;
+
+    arm7.writeReg(0, 0xAAAA0001);
+    arm7.writeReg(1, 0xBBBB0002);
+    arm7.writeReg(2, 0xCCCC0003);
+    arm7.writeReg(4, base);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "STM R4!, {R0,R1,R2}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(bus.read32ARM7(base + 0), 0xAAAA0001);
+    EXPECT_EQ(bus.read32ARM7(base + 4), 0xBBBB0002);
+    EXPECT_EQ(bus.read32ARM7(base + 8), 0xCCCC0003);
+    EXPECT_EQ(arm7.readReg(4), base + 12);
+}
+/**
+ * @brief Test STM with the base register in the list.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STM, STM_BASE_IN_LIST) {
+    uint32_t base = MAIN_RAM_START + 0x200;
+
+    arm7.writeReg(0, 0xAAAA0001);
+    arm7.writeReg(1, 0xBBBB0002);
+    arm7.writeReg(2, 0xCCCC0003);
+    arm7.writeReg(4, base);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "STM R4!, {R0,R1,R2,R4}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(bus.read32ARM7(base + 0), 0xAAAA0001);
+    EXPECT_EQ(bus.read32ARM7(base + 4), 0xBBBB0002);
+    EXPECT_EQ(bus.read32ARM7(base + 8), 0xCCCC0003);
+    EXPECT_EQ(bus.read32ARM7(base + 12), base);
+    EXPECT_EQ(arm7.readReg(4), base + 16);
+}
+// ==================================================================================================
+// LDM
+// ==================================================================================================
+class TestCPU_THUMB_LoadAndStoreInstructions_LDM : public TestCPU_THUMB_LoadAndStoreInstructions {
+protected:
+    TestCPU_THUMB_LoadAndStoreInstructions_LDM() {}
+    ~TestCPU_THUMB_LoadAndStoreInstructions_LDM() {}
+
+    void SetUp() override { TestCPU_THUMB_LoadAndStoreInstructions::SetUp(); }
+    void TearDown() override { TestCPU_THUMB_LoadAndStoreInstructions::TearDown(); }
+};
+/**
+ * @brief Test LDM.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_LDM, LDM_BASIC) {
+    uint32_t base = MAIN_RAM_START + 0x400;
+
+    bus.write32ARM7(base + 0, 0xAAAA0001);
+    bus.write32ARM7(base + 4, 0xBBBB0002);
+    bus.write32ARM7(base + 8, 0xCCCC0003);
+
+    arm7.writeReg(4, base);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "LDMIA R4!, {R0,R1,R2}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(arm7.readReg(0), 0xAAAA0001);
+    EXPECT_EQ(arm7.readReg(1), 0xBBBB0002);
+    EXPECT_EQ(arm7.readReg(2), 0xCCCC0003);
+
+    EXPECT_EQ(arm7.readReg(4), base + 12);
+}
+/**
+ * @brief Test LDM with the base register in the list.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_LDM, LDM_BASE_IN_LIST) {
+    uint32_t base = MAIN_RAM_START + 0x500;
+
+    bus.write32ARM7(base + 0, 0xAAAA0001);
+    bus.write32ARM7(base + 4, 0xBBBB0002);
+
+    arm7.writeReg(4, base);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "LDMIA R4!, {R0,R4}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(arm7.readReg(0), 0xAAAA0001);
+    EXPECT_EQ(arm7.readReg(4), 0xBBBB0002);
+}
+// ==================================================================================================
+// PUSH
+// ==================================================================================================
+class TestCPU_THUMB_LoadAndStoreInstructions_PUSH : public TestCPU_THUMB_LoadAndStoreInstructions {
+protected:
+    TestCPU_THUMB_LoadAndStoreInstructions_PUSH() {}
+    ~TestCPU_THUMB_LoadAndStoreInstructions_PUSH() {}
+
+    void SetUp() override { TestCPU_THUMB_LoadAndStoreInstructions::SetUp(); }
+    void TearDown() override { TestCPU_THUMB_LoadAndStoreInstructions::TearDown(); }
+};
+/**
+ * @brief Test PUSH.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_PUSH, PUSH_BASIC) {
+    uint32_t sp = MAIN_RAM_START + 0x600;
+
+    arm7.writeReg(0, 0xAAAA0001);
+    arm7.writeReg(1, 0xBBBB0002);
+    arm7.writeReg(SP_REGISTER_NUM, sp);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "PUSH {R0,R1}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(bus.read32ARM7(sp - 8), 0xAAAA0001);
+    EXPECT_EQ(bus.read32ARM7(sp - 4), 0xBBBB0002);
+
+    EXPECT_EQ(arm7.readReg(SP_REGISTER_NUM), sp - 8);
+}
+/**
+ * @brief Test PUSH with LR in the register list.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_PUSH, PUSH_WITH_LR) {
+    uint32_t sp = MAIN_RAM_START + 0x700;
+
+    arm7.writeReg(0, 0xAAAA0001);
+    arm7.writeReg(LR_REGISTER_NUM, 0xDEADBEEF);
+    arm7.writeReg(SP_REGISTER_NUM, sp);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "PUSH {R0,LR}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(bus.read32ARM7(sp - 8), 0xAAAA0001);
+    EXPECT_EQ(bus.read32ARM7(sp - 4), 0xDEADBEEF);
+
+    EXPECT_EQ(arm7.readReg(SP_REGISTER_NUM), sp - 8);
+}
+// ==================================================================================================
+// POP
+// ==================================================================================================
+class TestCPU_THUMB_LoadAndStoreInstructions_POP : public TestCPU_THUMB_LoadAndStoreInstructions {
+protected:
+    TestCPU_THUMB_LoadAndStoreInstructions_POP() {}
+    ~TestCPU_THUMB_LoadAndStoreInstructions_POP() {}
+
+    void SetUp() override { TestCPU_THUMB_LoadAndStoreInstructions::SetUp(); }
+    void TearDown() override { TestCPU_THUMB_LoadAndStoreInstructions::TearDown(); }
+};
+/**
+ * @brief Test POP.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_POP, POP_BASIC) {
+    uint32_t sp = MAIN_RAM_START + 0x800;
+
+    bus.write32ARM7(sp + 0, 0xAAAA0001);
+    bus.write32ARM7(sp + 4, 0xBBBB0002);
+
+    arm7.writeReg(SP_REGISTER_NUM, sp);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "POP {R0,R1}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(arm7.readReg(0), 0xAAAA0001);
+    EXPECT_EQ(arm7.readReg(1), 0xBBBB0002);
+
+    EXPECT_EQ(arm7.readReg(SP_REGISTER_NUM), sp + 8);
+}
+/**
+ * @brief Test POP with PC in the register list.
+ */
+TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_POP, POP_PC) {
+    uint32_t sp = MAIN_RAM_START + 0x900;
+
+    bus.write32ARM7(sp, MAIN_RAM_START + 0x100);
+
+    arm7.writeReg(SP_REGISTER_NUM, sp);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "POP {PC}\n",
+        MAIN_RAM_START, &bus, arm7.isARM7());
+
+    arm7.setPC(MAIN_RAM_START);
+    arm7.fetchAndExecute(1);
+
+    EXPECT_EQ(arm7.readReg(PC_REGISTER_NUM), MAIN_RAM_START + 0x100);
 }
