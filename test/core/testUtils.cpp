@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../src/utils/utils.h"
+#include "core/utils/utils.h"
 
 /**
  * @brief Test fixture for the application's utility functions.

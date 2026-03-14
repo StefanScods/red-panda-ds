@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../src/interconnect.h"
-#include "../src/memoryDefines.h"
+#include "core/interconnect.h"
+#include "core/memoryDefines.h"
 
 /**
  * @brief Test fixture for the interconnect.

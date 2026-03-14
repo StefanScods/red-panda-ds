@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "../src/cpu.h"
-#include "../src/interconnect.h"
-#include "../src/memoryDefines.h"
-#include "../src/utils/armEncode.h"
 #include "commonTest.h"
+#include "core/cpu.h"
+#include "core/interconnect.h"
+#include "core/memoryDefines.h"
+#include "core/utils/armEncode.h"
 
 /**
  * @brief Test fixture for the CPU's instructions in the data category.

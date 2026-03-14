@@ -4,8 +4,9 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/src/",
-                "${workspaceFolder}/src/utils",
+                "${workspaceFolder}/common/",
+                "${workspaceFolder}/core",
+                "${workspaceFolder}/test/core",
                 "${workspaceFolder}/build/_deps/googletest-src/googletest/include"
             ],
             "defines": [

@@ -5,10 +5,10 @@
 #include <iostream>
 #include <regex>
 
-#include "../src/cpu.h"
-#include "../src/interconnect.h"
-#include "../src/utils/armEncode.h"
-#include "../src/utils/utils.h"
+#include "core/cpu.h"
+#include "core/interconnect.h"
+#include "core/utils/armEncode.h"
+#include "core/utils/utils.h"
 
 const std::string BASE_REG_TOKEN = "{BASE_REG}";
 

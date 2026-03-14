@@ -1,21 +1,26 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(TEST_INCLUDES
-    ${TEST_INCLUDES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/
-    PARENT_SCOPE
-)
+message("Building Test Suite")
 
-set(TEST_SOURCES
-   ${TEST_SOURCES}
-   ${CMAKE_CURRENT_SOURCE_DIR}/commonTest.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/testInterconnect.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/CPU/ARM/branchInstructions.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/CPU/ARM/dataInstructions.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/CPU/ARM/loadStoreInstructions.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/CPU/THUMB/branchInstructions.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/CPU/THUMB/dataInstructions.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/CPU/THUMB/loadStoreInstructions.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/testUtils.cpp
-   PARENT_SCOPE
+# ==================================================================================================
+# Google Test
+# ==================================================================================================
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
 )
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+
+# Init the includes with the core application files and the test framework
+set(TEST_INCLUDES
+    ${EMU_CORE_INCLUDES}
+)
+include(GoogleTest)
+
+# ==================================================================================================
+# Test Suites
+# ==================================================================================================
+add_subdirectory(core)
