@@ -111,6 +111,7 @@ protected:
 TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STRH, STRH_IMMEDIATE_OFFSET) {
     uint32_t base = MAIN_RAM_START + 0x400;
 
+    bus.write32ARM7(base + 4, 0);
     arm7.writeReg(0, 0xABCD1234);
     arm7.writeReg(1, base);
     writeProgramToMemory(
@@ -130,6 +131,7 @@ TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STRH, STRH_IMMEDIATE_OFFSET) {
 TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STRH, STRH_REGISTER_OFFSET) {
     uint32_t base = MAIN_RAM_START + 0x400;
 
+    bus.write32ARM7(base + 4, 0);
     arm7.writeReg(0, 0xABCD1234);
     arm7.writeReg(1, base);
     arm7.writeReg(2, 0x4);
@@ -161,6 +163,7 @@ protected:
 TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STRB, STRB_IMMEDIATE_OFFSET) {
     uint32_t base = MAIN_RAM_START + 0x400;
 
+    bus.write32ARM7(base + 4, 0);
     arm7.writeReg(0, 0xABCD1234);
     arm7.writeReg(1, base);
     writeProgramToMemory(
@@ -180,6 +183,7 @@ TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STRB, STRB_IMMEDIATE_OFFSET) {
 TEST_F(TestCPU_THUMB_LoadAndStoreInstructions_STRB, STRB_REGISTER_OFFSET) {
     uint32_t base = MAIN_RAM_START + 0x400;
 
+    bus.write32ARM7(base + 4, 0);
     arm7.writeReg(0, 0xABCD1234);
     arm7.writeReg(1, base);
     arm7.writeReg(2, 0x4);

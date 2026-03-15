@@ -8,7 +8,7 @@
             "name": "Launch GDB",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Debug/redPandaDS.exe",
+            "program": "${workspaceFolder}/build/Debug/redPandaDS${env:OS:exe}",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -82,7 +82,7 @@
         {
             "label": "run (Release)",
             "type": "shell",
-            "command": "./build/Release/redPandaDS.exe",
+            "command": "./build/Release/redPandaDS${env:OS:exe}",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -101,7 +101,7 @@
         {
             "label": "test (Release)",
             "type": "shell",
-            "command": "./build/Release/runTests.exe",
+            "command": "./build/Release/runTests${env:OS:exe}",
             "args": [
                 "--gtest_color=yes",
                 "--gtest_output=xml:./test/reports/release.xml"
@@ -124,7 +124,7 @@
         {
             "label": "run (Debug)",
             "type": "shell",
-            "command": "./build/Debug/redPandaDS.exe",
+            "command": "./build/Debug/redPandaDS${env:OS:exe}",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -143,7 +143,7 @@
         {
             "label": "test (Debug)",
             "type": "shell",
-            "command": "./build/Debug/runTests.exe",
+            "command": "./build/Debug/runTests${env:OS:exe}",
             "args": [
                 "--gtest_color=yes",
                 "--gtest_output=xml:./test/reports/debug.xml"

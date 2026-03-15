@@ -7,18 +7,19 @@
 from pathlib import Path
 import shutil
 import sys
-from defines import BUILD_DIR, BUILD_TYPES, OUTPUT_BINARY
+from defines import BUILD_DIR, BUILD_TYPES, EXE_SUFFIX, OUTPUT_BINARY
 from utils import checkIfToolExists, runCommand, printStyle, ANSI_CODES
 import os
 
 cmakeCache = Path("build/CMakeCache.txt")
+
 
 def determineIfNeedToRunCMakeConfigure(type: str) -> bool:
     """Check if CMake configure needs to be ran."""
     # Check if the cache exits.
     if not cmakeCache.exists():
         return True
-    
+
     # Read in the CMake Cache.
     cmake_cache = {}
     with open(cmakeCache.as_posix(), "r") as file:
@@ -33,7 +34,7 @@ def determineIfNeedToRunCMakeConfigure(type: str) -> bool:
                 key = key_value[0].strip()
                 value = "=".join(key_value[1:]).strip()
                 cmake_cache[key] = value
-    
+
     # Check the build type.
     if "CMAKE_BUILD_TYPE:STRING" in cmake_cache:
         cached_type = cmake_cache["CMAKE_BUILD_TYPE:STRING"]
@@ -63,9 +64,11 @@ if __name__ == "__main__":
         printStyle("Error: Invalid BuildType", style=ANSI_CODES.RED + ANSI_CODES.BOLD)
         print("Supported BuildTypes:\n\t" + "\n\t".join(BUILD_TYPES))
         exit(1)
-    
+
     # Check if required tools exist.
     checkIfToolExists("git")
+    checkIfToolExists("arm-none-eabi-gcc")
+    checkIfToolExists("arm-none-eabi-objdump")
 
     # Pull submodules if not already pulled.
     output = runCommand("git submodule init")
@@ -76,10 +79,10 @@ if __name__ == "__main__":
     # Additional generator logic.
     additionalArgs = ""
     # Fetch location of gcc and g++.
-    checkIfToolExists("gcc.exe", installerName="msys64")
-    gccPath = shutil.which("gcc.exe")
-    checkIfToolExists("g++.exe", installerName="msys64")
-    gppPath = shutil.which("g++.exe")
+    checkIfToolExists("gcc" + EXE_SUFFIX, installerName="msys64")
+    gccPath = shutil.which("gcc" + EXE_SUFFIX)
+    checkIfToolExists("g++" + EXE_SUFFIX, installerName="msys64")
+    gppPath = shutil.which("g++" + EXE_SUFFIX)
     additionalArgs = f"-DCMAKE_C_COMPILER={gccPath} -DCMAKE_CXX_COMPILER={gppPath}"
 
     # Configure cmake.
@@ -93,7 +96,7 @@ if __name__ == "__main__":
         # Run CMake Configure.
         print(f"Configuring project...")
         output = runCommand(
-            f'cmake -G Ninja .. -DCMAKE_BUILD_TYPE={buildType} {additionalArgs}',
+            f"cmake -G Ninja .. -DCMAKE_BUILD_TYPE={buildType} {additionalArgs}",
             cwd=BUILD_DIR,
         )
         if output.returncode:
