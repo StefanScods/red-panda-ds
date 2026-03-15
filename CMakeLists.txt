@@ -55,7 +55,6 @@ if(${BUILD_TEST})
 endif()
 
 # ==================================================================================================
-# Main
+# Applications
 # ==================================================================================================
-add_executable(redPandaDS main.cpp)
-target_link_libraries(redPandaDS PRIVATE ${EMU_CORE_LIB})
+add_subdirectory(frontends/redPandaDS)

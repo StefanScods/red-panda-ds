@@ -48,7 +48,6 @@
             },
             "args": [
                 "./scripts/build.py",
-                "Ninja",
                 "Release"
             ],
             "presentation": {
@@ -69,49 +68,6 @@
             },
             "args": [
                 "./scripts/build.py",
-                "Ninja",
-                "Debug"
-            ],
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
-            }
-        },
-        {
-            "label": "build (MSVC Release)",
-            "type": "shell",
-            "command": "python",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "args": [
-                "./scripts/build.py",
-                "MSVC",
-                "Release"
-            ],
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
-            }
-        },
-        {
-            "label": "build (MSVC Debug)",
-            "type": "shell",
-            "command": "python",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "args": [
-                "./scripts/build.py",
-                "MSVC",
                 "Debug"
             ],
             "presentation": {

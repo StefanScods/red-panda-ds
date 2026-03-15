@@ -1518,7 +1518,7 @@ cycles ARM::ARM_SMLAWB(uint32_t instruct) {
     fixupIfTargetingPC(Rd);
     // Set Q Flag.
     if ((result >> 16) != ((int32_t)*activeRegs[Rd])) {
-        setFlag(Q_FLAG, 1);
+        setFlag(Q_BIT, 1);
     }
     return 1;  // Only one I Cycle.
 }
@@ -1540,7 +1540,7 @@ cycles ARM::ARM_SMLAWT(uint32_t instruct) {
     fixupIfTargetingPC(Rd);
     // Set Q Flag.
     if ((result >> 16) != ((int32_t)*activeRegs[Rd])) {
-        setFlag(Q_FLAG, 1);
+        setFlag(Q_BIT, 1);
     }
     return 1;  // Only one I Cycle.
 }
@@ -1551,7 +1551,7 @@ cycles ARM::ARM_SMLA(uint32_t desReg, int32_t opp1, int32_t opp2, int32_t addend
     fixupIfTargetingPC(desReg);
     // Set Q Flag.
     if (result != ((int32_t)result)) {
-        setFlag(Q_FLAG, 1);
+        setFlag(Q_BIT, 1);
     }
     return 1;  // Only one I Cycle.
 }

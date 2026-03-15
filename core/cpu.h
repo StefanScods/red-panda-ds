@@ -31,7 +31,7 @@ class Interconnect;
 // Overflow Condition Flag
 #define V_FLAG 28
 // Cumulative saturation Flag
-#define Q_FLAG 27
+#define Q_BIT 27
 // Disable IRQ interrupts
 #define I_BIT 7
 // Disable FIQ interrupts

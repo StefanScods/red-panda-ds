@@ -16,5 +16,3 @@ SRC_DIRS = ["src/", "test/"]
 SRC_FILE_EXTENSIONS = [".cpp", ".h", ".hpp"]
 # Supported build types.
 BUILD_TYPES = ["Release", "Debug"]
-# Supported build generators.
-BUILD_GENERATORS = ["Ninja", "MSVC"]

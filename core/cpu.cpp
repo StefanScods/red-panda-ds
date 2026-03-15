@@ -442,11 +442,11 @@ int64_t ARM::signedSaturatedQ(int64_t operand, uint8_t bitSize) {
     int64_t max = ((int64_t)std::pow(2, bitSize - 1)) - 1;
     int64_t min = -((int64_t)std::pow(2, bitSize - 1));
     if (operand > max) {
-        setFlag(Q_FLAG, 1);
+        setFlag(Q_BIT, 1);
         return max;
     }
     if (operand < min) {
-        setFlag(Q_FLAG, 1);
+        setFlag(Q_BIT, 1);
         return min;
     }
     // Do not clear the Q Flag.
