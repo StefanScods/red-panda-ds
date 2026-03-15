@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qss</file>
+        <file>../../build/resources/PixelCodeFont/PixelCode.ttf</file>
+        <file>../../build/resources/PixelCodeFont/LICENSE</file>
+    </qresource>
+</RCC>

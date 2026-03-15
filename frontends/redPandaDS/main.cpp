@@ -1,20 +1,18 @@
-
-
-#include "core/cpu.h"
-#include "core/interconnect.h"
-#include "core/utils/armEncode.h"
-#include "core/utils/utils.h"
-#include "mainWindow/mainWindow.h"
-
+#include "app/app.h"
 // Control print statements.
-#define LOG_LEVEL 2
+#define LOG_LEVEL 4
 #include "logger.h"
 
 int main(int argc, char** argv) {
-    QApplication app(argc, argv);
-    RedPandaDS::UI::MainWindow window;
-    window.show();
-    return app.exec();
+    std::vector<char*> args;
+    RedPandaDS::UI::RedPandaDSApp app(args);
+    if (!app.start()) {
+        return 1;
+    }
+    int returnCode = app.run();
+    LogDebug("Exiting with return code: " << returnCode);
+    app.exit();
+    return returnCode;
 }
 
 // Create a clean entry point for windows.
