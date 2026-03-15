@@ -9,6 +9,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/ARM-instruction-set-encoding?lang=en
 
 // ==================================================================================================
@@ -2591,3 +2594,6 @@ cycles ARM::ARM_coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint
     return ARM_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

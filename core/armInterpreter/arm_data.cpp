@@ -11,6 +11,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Data-processing-and-miscellaneous-instructions?lang=en
 
 // ==================================================================================================
@@ -1900,3 +1903,6 @@ cycles ARM::ARM_CLZ(uint32_t instruct) {
     return 1;  // Only one I Cycle.
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

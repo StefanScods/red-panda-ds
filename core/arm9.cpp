@@ -9,6 +9,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // ==================================================================================================
 ARM946ES::ARM946ES() {
     arm9 = true;
@@ -149,3 +152,6 @@ cycles ARM946ES::cycle() {
     return cyclesRan;
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

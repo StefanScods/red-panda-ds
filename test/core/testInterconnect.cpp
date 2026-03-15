@@ -3,6 +3,8 @@
 #include "core/interconnect.h"
 #include "core/memoryDefines.h"
 
+using namespace RedPandaDS::Core;
+
 /**
  * @brief Test fixture for the interconnect.
  */

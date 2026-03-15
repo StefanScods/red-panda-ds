@@ -7,6 +7,9 @@
 #include "types.h"
 #include "utils.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // Forward declarations.
 class Interconnect;
 
@@ -703,5 +706,8 @@ public:
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };
+
+}  // namespace Core
+}  // namespace RedPandaDS
 
 #endif

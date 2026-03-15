@@ -6,6 +6,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // ==================================================================================================
 Interconnect::Interconnect() {
 }
@@ -260,3 +263,6 @@ void Interconnect::write8ARM9(uint32_t addr, uint8_t data) {
     }
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

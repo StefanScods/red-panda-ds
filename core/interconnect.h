@@ -5,6 +5,9 @@
 
 #include "memoryDefines.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // Forward declarations.
 class ARM;
 
@@ -131,4 +134,8 @@ public:
      */
     void write8ARM9(uint32_t addr, uint8_t data);
 };
+
+}  // namespace Core
+}  // namespace RedPandaDS
+
 #endif

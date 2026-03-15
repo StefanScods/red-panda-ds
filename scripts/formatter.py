@@ -76,7 +76,7 @@ if __name__ == "__main__":
     # Print output message.
     modifiedCount = len(modified)
     if modifiedCount:
-        print(f"Reformated:\n\t{"\n\t".join(modified)}")
+        print("Reformated:\n\t" + "\n\t".join(modified))
     timeElapsed = time.time() - startTime
     print(f"Looked at {len(sourceFiles)} files within {timeElapsed} seconds.")
     if modifiedCount == 0:
@@ -86,6 +86,6 @@ if __name__ == "__main__":
         )
     else:
         printStyle(
-            f"Reformatted {modifiedCount} file{"s" if modifiedCount > 1 else ""}!",
+            f"Reformatted {modifiedCount} file" + ("s" if modifiedCount > 1 else "") +"!",
             style=ANSI_CODES.BOLD + ANSI_CODES.GREEN,
         )

@@ -2,6 +2,8 @@
 
 #include "core/utils/utils.h"
 
+using namespace RedPandaDS::Core;
+
 /**
  * @brief Test fixture for the application's utility functions.
  */

@@ -2,6 +2,9 @@
 #ifndef MEMORYDEFINES_H
 #define MEMORYDEFINES_H
 
+namespace RedPandaDS {
+namespace Core {
+
 #define ARM_WORD_SIZE 4
 #define ARM_MODE_INST_SIZE ARM_WORD_SIZE
 #define THUMB_MODE_INST_SIZE 2
@@ -37,4 +40,8 @@ enum ARM9MemoryRegionNum {
     BIOS = 0xFF
 };
 }
+
+}  // namespace Core
+}  // namespace RedPandaDS
+
 #endif

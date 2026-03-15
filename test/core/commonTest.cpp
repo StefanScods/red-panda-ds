@@ -5,6 +5,8 @@
 #define LOG_LEVEL 1
 #include "logger.h"
 
+using namespace RedPandaDS::Core;
+
 std::vector<InstructionTestCase> genInstuctionTestCase(std::vector<std::string> instruction,
                                                        std::vector<uint32_t> expectedVals,
                                                        bool skipPC) {

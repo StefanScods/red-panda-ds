@@ -1,6 +1,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+namespace RedPandaDS {
+namespace Core {
+
 #include <cstdint>
 
 #define INVALID_MEM_32BIT 0xFFFFFFFF
@@ -36,4 +39,8 @@ struct decodeShiftResult {
     uint8_t shiftType;
     uint8_t shiftAmount;
 };
+
+}  // namespace Core
+}  // namespace RedPandaDS
+
 #endif

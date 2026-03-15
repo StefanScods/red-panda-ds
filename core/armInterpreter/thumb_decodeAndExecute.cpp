@@ -9,6 +9,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // ==================================================================================================
 // Shift (immediate), add, subtract, move, compare
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding/Shift--immediate---add--subtract--move--and-compare?lang=en
@@ -357,3 +360,6 @@ cycles ARM::THUMB_condBranchAndSupervisorCallDecodeAndExecute(uint32_t instruct)
     return THUMB_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

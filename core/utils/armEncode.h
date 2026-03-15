@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+namespace RedPandaDS {
+namespace Core {
+
 class Interconnect;
 
 struct Encoding {
@@ -48,5 +51,8 @@ std::vector<Encoding> armEncodeASM(std::string instructions, bool arm7 = true);
  * ARM9.
  */
 void writeProgramToMemory(std::string program, uint32_t startAddress, Interconnect* bus, bool arm7);
+
+}  // namespace Core
+}  // namespace RedPandaDS
 
 #endif

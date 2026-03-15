@@ -13,6 +13,10 @@
 #include <vector>
 
 #include "types.h"
+
+namespace RedPandaDS {
+namespace Core {
+
 /**
  * @brief A helper function to perform a subtraction while removing potential underflows.
  *
@@ -389,5 +393,8 @@ inline uint32_t getLSB(uint32_t value) {
     }
     return 32;
 }
+
+}  // namespace Core
+}  // namespace RedPandaDS
 
 #endif

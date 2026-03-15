@@ -9,6 +9,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // TODO!!! Handle T instructions - privilege vs unprivilege access
 
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Load-store-word-and-unsigned-byte?lang=en
@@ -667,3 +670,6 @@ cycles ARM::ARM_LDRSH(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool p
     return payload.numCycles;
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

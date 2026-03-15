@@ -9,6 +9,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/ARM-Instruction-Set-Encoding/Branch--branch-with-link--and-block-data-transfer?lang=en
 
 // ==================================================================================================
@@ -65,3 +68,6 @@ cycles ARM::ARM_BX(uint32_t instruct) {
                // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

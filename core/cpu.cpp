@@ -7,6 +7,10 @@
 // Control print statements.
 #define LOG_LEVEL 1
 #include "logger.h"
+
+namespace RedPandaDS {
+namespace Core {
+
 // ==================================================================================================
 std::vector<std::string> g_regNames = {"r0", "r1", "r2",  "r3",  "r4",  "r5",  "r6",  "r7",
                                        "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"};
@@ -525,3 +529,6 @@ bool ARM::checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics conditio
     return false;
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

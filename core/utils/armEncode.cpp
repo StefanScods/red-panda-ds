@@ -12,6 +12,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // ==================================================================================================
 void cleanUpEncodeTemps(std::filesystem::path tempDir) {
     if (std::filesystem::exists(tempDir)) {
@@ -131,3 +134,6 @@ void writeProgramToMemory(std::string program, uint32_t startAddress, Interconne
                                             << bytesWritten << " byte(s)");
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS

@@ -10,6 +10,8 @@
 #include "core/utils/armEncode.h"
 #include "core/utils/utils.h"
 
+using namespace RedPandaDS::Core;
+
 const std::string BASE_REG_TOKEN = "{BASE_REG}";
 
 struct InstructionTestCase {

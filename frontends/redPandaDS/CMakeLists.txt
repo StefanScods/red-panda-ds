@@ -9,10 +9,11 @@ set(RED_PANDA_DS_INCLUDES
 )
 set(RED_PANDA_DS_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/mainWindow/mainWindow.cpp
 )
 
 set(RED_PANDA_DS_QT_UI_SOURCES
-   ${CMAKE_CURRENT_SOURCE_DIR}/ui/mainwindow.ui
+   ${CMAKE_CURRENT_SOURCE_DIR}/mainWindow/mainWindow.ui
 )
 
 # ==================================================================================================

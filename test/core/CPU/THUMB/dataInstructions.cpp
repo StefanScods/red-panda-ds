@@ -6,6 +6,8 @@
 #include "core/memoryDefines.h"
 #include "core/utils/armEncode.h"
 
+using namespace RedPandaDS::Core;
+
 /**
  * @brief Test fixture for the CPU's instructions in the data category.
  */

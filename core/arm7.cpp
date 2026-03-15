@@ -9,6 +9,9 @@
 #define LOG_LEVEL 2
 #include "logger.h"
 
+namespace RedPandaDS {
+namespace Core {
+
 // ==================================================================================================
 ARM7TDMI::ARM7TDMI() {
     arm9 = false;
@@ -149,3 +152,6 @@ cycles ARM7TDMI::cycle() {
     return cyclesRan;
 }
 // ==================================================================================================
+
+}  // namespace Core
+}  // namespace RedPandaDS
