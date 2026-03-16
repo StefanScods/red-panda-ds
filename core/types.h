@@ -13,6 +13,16 @@ namespace Core {
 typedef uint64_t cycles;
 
 /**
+ * @brief Defines an emulator Core event.
+ *
+ * @param timestamp The timestamp to finish this event.
+ */
+struct coreEvent {
+    cycles timestamp;
+    bool operator<(const coreEvent& other) const { return timestamp < other.timestamp; }
+};
+
+/**
  * @brief return type of bus reads / writes
  *
  * @param data The value of data read / written

@@ -2,12 +2,17 @@
 #define RED_PANDA_DS_UI_APP_H
 
 #include <QApplication>
+#include <QTimer>
 
+#include "common.h"
 #include "core/core.h"
+#include "cpuViewer/cpuViewer.h"
 #include "mainWindow/mainWindow.h"
 
 namespace RedPandaDS {
 namespace UI {
+
+#define APPLICATION_REFRESH_RATE 15  // ms
 
 class RedPandaDSApp {
 public:
@@ -38,6 +43,16 @@ public:
      * @return Core::DSEmuCore*
      */
     Core::DSEmuCore* getEmuCore() { return core; }
+    /**
+     * @brief Fetch the QT event timer for refreshing widgets.
+     *
+     * @return QTimer*
+     */
+    QTimer* getRefreshTimer() { return timer; }
+
+    // Widget openers.
+    void openARM7Viewer();
+    void openARM9Viewer();
 
 private:
     QApplication* app = nullptr;
@@ -45,6 +60,11 @@ private:
 
     // Windows.
     MainWindow* mainWindow = nullptr;
+    CPUViewer* arm7Viewer = nullptr;
+    CPUViewer* arm9Viewer = nullptr;
+
+    // Other QT components.
+    QTimer* timer = nullptr;
 };
 
 }  // namespace UI

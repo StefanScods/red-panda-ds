@@ -1,5 +1,10 @@
 #include "mainWindow.h"
 
+#include <QCloseEvent>
+
+#include "app/app.h"
+#include "common.h"
+
 // Control print statements.
 #define LOG_LEVEL 2
 #include "logger.h"
@@ -14,11 +19,19 @@ MainWindow::MainWindow(RedPandaDSApp* app, QWidget* parent)
 
     // Hook up callback functions.
     connect(ui->actionQuit, &QAction::triggered, qApp, &QCoreApplication::quit);
+    connect(ui->action_viewarm7, &QAction::triggered, this,
+            [this, app]() { app->openARM7Viewer(); });
+    connect(ui->action_viewarm9, &QAction::triggered, this,
+            [this, app]() { app->openARM9Viewer(); });
 }
 // ==================================================================================================
 MainWindow::~MainWindow() {
-    if (ui != nullptr) delete ui;
-    ui = nullptr;
+    DELETE_DYNAMIC_POINTER(ui);
+}
+// ==================================================================================================
+void MainWindow::closeEvent(QCloseEvent* event) {
+    QApplication::quit();
+    event->accept();
 }
 // ==================================================================================================
 }  // namespace UI

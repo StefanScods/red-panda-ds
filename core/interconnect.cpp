@@ -15,6 +15,7 @@ Interconnect::Interconnect() {
 // ==================================================================================================
 Interconnect::~Interconnect() {
     arm7 = nullptr;
+    arm9 = nullptr;
 
     if (mainRAM != nullptr) {
         delete[] mainRAM;

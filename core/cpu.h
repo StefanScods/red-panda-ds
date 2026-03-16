@@ -83,7 +83,27 @@ enum ProcessorModes : uint8_t {
     Undefined = 0b11011,
     System = 0b11111,
 };
+inline const char* toString(ProcessorModes mode) {
+    switch (mode) {
+        case User:
+            return "User";
+        case FIQ:
+            return "FIQ";
+        case IRQ:
+            return "IRQ";
+        case Supervisor:
+            return "Supervisor";
+        case Abort:
+            return "Abort";
+        case Undefined:
+            return "Undefined";
+        case System:
+            return "System";
+        default:
+            return "Unknown";
+    }
 }
+}  // namespace ProcessorModes
 
 extern std::vector<std::string> g_regNames;
 
@@ -164,6 +184,13 @@ protected:
 public:
     ARM();
     ~ARM();
+
+    /**
+     * @brief Get the name of the CPU.
+     *
+     * @return std::string
+     */
+    virtual std::string getCPUName() { return "ARM"; }
 
     /**
      * @brief Returns true if this CPU implements arm7.
@@ -250,6 +277,13 @@ public:
      * @param regNum (0-15)
      */
     uint32_t readReg(uint32_t regNum) const { return *activeRegs[regNum]; }
+    /**
+     * @brief Read a register value form a specific mode.
+     *
+     * @param mode The mode to read from.
+     * @param regNum (0-15) (16 - CPSR) (17 - SPSR)
+     */
+    uint32_t readModeReg(ProcessorModes::ProcessorModes mode, uint32_t regNum) const;
 
     /**
      * @brief Write to a register.
@@ -687,6 +721,7 @@ public:
 
     // Function overrides.
     cycles cycle() override;
+    std::string getCPUName() override { return "ARM7TDMI"; }
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };
@@ -703,6 +738,7 @@ public:
 
     // Function overrides.
     cycles cycle() override;
+    std::string getCPUName() override { return "ARM946ES"; }
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };

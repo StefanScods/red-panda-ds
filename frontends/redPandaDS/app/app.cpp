@@ -18,15 +18,16 @@ RedPandaDSApp::RedPandaDSApp(std::vector<char*>& args) {
     char** argv = args.data();
     app = new QApplication(argc, argv);
     mainWindow = new MainWindow(this);
+    timer = new QTimer(app);
 }
 // ==================================================================================================
 RedPandaDSApp::~RedPandaDSApp() {
-    if (core != nullptr) delete core;
-    core = nullptr;
-    if (app != nullptr) delete app;
-    app = nullptr;
-    if (mainWindow != nullptr) delete mainWindow;
-    mainWindow = nullptr;
+    DELETE_DYNAMIC_POINTER(core);
+    DELETE_DYNAMIC_POINTER(timer);
+    DELETE_DYNAMIC_POINTER(mainWindow);
+    DELETE_DYNAMIC_POINTER(arm7Viewer);
+    DELETE_DYNAMIC_POINTER(arm9Viewer);
+    DELETE_DYNAMIC_POINTER(app);
 }
 // ==================================================================================================
 bool RedPandaDSApp::start() {
@@ -44,6 +45,8 @@ bool RedPandaDSApp::start() {
     QString styleSheetContent = QLatin1String(styleSheetFile.readAll());
     app->setStyleSheet(styleSheetContent);
 
+    timer->start(APPLICATION_REFRESH_RATE);
+
     // Initialize the emulator.
     core->init();
 
@@ -59,6 +62,19 @@ int RedPandaDSApp::run() {
 bool RedPandaDSApp::exit() {
     LogMsg("Exiting RedPandaDS...");
     return true;
+}
+// ==================================================================================================
+void RedPandaDSApp::openARM7Viewer() {
+    if (arm7Viewer == nullptr) {
+        arm7Viewer = new CPUViewer(this, core->getARM7Core());
+    }
+    arm7Viewer->isHidden() ? arm7Viewer->show() : arm7Viewer->raise();
+}
+void RedPandaDSApp::openARM9Viewer() {
+    if (arm9Viewer == nullptr) {
+        arm9Viewer = new CPUViewer(this, core->getARM9Core());
+    }
+    arm9Viewer->isHidden() ? arm9Viewer->show() : arm9Viewer->raise();
 }
 // ==================================================================================================
 

@@ -25,10 +25,12 @@ set(RED_PANDA_DS_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/app/app.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/mainWindow/mainWindow.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpuViewer/cpuViewer.cpp
 )
 set(RED_PANDA_DS_QT_UI_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/resources.qrc
    ${CMAKE_CURRENT_SOURCE_DIR}/mainWindow/mainWindow.ui
+   ${CMAKE_CURRENT_SOURCE_DIR}/cpuViewer/cpuViewer.ui
 )
 
 # ==================================================================================================

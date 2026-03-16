@@ -1,11 +1,16 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include <queue>
+
 #include "cpu.h"
 #include "interconnect.h"
 
 namespace RedPandaDS {
 namespace Core {
+
+constexpr int ARM9_CYCLE_RATIO = 1;
+constexpr int ARM7_CYCLE_RATIO = 2;
 
 class DSEmuCore {
 public:
@@ -27,10 +32,17 @@ public:
      */
     void reset();
 
+    cycles processNextEvent();
+
 private:
+    // Components.
     Interconnect* bus = nullptr;
     ARM7TDMI* arm7 = nullptr;
     ARM946ES* arm9 = nullptr;
+
+    // Event queue and cycle counter.
+    std::priority_queue<coreEvent> eventQueue;
+    cycles currentCycle = 0;
 };
 
 }  // namespace Core

@@ -17,6 +17,13 @@ public:
     ~MainWindow();
 
 private:
+    /**
+     * @brief Override the close event hook.
+     *
+     * @param event The current close event.
+     */
+    void closeEvent(QCloseEvent* event) override;
+
     Ui::MainWindow* ui = nullptr;
     const RedPandaDSApp* app = nullptr;
 };

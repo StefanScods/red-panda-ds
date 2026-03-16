@@ -1,3 +1,10 @@
 * {
-    font: 9pt "Pixel Code";
+    font: 12pt "Pixel Code";
+}
+
+QLabel[maincpuViewerLabel="true"] {
+    font-weight: bold;
+}
+QToolTip { 
+    font-size: 8pt;
 }

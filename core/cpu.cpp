@@ -426,6 +426,41 @@ void ARM::advanceInstructionPipeline() {
     instuctionPipeLine[2] = NO_INSTRUCT;
 }
 // ==================================================================================================
+uint32_t ARM::readModeReg(ProcessorModes::ProcessorModes mode, uint32_t regNum) const {
+    switch (mode) {
+        case ProcessorModes::System:
+        case ProcessorModes::User:
+            if (regNum >= 0 && regNum <= PC_REGISTER_NUM) return reg[regNum];
+            if (regNum == 16) return cpsr;
+            break;
+        case ProcessorModes::FIQ:
+            if (regNum >= 8 && regNum <= 14) return regFIQ[regNum - 8];
+            if (regNum == 17) return spsrFIQ;
+            break;
+        case ProcessorModes::IRQ:
+            if (regNum >= 13 && regNum <= 14) return regIRQ[regNum - 13];
+            if (regNum == 17) return spsrIRQ;
+            break;
+        case ProcessorModes::Supervisor:
+            if (regNum >= 13 && regNum <= 14) return regSVC[regNum - 13];
+            if (regNum == 17) return spsrSVC;
+            break;
+        case ProcessorModes::Abort:
+            if (regNum >= 13 && regNum <= 14) return regABT[regNum - 13];
+            if (regNum == 17) return spsrABT;
+            break;
+        case ProcessorModes::Undefined:
+            if (regNum >= 13 && regNum <= 14) return regUND[regNum - 13];
+            if (regNum == 17) return spsrUND;
+            break;
+        default:
+            break;
+    }
+    LogError("No register '" << reg << "' exists for mode '" << ProcessorModes::toString(mode)
+                             << "'!");
+    return 0;
+}
+// ==================================================================================================
 void ARM::setCPSR(uint32_t data) {
     bool modeSwitch = readBits(data, MODE_LOWER_BIT, MODE_UPPER_BIT) != getProcessorMode();
     bool thumbChange = readBit(data, T_BIT) != getThumbMode();

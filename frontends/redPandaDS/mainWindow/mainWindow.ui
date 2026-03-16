@@ -46,6 +46,8 @@
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="action_viewarm7"/>
+    <addaction name="action_viewarm9"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSave_State"/>
@@ -56,6 +58,16 @@
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="action_viewarm7">
+   <property name="text">
+    <string>View ARM7TDMI</string>
+   </property>
+  </action>
+  <action name="action_viewarm9">
+   <property name="text">
+    <string>View ARM946ES</string>
    </property>
   </action>
  </widget>
