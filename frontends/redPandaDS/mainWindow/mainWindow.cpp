@@ -23,6 +23,10 @@ MainWindow::MainWindow(RedPandaDSApp* app, QWidget* parent)
             [this, app]() { app->openARM7Viewer(); });
     connect(ui->action_viewarm9, &QAction::triggered, this,
             [this, app]() { app->openARM9Viewer(); });
+    connect(ui->actionView_Memory, &QAction::triggered, this,
+            [this, app]() { app->openMemoryViewer(); });
+    connect(ui->actionOpen_Disassembly, &QAction::triggered, this,
+            [this, app]() { app->openDisassemblyViewer(); });
 }
 // ==================================================================================================
 MainWindow::~MainWindow() {

@@ -7,7 +7,9 @@
 #include "common.h"
 #include "core/core.h"
 #include "cpuViewer/cpuViewer.h"
+#include "disassemblyViewer/disassemblyViewer.h"
 #include "mainWindow/mainWindow.h"
+#include "memoryViewer/memoryViewer.h"
 
 namespace RedPandaDS {
 namespace UI {
@@ -53,6 +55,8 @@ public:
     // Widget openers.
     void openARM7Viewer();
     void openARM9Viewer();
+    void openMemoryViewer();
+    void openDisassemblyViewer();
 
 private:
     QApplication* app = nullptr;
@@ -62,6 +66,8 @@ private:
     MainWindow* mainWindow = nullptr;
     CPUViewer* arm7Viewer = nullptr;
     CPUViewer* arm9Viewer = nullptr;
+    MemoryViewer* memoryViewer = nullptr;
+    DisassemblyViewer* disassemblyViewer = nullptr;
 
     // Other QT components.
     QTimer* timer = nullptr;

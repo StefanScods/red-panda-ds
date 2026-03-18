@@ -17,8 +17,13 @@ public:
     CPUViewer(RedPandaDSApp* app, Core::ARM* cpu, QWidget* parent = nullptr);
     ~CPUViewer();
 
+    /**
+     * @brief Callback function to refresh the widget with new content from the emulator core.
+     */
     void update();
-
+    /**
+     * @brief Callback function to open the detailed view window.
+     */
     void toggleDetailedView();
 
 private:

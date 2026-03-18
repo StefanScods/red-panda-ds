@@ -27,6 +27,8 @@ RedPandaDSApp::~RedPandaDSApp() {
     DELETE_DYNAMIC_POINTER(mainWindow);
     DELETE_DYNAMIC_POINTER(arm7Viewer);
     DELETE_DYNAMIC_POINTER(arm9Viewer);
+    DELETE_DYNAMIC_POINTER(memoryViewer);
+    DELETE_DYNAMIC_POINTER(disassemblyViewer);
     DELETE_DYNAMIC_POINTER(app);
 }
 // ==================================================================================================
@@ -75,6 +77,18 @@ void RedPandaDSApp::openARM9Viewer() {
         arm9Viewer = new CPUViewer(this, core->getARM9Core());
     }
     arm9Viewer->isHidden() ? arm9Viewer->show() : arm9Viewer->raise();
+}
+void RedPandaDSApp::openDisassemblyViewer() {
+    if (disassemblyViewer == nullptr) {
+        disassemblyViewer = new DisassemblyViewer(this, core);
+    }
+    disassemblyViewer->isHidden() ? disassemblyViewer->show() : disassemblyViewer->raise();
+}
+void RedPandaDSApp::openMemoryViewer() {
+    if (memoryViewer == nullptr) {
+        memoryViewer = new MemoryViewer(this, core);
+    }
+    memoryViewer->isHidden() ? memoryViewer->show() : memoryViewer->raise();
 }
 // ==================================================================================================
 

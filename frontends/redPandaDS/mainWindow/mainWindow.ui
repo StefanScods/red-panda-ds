@@ -48,6 +48,9 @@
     </property>
     <addaction name="action_viewarm7"/>
     <addaction name="action_viewarm9"/>
+    <addaction name="actionView_Memory"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_Disassembly"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSave_State"/>
@@ -68,6 +71,16 @@
   <action name="action_viewarm9">
    <property name="text">
     <string>View ARM946ES</string>
+   </property>
+  </action>
+  <action name="actionOpen_Disassembly">
+   <property name="text">
+    <string>Open Disassembly</string>
+   </property>
+  </action>
+  <action name="actionView_Memory">
+   <property name="text">
+    <string>View Memory</string>
    </property>
   </action>
  </widget>
