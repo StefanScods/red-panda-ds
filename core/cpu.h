@@ -71,7 +71,45 @@ enum ConditionMnemonics : uint8_t {
     AL = 0b1110,
     SPECIAL = 0b1111
 };
+inline const char* toString(ConditionMnemonics code) {
+    switch (code) {
+        case EQ:
+            return "eq";
+        case NE:
+            return "ne";
+        case CS:
+            return "cs";
+        case CC:
+            return "cc";
+        case MI:
+            return "mi";
+        case PL:
+            return "pl";
+        case VS:
+            return "vs";
+        case VC:
+            return "vc";
+        case HI:
+            return "hi";
+        case LS:
+            return "ls";
+        case GE:
+            return "ge";
+        case LT:
+            return "lt";
+        case GT:
+            return "gt";
+        case LE:
+            return "le";
+        // Dont render these.
+        case AL:
+        case SPECIAL:
+            return "";
+        default:
+            return "unknown";
+    }
 }
+}  // namespace ConditionMnemonics
 // https://developer.arm.com/documentation/ddi0406/c/System-Level-Architecture/The-System-Level-Programmers--Model/ARM-processor-modes-and-ARM-core-registers/Program-Status-Registers--PSRs-?lang=en#CIHBFGJG
 namespace ProcessorModes {
 enum ProcessorModes : uint8_t {

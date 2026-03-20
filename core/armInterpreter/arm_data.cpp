@@ -83,12 +83,6 @@ cycles ARM::ARM_AND_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -159,12 +153,6 @@ cycles ARM::ARM_EOR_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -236,12 +224,6 @@ cycles ARM::ARM_SUB_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -313,12 +295,6 @@ cycles ARM::ARM_RSB_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -390,12 +366,6 @@ cycles ARM::ARM_ADD_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -467,12 +437,6 @@ cycles ARM::ARM_ADC_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -544,12 +508,6 @@ cycles ARM::ARM_SBC_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -621,12 +579,6 @@ cycles ARM::ARM_RSC_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -681,12 +633,6 @@ cycles ARM::ARM_TST_REG_SHIFT(uint32_t instruct) {
 cycles ARM::ARM_TST_IMM(uint32_t instruct) {
     // 1st Operand Register.
     uint8_t Rn = readBits(instruct, 16, 19);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -741,12 +687,6 @@ cycles ARM::ARM_TEQ_REG_SHIFT(uint32_t instruct) {
 cycles ARM::ARM_TEQ_IMM(uint32_t instruct) {
     // 1st Operand Register.
     uint8_t Rn = readBits(instruct, 16, 19);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -802,12 +742,6 @@ cycles ARM::ARM_CMP_REG_SHIFT(uint32_t instruct) {
 cycles ARM::ARM_CMP_IMM(uint32_t instruct) {
     // 1st Operand Register.
     uint8_t Rn = readBits(instruct, 16, 19);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -863,12 +797,6 @@ cycles ARM::ARM_CMN_REG_SHIFT(uint32_t instruct) {
 cycles ARM::ARM_CMN_IMM(uint32_t instruct) {
     // 1st Operand Register.
     uint8_t Rn = readBits(instruct, 16, 19);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -939,12 +867,6 @@ cycles ARM::ARM_ORR_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -1006,12 +928,6 @@ cycles ARM::ARM_MOV_IMM(uint32_t instruct) {
     bool S = readBit(instruct, 20);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -1081,12 +997,6 @@ cycles ARM::ARM_BIC_IMM(uint32_t instruct) {
     uint8_t Rn = readBits(instruct, 16, 19);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the second operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
@@ -1149,12 +1059,6 @@ cycles ARM::ARM_MVN_IMM(uint32_t instruct) {
     bool S = readBit(instruct, 20);
     // Destination Register.
     uint8_t Rd = readBits(instruct, 12, 15);
-    // Process the operand.
-    uint8_t Rs = readBits(instruct, 8, 11);
-    uint8_t type = readBits(instruct, 5, 6);
-    uint8_t Rm = readBits(instruct, 0, 3);
-    uint8_t shiftAmount = (*activeRegs[Rs]) & 0xFF;
-    u32AndBool operandShifted = ARMShift(type, *activeRegs[Rm], shiftAmount, readBit(cpsr, C_FLAG));
     // Intermediate encodings.
     uint32_t imm12 = readBits(instruct, 0, 11);
     u32AndBool immDecoded = ARMExpandImm_C(imm12, readBit(cpsr, C_FLAG));
