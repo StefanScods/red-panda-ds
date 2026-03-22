@@ -69,6 +69,18 @@ void dissembleARMInstruction_branchAndBlockTransfer(InstructionDisassembly& resu
                                                     uint32_t instruction, bool useHex);
 void dissembleARMInstruction_coProc(InstructionDisassembly& result, uint32_t instruction,
                                     bool useHex);
+void dissembleTHUMBInstruction_shiftAddSubtractMoveCompare(InstructionDisassembly& result,
+                                                           uint32_t instruction, bool useHex);
+void dissembleTHUMBInstruction_dataProcessing(InstructionDisassembly& result, uint32_t instruction,
+                                              bool useHex);
+void dissembleTHUMBInstruction_specialDataAndBranch(InstructionDisassembly& result,
+                                                    uint32_t instruction, bool useHex);
+void dissembleTHUMBInstruction_loadStore(InstructionDisassembly& result, uint32_t instruction,
+                                         bool useHex);
+void dissembleTHUMBInstruction_misc(InstructionDisassembly& result, uint32_t instruction,
+                                    bool useHex);
+void dissembleTHUMBInstruction_condBranchAndSupervisorCall(InstructionDisassembly& result,
+                                                           uint32_t instruction, bool useHex);
 }  // namespace Core
 }  // namespace RedPandaDS
 

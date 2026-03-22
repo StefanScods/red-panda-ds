@@ -343,7 +343,7 @@ cycles ARM::THUMB_miscDecodeAndExecute(uint32_t instruct) {
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding/Conditional-branch--and-Supervisor-Call?lang=en
 // ==================================================================================================
 cycles ARM::THUMB_condBranchAndSupervisorCallDecodeAndExecute(uint32_t instruct) {
-    uint8_t condition = readBits(instruct, 11, 8);
+    uint8_t condition = readBits(instruct, 8, 11);
     switch (condition) {
         // Permanently undefined
         case ConditionMnemonics::AL: {

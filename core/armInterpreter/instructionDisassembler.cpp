@@ -26,7 +26,9 @@ std::string InstructionDisassembly::toString() {
         result += operand1;
     }
     if (!operand2.empty()) {
-        result += ",";
+        if (!destination.empty() || !operand1.empty()) {
+            result += ",";
+        }
         result += " ";
         result += operand2;
     }
@@ -1043,6 +1045,126 @@ void dissembleARMInstruction_coProc(InstructionDisassembly& result, uint32_t ins
 InstructionDisassembly dissembleTHUMBInstruction(uint32_t instruction, bool useHex) {
     InstructionDisassembly result;
     result.opcode = UNDEFINED_INSTRUCTION_OPCODE;
+    uint8_t opCode = readBits(instruction, 10, 15);
+    switch (opCode) {
+        case 0b000000:
+        case 0b000001:
+        case 0b000010:
+        case 0b000011:
+        case 0b000100:
+        case 0b000101:
+        case 0b000110:
+        case 0b000111:
+        case 0b001000:
+        case 0b001001:
+        case 0b001010:
+        case 0b001011:
+        case 0b001100:
+        case 0b001101:
+        case 0b001110:
+        case 0b001111:
+            dissembleTHUMBInstruction_shiftAddSubtractMoveCompare(result, instruction, useHex);
+            break;
+        case 0b010000:
+            dissembleTHUMBInstruction_dataProcessing(result, instruction, useHex);
+            break;
+        case 0b010001:
+            dissembleTHUMBInstruction_specialDataAndBranch(result, instruction, useHex);
+            break;
+        case 0b010010:
+        case 0b010011: {
+            uint32_t imm = readBits(instruction, 0, 7) << 2;
+            result.opcode = "LDR";
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand1 = ".";
+            std::string offset = getImmString(imm, useHex).substr(1);
+            if (imm > 0) offset.insert(0, 1, '+');
+            if (imm != 0) result.operand1 += offset;
+            break;
+        }
+        case 0b010100:
+        case 0b010101:
+        case 0b010110:
+        case 0b010111:
+        case 0b011000:
+        case 0b011001:
+        case 0b011010:
+        case 0b011011:
+        case 0b011100:
+        case 0b011101:
+        case 0b011110:
+        case 0b011111:
+        case 0b100000:
+        case 0b100001:
+        case 0b100010:
+        case 0b100011:
+        case 0b100100:
+        case 0b100101:
+        case 0b100110:
+        case 0b100111:
+            dissembleTHUMBInstruction_loadStore(result, instruction, useHex);
+            break;
+        case 0b101000:
+        case 0b101001: {
+            uint32_t imm = (readBits(instruction, 0, 7) << 2);
+            result.opcode = "ADD";
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand1 = g_regNames[PC_REGISTER_NUM];
+            result.operand2 = getImmString(imm, useHex);
+            result.comment = "ADR";
+            break;
+        }
+        case 0b101010:
+        case 0b101011: {
+            result.opcode = "ADD";
+            uint32_t imm = readBits(instruction, 0, 7) << 2;
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand1 = g_regNames[SP_REGISTER_NUM];
+            result.operand2 = getImmString(imm, useHex);
+            break;
+        }
+        case 0b101100:
+        case 0b101101:
+        case 0b101110:
+        case 0b101111:
+            dissembleTHUMBInstruction_misc(result, instruction, useHex);
+            break;
+        case 0b110000:
+        case 0b110001: {
+            result.opcode = "STMIA";
+            result.operand1 = g_regNames[readBits(instruction, 8, 10)] + "!";
+            result.operand2 = getRegListString(readBits(instruction, 0, 7));
+            break;
+        }
+        case 0b110010:
+        case 0b110011: {
+            result.opcode = "LDMIA";
+            result.operand1 = g_regNames[readBits(instruction, 8, 10)] + "!";
+            result.operand2 = getRegListString(readBits(instruction, 0, 7));
+            break;
+        }
+        case 0b110100:
+        case 0b110101:
+        case 0b110110:
+        case 0b110111: {
+            dissembleTHUMBInstruction_condBranchAndSupervisorCall(result, instruction, useHex);
+            break;
+        }
+        case 0b111000:
+        case 0b111001: {
+            uint32_t imm11 = readBits(instruction, 0, 10);
+            int32_t imms = (((int32_t)(instruction << 21)) >> 20) + 4;
+            result.opcode = "B";
+            result.operand1 = ".";
+            std::string offset = getImmStringSigned(imms, useHex).substr(1);
+            if (imms > 0) offset.insert(0, 1, '+');
+            if (imms != 0) result.operand1 += offset;
+            break;
+        }
+        default:
+            break;
+    }
+
     // Clear the result if undefined.
     if (result.opcode == UNDEFINED_INSTRUCTION_OPCODE) {
         result = InstructionDisassembly();
@@ -1052,6 +1174,410 @@ InstructionDisassembly dissembleTHUMBInstruction(uint32_t instruction, bool useH
     return result;
 }
 // ==================================================================================================
-
+void dissembleTHUMBInstruction_shiftAddSubtractMoveCompare(InstructionDisassembly& result,
+                                                           uint32_t instruction, bool useHex) {
+    uint8_t opcode = readBits(instruction, 9, 13);
+    switch (opcode) {
+        case 0b00000:
+        case 0b00001:
+        case 0b00010:
+        case 0b00011: {
+            result.opcode = "LSL";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = getImmString(readBits(instruction, 6, 10), useHex);
+            break;
+        }
+        case 0b00100:
+        case 0b00101:
+        case 0b00110:
+        case 0b00111: {
+            result.opcode = "LSR";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = getImmString(readBits(instruction, 6, 10), useHex);
+            break;
+        }
+        case 0b01000:
+        case 0b01001:
+        case 0b01010:
+        case 0b01011: {
+            result.opcode = "ASR";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = getImmString(readBits(instruction, 6, 10), useHex);
+            break;
+        }
+        case 0b01100: {
+            result.opcode = "ADD";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = g_regNames[readBits(instruction, 6, 8)];
+            break;
+        }
+        case 0b01101: {
+            result.opcode = "SUB";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = g_regNames[readBits(instruction, 6, 8)];
+            break;
+        }
+        case 0b01110: {
+            result.opcode = "ADD";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = getImmString(readBits(instruction, 6, 8), useHex);
+            break;
+        }
+        case 0b01111: {
+            result.opcode = "SUB";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = getImmString(readBits(instruction, 6, 8), useHex);
+            break;
+        }
+        case 0b10000:
+        case 0b10001:
+        case 0b10010:
+        case 0b10011: {
+            result.opcode = "MOVS";
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand1 = getImmString(readBits(instruction, 0, 7), useHex);
+            break;
+        }
+        case 0b10100:
+        case 0b10101:
+        case 0b10110:
+        case 0b10111: {
+            result.opcode = "CMP";
+            result.operand1 = g_regNames[readBits(instruction, 8, 10)];
+            result.operand2 = getImmString(readBits(instruction, 0, 7), useHex);
+            break;
+        }
+        case 0b11000:
+        case 0b11001:
+        case 0b11010:
+        case 0b11011: {
+            result.opcode = "ADD";
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand1 = getImmString(readBits(instruction, 0, 7), useHex);
+            break;
+        }
+        case 0b11100:
+        case 0b11101:
+        case 0b11110:
+        case 0b11111: {
+            result.opcode = "SUB";
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand1 = getImmString(readBits(instruction, 0, 7), useHex);
+            break;
+        }
+        default:
+            break;
+    }
+}
+// ==================================================================================================
+void dissembleTHUMBInstruction_dataProcessing(InstructionDisassembly& result, uint32_t instruction,
+                                              bool useHex) {
+    result.destination = g_regNames[readBits(instruction, 0, 2)];
+    result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+    uint8_t opcode = readBits(instruction, 6, 9);
+    switch (opcode) {
+        case 0b0000: {
+            result.opcode = "AND";
+            break;
+        }
+        case 0b0001: {
+            result.opcode = "EOR";
+            break;
+        }
+        case 0b0010: {
+            result.opcode = "LSL";
+            break;
+        }
+        case 0b0011: {
+            result.opcode = "LSR";
+            break;
+        }
+        case 0b0100: {
+            result.opcode = "ASR";
+            break;
+        }
+        case 0b0101: {
+            result.opcode = "ADC";
+            break;
+        }
+        case 0b0110: {
+            result.opcode = "SBC";
+            break;
+        }
+        case 0b0111: {
+            result.opcode = "ROR";
+            break;
+        }
+        case 0b1000: {
+            result.opcode = "TST";
+            result.operand2 = result.operand1;
+            result.operand1 = result.destination;
+            result.destination = "";
+            break;
+        }
+        case 0b1001: {
+            result.opcode = "RSB";
+            result.operand2 = "#0";
+            break;
+        }
+        case 0b1010: {
+            result.opcode = "CMP";
+            result.operand2 = result.operand1;
+            result.operand1 = result.destination;
+            result.destination = "";
+            break;
+        }
+        case 0b1011: {
+            result.opcode = "CMN";
+            result.operand2 = result.operand1;
+            result.operand1 = result.destination;
+            result.destination = "";
+            break;
+        }
+        case 0b1100: {
+            result.opcode = "ORR";
+            break;
+        }
+        case 0b1101: {
+            result.opcode = "MUL";
+            result.operand2 = result.destination;
+            break;
+        }
+        case 0b1110: {
+            result.opcode = "BIC";
+            break;
+        }
+        case 0b1111: {
+            result.opcode = "MVN";
+            break;
+        }
+        default:
+            break;
+    }
+}
+// ==================================================================================================
+void dissembleTHUMBInstruction_specialDataAndBranch(InstructionDisassembly& result,
+                                                    uint32_t instruction, bool useHex) {
+    uint8_t opcode = readBits(instruction, 6, 9);
+    switch (opcode) {
+        case 0b0000: {
+            result.opcode = "ADD";
+            result.destination = g_regNames[readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 5)];
+            result.operand2 = g_regNames[readBits(instruction, 6, 8)];
+            result.comment = "Unsupported";
+            break;
+        }
+        case 0b0001:
+        case 0b0010:
+        case 0b0011: {
+            result.opcode = "ADD";
+            result.destination =
+                g_regNames[(readBit(instruction, 7) << 3) | readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 6)];
+            break;
+        }
+        case 0b0100:
+        case 0b0101:
+        case 0b0110:
+        case 0b0111: {
+            result.opcode = "CMP";
+            result.operand1 =
+                g_regNames[(readBit(instruction, 7) << 3) | readBits(instruction, 0, 2)];
+            result.operand2 = g_regNames[readBits(instruction, 3, 6)];
+            break;
+        }
+        case 0b1000:
+            result.comment = "Unsupported";
+            // Fall through.
+        case 0b1001:
+        case 0b1010:
+        case 0b1011: {
+            result.opcode = "MOVS";
+            result.destination =
+                g_regNames[(readBit(instruction, 7) << 3) | readBits(instruction, 0, 2)];
+            result.operand1 = g_regNames[readBits(instruction, 3, 6)];
+            break;
+        }
+        case 0b1100:
+        case 0b1101: {
+            result.opcode = "BX";
+            result.operand1 = g_regNames[readBits(instruction, 3, 6)];
+            break;
+        }
+        case 0b1110:
+        case 0b1111: {
+            result.opcode = "BLX";
+            result.operand1 = g_regNames[readBits(instruction, 3, 6)];
+            break;
+        }
+        default:
+            break;
+    }
+}
+// ==================================================================================================
+void dissembleTHUMBInstruction_loadStore(InstructionDisassembly& result, uint32_t instruction,
+                                         bool useHex) {
+    result.destination = g_regNames[readBits(instruction, 0, 2)];
+    uint8_t opA = readBits(instruction, 12, 15);
+    switch (opA) {
+        // All register based offset load / stores.
+        case 0b0101: {
+            result.operand2 = "[" + g_regNames[readBits(instruction, 3, 5)] + ", " +
+                              g_regNames[readBits(instruction, 6, 8)] + "]";
+            uint8_t opB = readBits(instruction, 9, 11);
+            switch (opB) {
+                case 0b000:
+                    result.opcode = "STR";
+                    break;
+                case 0b001:
+                    result.opcode = "STRH";
+                    break;
+                case 0b010:
+                    result.opcode = "STRB";
+                    break;
+                case 0b011:
+                    result.opcode = "LDRSB";
+                    break;
+                case 0b100:
+                    result.opcode = "LDR";
+                    break;
+                case 0b101:
+                    result.opcode = "LDRH";
+                    break;
+                case 0b110:
+                    result.opcode = "LDRB";
+                    break;
+                case 0b111:
+                    result.opcode = "LDRSH";
+                    break;
+                default:
+                    break;
+            }
+            break;
+        }
+        case 0b0110: {
+            result.operand2 = "[" + g_regNames[readBits(instruction, 3, 5)];
+            uint32_t offset = readBits(instruction, 6, 8) << 2;
+            if (offset > 0) result.operand2 += ", " + getImmString(offset, useHex);
+            result.operand2 += "]";
+            result.opcode = readBit(instruction, 11) ? "LDR" : "STR";
+            break;
+        }
+        case 0b0111: {
+            result.operand2 = "[" + g_regNames[readBits(instruction, 3, 5)];
+            uint32_t offset = readBits(instruction, 6, 8);
+            if (offset > 0) result.operand2 += ", " + getImmString(offset, useHex);
+            result.operand2 += "]";
+            result.opcode = readBit(instruction, 11) ? "LDRB" : "STRB";
+            break;
+        }
+        case 0b1000: {
+            result.operand2 = "[" + g_regNames[readBits(instruction, 3, 5)];
+            uint32_t offset = readBits(instruction, 6, 8) << 1;
+            if (offset > 0) result.operand2 += ", " + getImmString(offset, useHex);
+            result.operand2 += "]";
+            result.opcode = readBit(instruction, 11) ? "LDRH" : "STRH";
+            break;
+        }
+        case 0b1001: {
+            result.destination = g_regNames[readBits(instruction, 8, 10)];
+            result.operand2 = "[" + g_regNames[SP_REGISTER_NUM];
+            uint32_t offset = readBits(instruction, 0, 7) << 2;
+            if (offset > 0) result.operand2 += ", " + getImmString(offset, useHex);
+            result.operand2 += "]";
+            result.opcode = readBit(instruction, 11) ? "LDR" : "STR";
+            break;
+        }
+        default:
+            break;
+    }
+}
+// ==================================================================================================
+void dissembleTHUMBInstruction_misc(InstructionDisassembly& result, uint32_t instruction,
+                                    bool useHex) {
+    uint8_t opcode = readBits(instruction, 7, 11);
+    switch (opcode) {
+        case 0b00000: {
+            result.opcode = "ADD";
+            uint32_t imm = readBits(instruction, 0, 6) << 2;
+            result.destination = g_regNames[SP_REGISTER_NUM];
+            result.operand1 = g_regNames[SP_REGISTER_NUM];
+            result.operand2 = getImmString(imm, useHex);
+            break;
+        }
+        case 0b00001: {
+            result.opcode = "SUB";
+            uint32_t imm = readBits(instruction, 0, 6) << 2;
+            result.destination = g_regNames[SP_REGISTER_NUM];
+            result.operand1 = g_regNames[SP_REGISTER_NUM];
+            result.operand2 = getImmString(imm, useHex);
+            break;
+        }
+        case 0b01000:
+        case 0b01001:
+        case 0b01010:
+        case 0b01011: {
+            result.opcode = "PUSH";
+            result.operand2 = getRegListString((readBit(instruction, 8) << LR_REGISTER_NUM) |
+                                               readBits(instruction, 0, 7));
+            break;
+        }
+        case 0b11000:
+        case 0b11001:
+        case 0b11010:
+        case 0b11011: {
+            result.opcode = "POP";
+            result.operand2 = getRegListString((readBit(instruction, 8) << PC_REGISTER_NUM) |
+                                               readBits(instruction, 0, 7));
+            break;
+        }
+        case 0b11100:
+        case 0b11101: {
+            result.opcode = "BKPT";
+            uint32_t imm = readBits(instruction, 0, 7);
+            result.operand1 = getImmString(imm, useHex);
+            break;
+        }
+        default:
+            break;
+    }
+}
+// ==================================================================================================
+void dissembleTHUMBInstruction_condBranchAndSupervisorCall(InstructionDisassembly& result,
+                                                           uint32_t instruction, bool useHex) {
+    uint8_t condition = readBits(instruction, 8, 11);
+    switch (condition) {
+        case ConditionMnemonics::AL: {
+            // Permanently undefined
+            break;
+        }
+        case ConditionMnemonics::SPECIAL: {
+            uint32_t imm8 = readBits(instruction, 0, 7);
+            result.opcode = "SVC";
+            result.operand1 = getImmString(imm8, useHex);
+            break;
+        }
+        default: {
+            uint32_t imm8 = readBits(instruction, 0, 7);
+            int32_t imms = (((int32_t)(instruction << 24)) >> 23) + 4;
+            result.opcode = "B";
+            result.conditionCode = ConditionMnemonics::toString(condition);
+            result.operand1 = ".";
+            std::string offset = getImmStringSigned(imms, useHex).substr(1);
+            if (imms > 0) offset.insert(0, 1, '+');
+            if (imms != 0) result.operand1 += offset;
+            break;
+        }
+    }
+}
+// ==================================================================================================
 }  // namespace Core
 }  // namespace RedPandaDS

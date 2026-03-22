@@ -171,8 +171,8 @@ TEST_F(TestUtils, ARMDisassemble) {
                                           "LDRSH R10, [R11]",
                                           "LDMIA R0!, {R1-R3}",
                                           "STMDB R4!, {R5-R7}",
-                                          "LDMIA SP!, {R0-R3}",
-                                          "STMDB SP!, {R4-R7,LR}",
+                                          "LDMIA R12!, {R0-R3}",
+                                          "STMDB R11!, {R4-R7,LR}",
                                           "B .+4",
                                           "BL .+8",
                                           "Bne .-4",
@@ -266,6 +266,79 @@ TEST_F(TestUtils, ARMDisassemble) {
     EXPECT_EQ(encodings.size(), testCases.size());
     for (uint32_t i = 0; i < encodings.size(); i++) {
         InstructionDisassembly disassembly = dissembleARMInstruction(encodings.at(i).instruction);
+
+        std::cout << testCases.at(i) << ": " << "0x" << std::hex
+                  << (uint32_t)(encodings.at(i).instruction) << std::dec << std::endl;
+        EXPECT_EQ(testCases.at(i), disassembly.toString());
+    }
+}
+
+TEST_F(TestUtils, THUMBDisassemble) {
+    std::vector<std::string> testCases = {"MOVS R0, #0",
+                                          "MOVS R1, #255",
+                                          "MOVS R10, R11",
+                                          "ADD R0, R1, R2",
+                                          "ADD R3, R4, #5",
+                                          "SUB R5, R6, R7",
+                                          "SUB R0, R1, #3",
+                                          "CMP R0, R1",
+                                          "CMP R2, #10",
+                                          "AND R0, R1",
+                                          "EOR R2, R3",
+                                          "ORR R4, R5",
+                                          "BIC R6, R7",
+                                          "MVN R0, R1",
+                                          "LSL R0, R1, #2",
+                                          "LSR R2, R3, #3",
+                                          "ASR R4, R5, #1",
+                                          "LSL R6, R7",
+                                          "LSR R0, R1",
+                                          "ASR R2, R3",
+                                          "ADD R0, R1, R2",
+                                          "ADD R3, R4, #7",
+                                          "SUB R5, R6, R7",
+                                          "ADD R8, R0",
+                                          "ADD R0, R8",
+                                          "MOVS R8, R1",
+                                          "MOVS R2, R9",
+                                          "CMP R8, R0",
+                                          "ADD R1, SP, #8",
+                                          "LDR R0, [R1, R2]",
+                                          "STR R3, [R4, R5]",
+                                          "LDR R6, [R7, #4]",
+                                          "STR R0, [R1, #8]",
+                                          "LDRB R2, [R3, #1]",
+                                          "STRB R4, [R5, #2]",
+                                          "LDRH R6, [R7, #2]",
+                                          "STRH R0, [R1, #4]",
+                                          "LDR R0, [SP, #4]",
+                                          "STR R1, [SP, #8]",
+                                          "ADD R0, PC, #4",
+                                          "PUSH {R0-R2,R5}",
+                                          "PUSH {R4-R7,LR}",
+                                          "POP {R0-R2,R5}",
+                                          "POP {R4-R7,PC}",
+                                          "STMIA R0!, {R1-R3}",
+                                          "LDMIA R4!, {R5-R7}",
+                                          "B .+4",
+                                          "B .-2",
+                                          "Beq .+4",
+                                          "Bne .-2",
+                                          "Bgt .+6",
+                                          "Blt .-4",
+                                          "BX R0",
+                                          "BX LR",
+                                          "SVC #0",
+                                          "BKPT #255",
+                                          "SVC #255"};
+    std::stringstream stream;
+    for (const auto& testCase : testCases) {
+        stream << ".thumb\n" << testCase << '\n';
+    }
+    std::vector<Encoding> encodings = armEncodeASM(stream.str(), false);
+    EXPECT_EQ(encodings.size(), testCases.size());
+    for (uint32_t i = 0; i < encodings.size(); i++) {
+        InstructionDisassembly disassembly = dissembleTHUMBInstruction(encodings.at(i).instruction);
 
         std::cout << testCases.at(i) << ": " << "0x" << std::hex
                   << (uint32_t)(encodings.at(i).instruction) << std::dec << std::endl;

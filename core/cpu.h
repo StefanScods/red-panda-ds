@@ -109,6 +109,9 @@ inline const char* toString(ConditionMnemonics code) {
             return "unknown";
     }
 }
+inline const char* toString(uint8_t code) {
+    return toString(ConditionMnemonics(code));
+}
 }  // namespace ConditionMnemonics
 // https://developer.arm.com/documentation/ddi0406/c/System-Level-Architecture/The-System-Level-Programmers--Model/ARM-processor-modes-and-ARM-core-registers/Program-Status-Registers--PSRs-?lang=en#CIHBFGJG
 namespace ProcessorModes {
