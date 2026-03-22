@@ -2324,13 +2324,13 @@ cycles ARM::ARM_coprocessorAndSupervisorDecodeAndExecute(uint32_t instruct, uint
     // OpCode.
     uint8_t op1 = readBits(instruct, 20, 25);
     uint8_t op = readBit(instruct, 4);
-    uint8_t opcode = op1 << 1 | op;
+    uint8_t opcode = (op1 << 1) | op;
     // Check that the coproc is supported.
     uint8_t coproc = readBits(instruct, 9, 11);
-    if (coproc == 0b101) {
+    if (readBits(instruct, 24, 25) != 0b11 && coproc == 0b101) {
         LogError("Coprocessor " << coproc << " is not supported!");
     }
-    switch (op) {
+    switch (opcode) {
         // Undefined.
         case 0b0000000:
         case 0b0000001:

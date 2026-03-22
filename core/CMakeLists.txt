@@ -28,6 +28,7 @@ set(EMU_CORE_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_data.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_loadStore.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/thumb_misc.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/instructionDisassembler.cpp
 )
 
 # ==================================================================================================
