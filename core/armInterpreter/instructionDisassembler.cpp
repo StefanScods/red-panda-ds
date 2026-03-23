@@ -805,6 +805,17 @@ void dissembleARMInstruction_branchAndBlockTransfer(InstructionDisassembly& resu
         default:
             break;
     }
+    // Special cases.
+    if (result.opcode == "LDMIA" && result.operand1 == g_regNames[SP_REGISTER_NUM] + "!") {
+        result.comment = result.opcode + " " + result.operand1;
+        result.opcode = "POP";
+        result.operand1 = "";
+    }
+    if (result.opcode == "STMDB" && result.operand1 == g_regNames[SP_REGISTER_NUM] + "!") {
+        result.comment = result.opcode + " " + result.operand1;
+        result.opcode = "PUSH";
+        result.operand1 = "";
+    }
 }
 // ==================================================================================================
 void dissembleARMInstruction_coProc(InstructionDisassembly& result, uint32_t instruction,
@@ -1111,12 +1122,10 @@ InstructionDisassembly dissembleTHUMBInstruction(uint32_t instruction, bool useH
                 break;
             case 0b101000:
             case 0b101001: {
-                uint32_t imm = (readBits(instruction, 0, 7) << 2);
-                result.opcode = "ADD";
+                uint32_t imm = (readBits(instruction, 0, 7) << 2) + 2;
+                result.opcode = "ADR";
                 result.destination = g_regNames[readBits(instruction, 8, 10)];
-                result.operand1 = g_regNames[PC_REGISTER_NUM];
-                result.operand2 = getImmString(imm, useHex);
-                result.comment = "ADR";
+                result.operand2 = ".+" + getImmString(imm, useHex).substr(1);
                 break;
             }
             case 0b101010:
@@ -1366,8 +1375,8 @@ void dissembleTHUMBInstruction_dataProcessing(InstructionDisassembly& result, ui
             break;
         }
         case 0b1001: {
-            result.opcode = "RSB";
-            result.operand2 = "#0";
+            result.opcode = "NEG";
+            result.comment = "RSB " + result.destination + ", " + result.operand1 + ", #0";
             break;
         }
         case 0b1010: {

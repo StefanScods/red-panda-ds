@@ -255,7 +255,9 @@ TEST_F(TestUtils, ARMDisassemble) {
                                           "STC p2, c1, [R1], #8",
                                           "SWPB R12, R2, [R1]",
                                           "QADD R0, R0, R0",
-                                          "QSUB R1, R1, R1"
+                                          "QSUB R1, R1, R1",
+                                          "PUSH {R0-R12,SP,LR,PC}",
+                                          "POP {R0-R12,SP,LR,PC}"
 
     };
     std::stringstream stream;
@@ -272,6 +274,7 @@ TEST_F(TestUtils, ARMDisassemble) {
 
 TEST_F(TestUtils, THUMBDisassemble) {
     std::vector<std::string> testCases = {"MOVS R0, #0",
+                                          "ADR R3, .+1022",
                                           "MOVS R1, #255",
                                           "MOVS R10, R11",
                                           "ADD R0, R1, R2",
@@ -296,6 +299,7 @@ TEST_F(TestUtils, THUMBDisassemble) {
                                           "SUB R5, R6, R7",
                                           "ADD R8, R0",
                                           "ADD R0, R8",
+                                          "NEG R0, R4",
                                           "MOVS R8, R1",
                                           "MOVS R2, R9",
                                           "CMP R8, R0",
@@ -310,7 +314,6 @@ TEST_F(TestUtils, THUMBDisassemble) {
                                           "STRH R0, [R1, #4]",
                                           "LDR R0, [SP, #4]",
                                           "STR R1, [SP, #8]",
-                                          "ADD R0, PC, #4",
                                           "PUSH {R0-R2,R5}",
                                           "PUSH {R4-R7,LR}",
                                           "POP {R0-R2,R5}",
