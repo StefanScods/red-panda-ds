@@ -65,43 +65,41 @@ std::vector<Encoding> armEncodeASM(std::string instructions, bool arm7) {
 
     LogDebugPrefixed("Created Assembly Dump:\n==========================================",
                      "ASM Encode");
-    bool armMode = true;
-    uint32_t prevAddress = 0;
     std::string line;
     // Re-read the dump and extract the asm encodings.
     std::ifstream dumpFile(outputObjectDumpFile);
+    std::regex thumb32Regex(
+        R"(^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]{4})\s+([0-9a-fA-F]{4})(?:\s+.*)?$)");
+    std::regex thumb16Regex(R"(^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]{4})(?:\s+.*)?$)");
+    std::regex armRegex(R"(^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]{8})(?:\s+.*)?$)");
     while (std::getline(dumpFile, line)) {
         LogDebugPrefixed(line, "ASM Encode");
-        std::string nopString = "...";
-        if (line.find(nopString) != std::string::npos) {
-            // Detected a switch to thumb encoding.
-            if (armMode) {
-                // Set the last instruction to thumb mode as well.
-                encodings.back().arm = false;
-                armMode = false;
-            }
-            continue;
-        }
-        // Regex to match the "address: encoding    instuction" lines.
-        std::regex pattern(R"(\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]+))");
+
         std::smatch match;
-        if (!std::regex_search(line, match, pattern)) continue;
-        uint32_t instruction = std::stoul(match[2], nullptr, 16);
-        uint32_t address = std::stoul(match[1], nullptr, 16);
-        // Detect switches in encodings.
-        if (armMode && (address - prevAddress) == THUMB_MODE_INST_SIZE) {
-            // Set the last instruction to thumb mode as well.
-            encodings.back().arm = false;
-            armMode = false;
+
+        // ARM (32-bit)
+        if (std::regex_match(line, match, armRegex)) {
+            uint32_t address = std::stoul(match[1], nullptr, 16);
+            uint32_t instr = std::stoul(match[2], nullptr, 16);
+            encodings.emplace_back(instr, address, true);
         }
-        if (!armMode && (address - prevAddress) == ARM_MODE_INST_SIZE) {
-            // Set the last instruction to thumb mode as well.
-            encodings.back().arm = true;
-            armMode = true;
+        // Thumb-32 (Two halfwords)
+        else if (std::regex_match(line, match, thumb32Regex)) {
+            uint32_t address = std::stoul(match[1], nullptr, 16);
+
+            uint16_t instr1 = std::stoul(match[2], nullptr, 16);
+            uint16_t instr2 = std::stoul(match[3], nullptr, 16);
+
+            encodings.emplace_back(instr1, address, false);
+            encodings.emplace_back(instr2, address + 2, false);
         }
-        // Add the new instruction.
-        encodings.emplace_back(instruction, address, armMode);
-        prevAddress = address;
+        // Thumb-16
+        else if (std::regex_match(line, match, thumb16Regex)) {
+            uint32_t address = std::stoul(match[1], nullptr, 16);
+            uint16_t instr = std::stoul(match[2], nullptr, 16);
+
+            encodings.emplace_back(instr, address, false);
+        }
     }
 
     dumpFile.close();
