@@ -11,7 +11,40 @@
 
 namespace RedPandaDS {
 namespace Core {
-
+// ==================================================================================================
+// 32-bit Thumb instruction encoding
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/32-bit-Thumb-instruction-encoding?lang=en
+// ==================================================================================================
+cycles ARM::THUMB_32BitWideDecodeAndExecute(uint32_t instruct) {
+    // Decode and execute the instuction.
+    uint32_t opcode = (readBits(instruct, 27, 28) << 1) | readBit(instruct, 15);
+    if (opcode == 0b101) return THUMB_32BitWide_branchesAndMiscControlDecodeAndExecute(instruct);
+    return THUMB_UNDEFINED_INST(instruct);
+}
+// ==================================================================================================
+// Branches and miscellaneous control
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/32-bit-Thumb-instruction-encoding/Branches-and-miscellaneous-control?lang=en
+// ==================================================================================================
+cycles ARM::THUMB_32BitWide_branchesAndMiscControlDecodeAndExecute(uint32_t instruct) {
+    uint32_t op1 = readBits(instruct, 12, 14);
+    switch (op1) {
+        // MSR (register).
+        case 0b000:
+        case 0b010: {
+            return THUMB_MSR(instruct);
+        }
+        // BL, BLX (immediate)
+        case 0b100:
+        case 0b110:
+        case 0b101:
+        case 0b111: {
+            return THUMB_BLX_IMM(instruct);
+        }
+        default:
+            break;
+    }
+    return THUMB_UNDEFINED_INST(instruct);
+}
 // ==================================================================================================
 // Shift (immediate), add, subtract, move, compare
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding/Shift--immediate---add--subtract--move--and-compare?lang=en
@@ -174,7 +207,7 @@ cycles ARM::THUMB_specialDataAndBranchDecodeAndExecute(uint32_t instruct) {
         // BLX (register)
         case 0b1110:
         case 0b1111:
-            return THUMB_BLX(instruct);
+            return THUMB_BLX_REG(instruct);
         default:
             break;
     }

@@ -266,9 +266,6 @@ TEST_F(TestUtils, ARMDisassemble) {
     EXPECT_EQ(encodings.size(), testCases.size());
     for (uint32_t i = 0; i < encodings.size(); i++) {
         InstructionDisassembly disassembly = dissembleARMInstruction(encodings.at(i).instruction);
-
-        std::cout << testCases.at(i) << ": " << "0x" << std::hex
-                  << (uint32_t)(encodings.at(i).instruction) << std::dec << std::endl;
         EXPECT_EQ(testCases.at(i), disassembly.toString());
     }
 }
@@ -333,15 +330,28 @@ TEST_F(TestUtils, THUMBDisassemble) {
                                           "SVC #255"};
     std::stringstream stream;
     for (const auto& testCase : testCases) {
-        stream << ".thumb\n" << testCase << '\n';
+        stream << testCase << '\n';
     }
-    std::vector<Encoding> encodings = armEncodeASM(stream.str(), false);
+    std::vector<Encoding> encodings = armEncodeASM(".thumb\n" + stream.str(), false);
     EXPECT_EQ(encodings.size(), testCases.size());
     for (uint32_t i = 0; i < encodings.size(); i++) {
         InstructionDisassembly disassembly = dissembleTHUMBInstruction(encodings.at(i).instruction);
+        EXPECT_EQ(testCases.at(i), disassembly.toString());
+    }
+}
+TEST_F(TestUtils, THUMBDisassembleWide) {
+    std::vector<std::string> testCases = {"BLX .+100", "BLX .-100", "BLX .",
+                                          "BL .+100",  "BL .-100",  "BL ."};
+    std::stringstream stream;
+    for (const auto& testCase : testCases) {
+        stream << testCase << '\n';
+    }
+    std::vector<Encoding> encodings = armEncodeASM(".thumb\n" + stream.str(), false);
+    EXPECT_EQ(encodings.size(), testCases.size() * 2);
+    for (uint32_t i = 0; i < testCases.size(); i++) {
+        InstructionDisassembly disassembly = dissembleTHUMBInstruction(
+            (encodings.at(i * 2).instruction << 16) | encodings.at(i * 2 + 1).instruction);
 
-        std::cout << testCases.at(i) << ": " << "0x" << std::hex
-                  << (uint32_t)(encodings.at(i).instruction) << std::dec << std::endl;
         EXPECT_EQ(testCases.at(i), disassembly.toString());
     }
 }

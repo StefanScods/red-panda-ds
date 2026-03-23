@@ -40,6 +40,7 @@ cycles ARM::THUMB_B_COND(uint32_t instruct) {
 // Branch Link and Exchange
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BX?lang=en
 // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BLX--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BL--BLX--immediate-?lang=en
 // ==================================================================================================
 cycles ARM::THUMB_BX(uint32_t instruct) {
     uint8_t Rm = readBits(instruct, 3, 6);
@@ -48,10 +49,30 @@ cycles ARM::THUMB_BX(uint32_t instruct) {
                // trigger one non-sequential + a sequential code read on the following fetches.
 }
 // ==================================================================================================
-cycles ARM::THUMB_BLX(uint32_t instruct) {
+cycles ARM::THUMB_BLX_REG(uint32_t instruct) {
     lr() = pc() - 2 | 0b1;  // Point to the previous instruction in thumb mode.
     uint8_t Rm = readBits(instruct, 3, 6);
     branch(*activeRegs[Rm]);
+    return 1;  // An instruction prefetch occurs at the same time as the operation. Branch will
+               // trigger one non-sequential + a sequential code read on the following fetches.
+}
+cycles ARM::THUMB_BLX_IMM(uint32_t instruct) {
+    uint32_t pcVal = pc() - 2;  // PC calculation is off. Easier to fix here than fix emu.
+    lr() = pcVal - 2 | 0b1;     // Point to the previous instruction in thumb mode.
+    bool S = readBit(instruct, 26);
+    bool I1 = !(readBit(instruct, 13) ^ S);
+    bool I2 = !(readBit(instruct, 11) ^ S);
+    if (readBit(instruct, 12)) {
+        uint32_t imm = (S << 23) | (I1 << 22) | (I2 << 21) | (readBits(instruct, 16, 25) << 11) |
+                       readBits(instruct, 0, 10);
+        int32_t offset = (((int32_t)(imm << 8)) >> 7);
+        branch(pcVal + offset, false);
+    } else {
+        uint32_t imm = (S << 22) | (I1 << 21) | (I2 << 20) | (readBits(instruct, 16, 25) << 10) |
+                       readBits(instruct, 1, 10);
+        int32_t offset = (((int32_t)(imm << 9)) >> 7);
+        branch(pcVal + offset);
+    }
     return 1;  // An instruction prefetch occurs at the same time as the operation. Branch will
                // trigger one non-sequential + a sequential code read on the following fetches.
 }

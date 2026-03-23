@@ -138,6 +138,11 @@ cycles ARM::THUMB_execute() {
     if (nextInstruction == NO_INSTRUCT) {
         LogError("Trying to execute an empty pipeline / bubble in pipeline!");
     }
+    // Catch 32-bit thumb instructions.
+    uint8_t wideEncoding = readBits(nextInstruction, 27, 31);
+    if (wideEncoding) {
+        return THUMB_32BitWideDecodeAndExecute(nextInstruction);
+    }
     // Decode and execute the instuction.
     uint8_t opCode = readBits(nextInstruction, 10, 15);
     // https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/16-bit-Thumb-instruction-encoding?lang=en
@@ -424,6 +429,14 @@ void ARM::advanceInstructionPipeline() {
     instuctionPipeLine[0] = instuctionPipeLine[1];
     instuctionPipeLine[1] = instuctionPipeLine[2];
     instuctionPipeLine[2] = NO_INSTRUCT;
+    // Detect and recombine 32 bit thumb instructions.
+    if (getThumbMode() && (readBits(instuctionPipeLine[0], 29, 31) != 0b111) &&
+        (readBits(instuctionPipeLine[0], 13, 15) == 0b111) &&
+        (readBits(instuctionPipeLine[0], 11, 12) != 0b00)) {
+        // Create a 32 bit thumb instruction.
+        instuctionPipeLine[1] = (instuctionPipeLine[0] << 16) | (instuctionPipeLine[1]);
+        instuctionPipeLine[0] = NO_INSTRUCT;
+    }
 }
 // ==================================================================================================
 uint32_t ARM::readModeReg(ProcessorModes::ProcessorModes mode, uint32_t regNum) const {

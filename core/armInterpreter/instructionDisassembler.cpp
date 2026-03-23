@@ -1045,124 +1045,130 @@ void dissembleARMInstruction_coProc(InstructionDisassembly& result, uint32_t ins
 InstructionDisassembly dissembleTHUMBInstruction(uint32_t instruction, bool useHex) {
     InstructionDisassembly result;
     result.opcode = UNDEFINED_INSTRUCTION_OPCODE;
-    uint8_t opCode = readBits(instruction, 10, 15);
-    switch (opCode) {
-        case 0b000000:
-        case 0b000001:
-        case 0b000010:
-        case 0b000011:
-        case 0b000100:
-        case 0b000101:
-        case 0b000110:
-        case 0b000111:
-        case 0b001000:
-        case 0b001001:
-        case 0b001010:
-        case 0b001011:
-        case 0b001100:
-        case 0b001101:
-        case 0b001110:
-        case 0b001111:
-            dissembleTHUMBInstruction_shiftAddSubtractMoveCompare(result, instruction, useHex);
-            break;
-        case 0b010000:
-            dissembleTHUMBInstruction_dataProcessing(result, instruction, useHex);
-            break;
-        case 0b010001:
-            dissembleTHUMBInstruction_specialDataAndBranch(result, instruction, useHex);
-            break;
-        case 0b010010:
-        case 0b010011: {
-            uint32_t imm = readBits(instruction, 0, 7) << 2;
-            result.opcode = "LDR";
-            result.destination = g_regNames[readBits(instruction, 8, 10)];
-            result.operand1 = ".";
-            std::string offset = getImmString(imm, useHex).substr(1);
-            if (imm > 0) offset.insert(0, 1, '+');
-            if (imm != 0) result.operand1 += offset;
-            break;
+    // Catch 32-bit thumb instructions.
+    uint8_t wideEncoding = readBits(instruction, 27, 31);
+    if (wideEncoding) {
+        dissembleARMInstruction_wideEncoding(result, instruction, useHex);
+    } else {
+        uint8_t opCode = readBits(instruction, 10, 15);
+        switch (opCode) {
+            case 0b000000:
+            case 0b000001:
+            case 0b000010:
+            case 0b000011:
+            case 0b000100:
+            case 0b000101:
+            case 0b000110:
+            case 0b000111:
+            case 0b001000:
+            case 0b001001:
+            case 0b001010:
+            case 0b001011:
+            case 0b001100:
+            case 0b001101:
+            case 0b001110:
+            case 0b001111:
+                dissembleTHUMBInstruction_shiftAddSubtractMoveCompare(result, instruction, useHex);
+                break;
+            case 0b010000:
+                dissembleTHUMBInstruction_dataProcessing(result, instruction, useHex);
+                break;
+            case 0b010001:
+                dissembleTHUMBInstruction_specialDataAndBranch(result, instruction, useHex);
+                break;
+            case 0b010010:
+            case 0b010011: {
+                uint32_t imm = readBits(instruction, 0, 7) << 2;
+                result.opcode = "LDR";
+                result.destination = g_regNames[readBits(instruction, 8, 10)];
+                result.operand1 = ".";
+                std::string offset = getImmString(imm, useHex).substr(1);
+                if (imm > 0) offset.insert(0, 1, '+');
+                if (imm != 0) result.operand1 += offset;
+                break;
+            }
+            case 0b010100:
+            case 0b010101:
+            case 0b010110:
+            case 0b010111:
+            case 0b011000:
+            case 0b011001:
+            case 0b011010:
+            case 0b011011:
+            case 0b011100:
+            case 0b011101:
+            case 0b011110:
+            case 0b011111:
+            case 0b100000:
+            case 0b100001:
+            case 0b100010:
+            case 0b100011:
+            case 0b100100:
+            case 0b100101:
+            case 0b100110:
+            case 0b100111:
+                dissembleTHUMBInstruction_loadStore(result, instruction, useHex);
+                break;
+            case 0b101000:
+            case 0b101001: {
+                uint32_t imm = (readBits(instruction, 0, 7) << 2);
+                result.opcode = "ADD";
+                result.destination = g_regNames[readBits(instruction, 8, 10)];
+                result.operand1 = g_regNames[PC_REGISTER_NUM];
+                result.operand2 = getImmString(imm, useHex);
+                result.comment = "ADR";
+                break;
+            }
+            case 0b101010:
+            case 0b101011: {
+                result.opcode = "ADD";
+                uint32_t imm = readBits(instruction, 0, 7) << 2;
+                result.destination = g_regNames[readBits(instruction, 8, 10)];
+                result.operand1 = g_regNames[SP_REGISTER_NUM];
+                result.operand2 = getImmString(imm, useHex);
+                break;
+            }
+            case 0b101100:
+            case 0b101101:
+            case 0b101110:
+            case 0b101111:
+                dissembleTHUMBInstruction_misc(result, instruction, useHex);
+                break;
+            case 0b110000:
+            case 0b110001: {
+                result.opcode = "STMIA";
+                result.operand1 = g_regNames[readBits(instruction, 8, 10)] + "!";
+                result.operand2 = getRegListString(readBits(instruction, 0, 7));
+                break;
+            }
+            case 0b110010:
+            case 0b110011: {
+                result.opcode = "LDMIA";
+                result.operand1 = g_regNames[readBits(instruction, 8, 10)] + "!";
+                result.operand2 = getRegListString(readBits(instruction, 0, 7));
+                break;
+            }
+            case 0b110100:
+            case 0b110101:
+            case 0b110110:
+            case 0b110111: {
+                dissembleTHUMBInstruction_condBranchAndSupervisorCall(result, instruction, useHex);
+                break;
+            }
+            case 0b111000:
+            case 0b111001: {
+                uint32_t imm11 = readBits(instruction, 0, 10);
+                int32_t imms = (((int32_t)(instruction << 21)) >> 20) + 4;
+                result.opcode = "B";
+                result.operand1 = ".";
+                std::string offset = getImmStringSigned(imms, useHex).substr(1);
+                if (imms > 0) offset.insert(0, 1, '+');
+                if (imms != 0) result.operand1 += offset;
+                break;
+            }
+            default:
+                break;
         }
-        case 0b010100:
-        case 0b010101:
-        case 0b010110:
-        case 0b010111:
-        case 0b011000:
-        case 0b011001:
-        case 0b011010:
-        case 0b011011:
-        case 0b011100:
-        case 0b011101:
-        case 0b011110:
-        case 0b011111:
-        case 0b100000:
-        case 0b100001:
-        case 0b100010:
-        case 0b100011:
-        case 0b100100:
-        case 0b100101:
-        case 0b100110:
-        case 0b100111:
-            dissembleTHUMBInstruction_loadStore(result, instruction, useHex);
-            break;
-        case 0b101000:
-        case 0b101001: {
-            uint32_t imm = (readBits(instruction, 0, 7) << 2);
-            result.opcode = "ADD";
-            result.destination = g_regNames[readBits(instruction, 8, 10)];
-            result.operand1 = g_regNames[PC_REGISTER_NUM];
-            result.operand2 = getImmString(imm, useHex);
-            result.comment = "ADR";
-            break;
-        }
-        case 0b101010:
-        case 0b101011: {
-            result.opcode = "ADD";
-            uint32_t imm = readBits(instruction, 0, 7) << 2;
-            result.destination = g_regNames[readBits(instruction, 8, 10)];
-            result.operand1 = g_regNames[SP_REGISTER_NUM];
-            result.operand2 = getImmString(imm, useHex);
-            break;
-        }
-        case 0b101100:
-        case 0b101101:
-        case 0b101110:
-        case 0b101111:
-            dissembleTHUMBInstruction_misc(result, instruction, useHex);
-            break;
-        case 0b110000:
-        case 0b110001: {
-            result.opcode = "STMIA";
-            result.operand1 = g_regNames[readBits(instruction, 8, 10)] + "!";
-            result.operand2 = getRegListString(readBits(instruction, 0, 7));
-            break;
-        }
-        case 0b110010:
-        case 0b110011: {
-            result.opcode = "LDMIA";
-            result.operand1 = g_regNames[readBits(instruction, 8, 10)] + "!";
-            result.operand2 = getRegListString(readBits(instruction, 0, 7));
-            break;
-        }
-        case 0b110100:
-        case 0b110101:
-        case 0b110110:
-        case 0b110111: {
-            dissembleTHUMBInstruction_condBranchAndSupervisorCall(result, instruction, useHex);
-            break;
-        }
-        case 0b111000:
-        case 0b111001: {
-            uint32_t imm11 = readBits(instruction, 0, 10);
-            int32_t imms = (((int32_t)(instruction << 21)) >> 20) + 4;
-            result.opcode = "B";
-            result.operand1 = ".";
-            std::string offset = getImmStringSigned(imms, useHex).substr(1);
-            if (imms > 0) offset.insert(0, 1, '+');
-            if (imms != 0) result.operand1 += offset;
-            break;
-        }
-        default:
-            break;
     }
 
     // Clear the result if undefined.
@@ -1172,6 +1178,43 @@ InstructionDisassembly dissembleTHUMBInstruction(uint32_t instruction, bool useH
     }
     result.rawData = instruction;
     return result;
+}
+// ==================================================================================================
+void dissembleARMInstruction_wideEncoding(InstructionDisassembly& result, uint32_t instruction,
+                                          bool useHex) {
+    uint32_t opcode = (readBits(instruction, 27, 28) << 1) | readBit(instruction, 15);
+    if (opcode != 0b101) return;
+    uint32_t op1 = readBits(instruction, 12, 14);
+    switch (op1) {
+        case 0b100:
+        case 0b110:
+        case 0b101:
+        case 0b111: {
+            bool S = readBit(instruction, 26);
+            bool I1 = !(readBit(instruction, 13) ^ S);
+            bool I2 = !(readBit(instruction, 11) ^ S);
+            int32_t imms = 0;
+            if (readBit(instruction, 12)) {
+                uint32_t imm = (S << 23) | (I1 << 22) | (I2 << 21) |
+                               (readBits(instruction, 16, 25) << 11) | readBits(instruction, 0, 10);
+                imms = (((int32_t)(imm << 8)) >> 7) + 4;
+                result.opcode = "BL";
+            } else {
+                uint32_t imm = (S << 22) | (I1 << 21) | (I2 << 20) |
+                               (readBits(instruction, 16, 25) << 10) | readBits(instruction, 1, 10);
+                imms = (((int32_t)(imm << 9)) >> 7) + 4;
+                result.opcode = "BLX";
+            }
+
+            result.operand1 = ".";
+            std::string offset = getImmStringSigned(imms, useHex).substr(1);
+            if (imms > 0) offset.insert(0, 1, '+');
+            if (imms != 0) result.operand1 += offset;
+            break;
+        }
+        default:
+            break;
+    }
 }
 // ==================================================================================================
 void dissembleTHUMBInstruction_shiftAddSubtractMoveCompare(InstructionDisassembly& result,

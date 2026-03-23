@@ -40,11 +40,12 @@ std::vector<Encoding> armEncodeASM(std::string instructions, bool arm7) {
     asmFile << instructions << std::endl;
     asmFile.close();
 
-    std::string arch = arm7 ? "armv4t" : "ARMv5TE";
+    std::string arch = arm7 ? "armv4t" : "armv5te";
+    std::string cpu = arm7 ? "arm7tdmi" : "arm946e-s";
     // Assemble the instructions.
     std::filesystem::path outputObjectFile = tempDir / "temp.o";
     std::string armASMCommand = "arm-none-eabi-gcc -c " + inputAsmFile.string() + " -o " +
-                                outputObjectFile.string() + " -march=" + arch;
+                                outputObjectFile.string() + " -march=" + arch + " -mcpu=" + cpu;
     LogDebugPrefixed("Calling: " << armASMCommand, "ASM Encode");
     if (system(armASMCommand.c_str()) != 0) {
         LogErrorPrefixed("Failed to compile assembly file!", "ASM Encode");

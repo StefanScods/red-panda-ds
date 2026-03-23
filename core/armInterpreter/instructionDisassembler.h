@@ -45,6 +45,8 @@ InstructionDisassembly dissembleTHUMBInstruction(uint32_t instruction, bool useH
 std::string getImmString(uint32_t val, bool useHex);
 std::string getImmStringSigned(int32_t val, bool useHex);
 std::string getRegListString(uint32_t regList);
+void dissembleARMInstruction_wideEncoding(InstructionDisassembly& result, uint32_t instruction,
+                                  bool useHex);
 void dissembleARMInstruction_data(InstructionDisassembly& result, uint32_t instruction,
                                   bool useHex);
 void dissembleARMInstruction_data_dataProcessing(InstructionDisassembly& result,

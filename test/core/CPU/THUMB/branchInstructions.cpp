@@ -561,3 +561,98 @@ TEST_F(TestCPU_THUMB_BranchInstructions_BLX, BLX_THUMB_REG) {
     ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), MAIN_RAM_START + 3);
     ASSERT_EQ(arm9.getThumbMode(), 1);
 }
+// ==================================================================================================
+// Branch Link and Exchange Wide
+// ==================================================================================================
+class TestCPU_THUMB_BranchInstructions_BLX_WIDE : public TestCPU_THUMB_BranchInstructions {
+protected:
+    TestCPU_THUMB_BranchInstructions_BLX_WIDE() {}
+    ~TestCPU_THUMB_BranchInstructions_BLX_WIDE() {}
+
+    void SetUp() override { TestCPU_THUMB_BranchInstructions::SetUp(); }
+
+    void TearDown() override { TestCPU_THUMB_BranchInstructions::TearDown(); }
+};
+/**
+ * @brief Tests a Branch Link operation using a positive offset.
+ */
+TEST_F(TestCPU_THUMB_BranchInstructions_BLX_WIDE, BL_Thumb_Imm_Relative_Forward) {
+    uint32_t start = MAIN_RAM_START;
+
+    arm9.setPC(start);
+    writeProgramToMemory(
+        ".thumb\n"
+        "BL .+0x100",
+        start, &bus, arm9.isARM7());
+
+    arm9.fetchAndExecute(1);
+
+    uint32_t expectedTarget = start + 0x100;
+
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), expectedTarget);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), start + 3);
+    ASSERT_EQ(arm9.getThumbMode(), 1);
+}
+/**
+ * @brief Tests a Branch Link operation using a negative offset.
+ */
+TEST_F(TestCPU_THUMB_BranchInstructions_BLX_WIDE, BL_Thumb_Imm_Relative_Backward) {
+    uint32_t start = MAIN_RAM_START + 0x200;
+
+    arm9.setPC(start);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "BL .-0x100",
+        start, &bus, arm9.isARM7());
+
+    arm9.fetchAndExecute(1);
+
+    uint32_t expectedTarget = start - 0x100;
+
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), expectedTarget);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), start + 3);
+    ASSERT_EQ(arm9.getThumbMode(), 1);
+}
+/**
+ * @brief Tests a Branch Link and exchange operation using a positive offset.
+ */
+TEST_F(TestCPU_THUMB_BranchInstructions_BLX_WIDE, BLX_Thumb_Imm_Relative_Forward) {
+    uint32_t start = MAIN_RAM_START;
+
+    arm9.setPC(start);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "BLX .+0x100",
+        start, &bus, arm9.isARM7());
+
+    arm9.fetchAndExecute(1);
+
+    uint32_t expectedTarget = (start + 0x100) & ~1u;  // force ARM alignment
+
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), expectedTarget);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), start + 3);
+    ASSERT_EQ(arm9.getThumbMode(), 0);
+}
+/**
+ * @brief Tests a Branch Link and exchange operation using a negative offset.
+ */
+TEST_F(TestCPU_THUMB_BranchInstructions_BLX_WIDE, BLX_Thumb_Imm_Relative_Backward) {
+    uint32_t start = MAIN_RAM_START + 0x200;
+
+    arm9.setPC(start);
+
+    writeProgramToMemory(
+        ".thumb\n"
+        "BLX .-0x100",
+        start, &bus, arm9.isARM7());
+
+    arm9.fetchAndExecute(1);
+
+    uint32_t expectedTarget = (start - 0x100) & ~1u;
+
+    ASSERT_EQ(arm9.readReg(PC_REGISTER_NUM), expectedTarget);
+    ASSERT_EQ(arm9.readReg(LR_REGISTER_NUM), start + 3);
+    ASSERT_EQ(arm9.getThumbMode(), 0);
+}

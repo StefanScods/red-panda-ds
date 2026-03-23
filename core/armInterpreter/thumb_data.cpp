@@ -523,6 +523,38 @@ cycles ARM::THUMB_ADR(uint32_t instruct) {
     return 1;  // One I cycle.
 }
 // ==================================================================================================
+// MSR
+// https://developer.arm.com/documentation/ddi0406/cb/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/MSR--register-?lang=en
+// https://developer.arm.com/documentation/ddi0406/cb/System-Level-Architecture/System-Instructions/Alphabetical-list-of-instructions/MSR--register-?lang=en
+// ==================================================================================================
+cycles ARM::THUMB_MSR(uint32_t instruct) {
+    if (readBit(instruct, 5)) return THUMB_UNDEFINED_INST(instruct);
+    if (readBits(instruct, 21, 26) != 0b011100) return THUMB_UNDEFINED_INST(instruct);
+    bool writeSPSR = readBit(instruct, 20);
+    uint32_t Rn = readBits(instruct, 16, 19);
+    uint32_t value = *activeRegs[Rn];
+    uint32_t maskBits = readBits(instruct, 8, 11);
 
+    uint32_t mask = 0;
+    if (readBit(maskBits, 0)) mask |= 0x000000FF;
+    if (readBit(maskBits, 1)) mask |= 0x0000FF00;
+    if (readBit(maskBits, 2)) mask |= 0x00FF0000;
+    if (readBit(maskBits, 3)) mask |= 0xFF000000;
+    // Handle processor modes.
+    if (getProcessorMode() == ProcessorModes::User) {
+        mask &= 0xFF000000;  // Only support writing to the flags in user mode.
+    }
+    if (writeSPSR) {
+        if (spsr == nullptr) {
+            LogError("Cannot write to SPSR in current processor Mode!");
+            return 1;
+        }
+        *spsr = value & mask;
+    } else {
+        setCPSR(value & mask);
+    }
+    return 1;  // Only one I Cycle.
+}
+// ==================================================================================================
 }  // namespace Core
 }  // namespace RedPandaDS

@@ -676,6 +676,8 @@ public:
     // Invalid instruction.
     cycles THUMB_UNDEFINED_INST(uint32_t instruct);
     // Decode helpers.
+    cycles THUMB_32BitWideDecodeAndExecute(uint32_t instruct);
+    cycles THUMB_32BitWide_branchesAndMiscControlDecodeAndExecute(uint32_t instruct);
     cycles THUMB_shiftAddSubtractMoveCompareDecodeAndExecute(uint32_t instruct);
     cycles THUMB_dataProcessingDecodeAndExecute(uint32_t instruct);
     cycles THUMB_specialDataAndBranchDecodeAndExecute(uint32_t instruct);
@@ -726,6 +728,7 @@ public:
     cycles THUMB_BIC_REG(uint32_t instruct);
     cycles THUMB_MVN_REG(uint32_t instruct);
     cycles THUMB_ADR(uint32_t instruct);
+    cycles THUMB_MSR(uint32_t instruct);
     // Load and Store category.
     cycles THUMB_STR(uint32_t srcReg, uint32_t baseReg, uint32_t offset);
     cycles THUMB_STRH(uint32_t srcReg, uint32_t baseReg, uint32_t offset);
@@ -744,7 +747,8 @@ public:
     cycles THUMB_B(uint32_t instruct);
     cycles THUMB_B_COND(uint32_t instruct);
     cycles THUMB_BX(uint32_t instruct);
-    cycles THUMB_BLX(uint32_t instruct);
+    cycles THUMB_BLX_REG(uint32_t instruct);
+    cycles THUMB_BLX_IMM(uint32_t instruct);
     // Misc category.
     cycles THUMB_BKPT(uint32_t instruct);
     cycles THUMB_SVC(uint32_t instruct);
