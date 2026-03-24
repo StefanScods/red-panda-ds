@@ -22,6 +22,7 @@ RedPandaDSApp::RedPandaDSApp(std::vector<char*>& args) {
 }
 // ==================================================================================================
 RedPandaDSApp::~RedPandaDSApp() {
+    assert(!running);
     DELETE_DYNAMIC_POINTER(core);
     DELETE_DYNAMIC_POINTER(timer);
     DELETE_DYNAMIC_POINTER(mainWindow);
@@ -47,23 +48,84 @@ bool RedPandaDSApp::start() {
     QString styleSheetContent = QLatin1String(styleSheetFile.readAll());
     app->setStyleSheet(styleSheetContent);
 
-    timer->start(APPLICATION_REFRESH_RATE);
-
-    // Initialize the emulator.
-    core->init();
-
-    // Show the main window.
-    mainWindow->show();
     return true;
 }
 // ==================================================================================================
 int RedPandaDSApp::run() {
+    // Initialize the emulator.
+    core->init();
+
+    timer->start(APPLICATION_REFRESH_RATE);
+
+    // Start the emulation thread.
+    running = true;
+    emulationThread = std::thread(&RedPandaDSApp::emulationThreadBody, this);
+
+    // Show the main window.
+    mainWindow->show();
     return app->exec();
 }
 // ==================================================================================================
 bool RedPandaDSApp::exit() {
     LogMsg("Exiting RedPandaDS...");
+    // Exit the emulation thread.
+    running = false;
+    if (emulationThread.joinable()) {
+        emulationThread.join();
+    }
     return true;
+}
+// ==================================================================================================
+void RedPandaDSApp::emulationThreadBody() {
+    LogDebug("Starting emulation thread.");
+    auto targetTime = std::chrono::high_resolution_clock::now();
+
+    uint32_t aaaaa = 0;
+    while (running) {
+        targetTime += FPS_targetFrameTime;
+
+        // Do work.
+        Core::NDS_LCD* lcd = core->getNDS_LCD();
+        auto& bottom = *lcd->getBottomScreenWorkBuffer();
+        auto& top = *lcd->getTopScreenWorkBuffer();
+
+        for (uint32_t i = 0; i < Core::DS_LCD_WIDTH; i++) {
+            for (uint32_t j = 0; j < Core::DS_LCD_HEIGHT; j++) {
+                uint32_t index = j * Core::DS_LCD_WIDTH + i;
+                bottom[index] = 0xff000000;
+                top[index] = 0xff000000;
+            }
+        }
+
+        lcd->swapBuffers();
+
+        uint32_t x = aaaaa % Core::DS_LCD_WIDTH;
+        uint32_t y = aaaaa % Core::DS_LCD_HEIGHT;
+        aaaaa++;
+
+        top[(50) * Core::DS_LCD_WIDTH + (x)] = 0xff00ffff;
+        top[(50 + 1) * Core::DS_LCD_WIDTH + (x)] = 0xff00ffff;
+        top[(50) * Core::DS_LCD_WIDTH + (x + 1)] = 0xff00ffff;
+        top[(50 + 1) * Core::DS_LCD_WIDTH + (x + 1)] = 0xff00ffff;
+
+        bottom[(y)*Core::DS_LCD_WIDTH + (50)] = 0xff00ffff;
+        bottom[(y + 1) * Core::DS_LCD_WIDTH + (50)] = 0xff00ffff;
+        bottom[(y)*Core::DS_LCD_WIDTH + (50 + 1)] = 0xff00ffff;
+        bottom[(y + 1) * Core::DS_LCD_WIDTH + (50 + 1)] = 0xff00ffff;
+
+        auto start = std::chrono::high_resolution_clock::now();
+        auto target = start + std::chrono::microseconds(15000);
+        while (std::chrono::high_resolution_clock::now() < target) {
+            std::this_thread::yield();
+        }
+
+        // Target 60 FPS.
+        std::this_thread::sleep_until(targetTime);
+        // Let the rest of the emulator know the core has finished a "frame".
+        QMetaObject::invokeMethod(
+            mainWindow, [this] { mainWindow->onEmulatorCoreUpdate(); }, Qt::QueuedConnection);
+    }
+    LogDebug("Exiting emulation thread.");
 }
 // ==================================================================================================
 void RedPandaDSApp::openARM7Viewer() {

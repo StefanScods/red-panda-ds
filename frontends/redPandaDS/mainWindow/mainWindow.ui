@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>538</width>
+    <height>255</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,13 +16,52 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="RedPandaDS::UI::ScreenWidget" name="topScreenWidget">
+        <property name="minimumSize">
+         <size>
+          <width>256</width>
+          <height>192</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>256</width>
+          <height>192</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="RedPandaDS::UI::ScreenWidget" name="bottomScreenWidget">
+        <property name="minimumSize">
+         <size>
+          <width>256</width>
+          <height>192</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>256</width>
+          <height>192</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>538</width>
      <height>21</height>
     </rect>
    </property>
@@ -84,6 +123,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RedPandaDS::UI::ScreenWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>common/screenWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

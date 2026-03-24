@@ -15,6 +15,7 @@ DSEmuCore::DSEmuCore() {
     arm7 = new ARM7TDMI();
     arm9 = new ARM946ES();
     bus = new Interconnect();
+    ndsLCD = new NDS_LCD();
     bus->init();
     bus->bindARM7(arm7);
     bus->bindARM9(arm9);
@@ -24,6 +25,7 @@ DSEmuCore::~DSEmuCore() {
     DELETE_DYNAMIC_POINTER(arm7);
     DELETE_DYNAMIC_POINTER(arm9);
     DELETE_DYNAMIC_POINTER(bus);
+    DELETE_DYNAMIC_POINTER(ndsLCD);
 }
 // ==================================================================================================
 void DSEmuCore::init() {
@@ -33,6 +35,7 @@ void DSEmuCore::init() {
 void DSEmuCore::reset() {
     eventQueue = {};
     cycles currentCycle = 0;
+    ndsLCD->reset();
     arm7->reset();
     arm9->reset();
 }

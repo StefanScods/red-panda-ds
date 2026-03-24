@@ -3,6 +3,9 @@
 
 #include <QApplication>
 #include <QTimer>
+#include <array>
+#include <chrono>
+#include <thread>
 
 #include "common.h"
 #include "core/core.h"
@@ -14,6 +17,7 @@
 namespace RedPandaDS {
 namespace UI {
 
+#define APPLICATION_EMU_CORE_FPS 60  // fps
 #define APPLICATION_REFRESH_RATE 15  // ms
 
 class RedPandaDSApp {
@@ -40,6 +44,10 @@ public:
      */
     bool exit();
     /**
+     * @brief Main execution loop of the emulator. Drives the emulator core at a fixed FPS.
+     */
+    void emulationThreadBody();
+    /**
      * @brief Fetch the emulated core.
      *
      * @return Core::DSEmuCore*
@@ -58,6 +66,9 @@ public:
     void openMemoryViewer();
     void openDisassemblyViewer();
 
+signals:
+    void emulatorCoreUpdate();
+
 private:
     QApplication* app = nullptr;
     Core::DSEmuCore* core = nullptr;
@@ -71,6 +82,12 @@ private:
 
     // Other QT components.
     QTimer* timer = nullptr;
+
+    std::thread emulationThread;
+    bool running = false;
+
+    // Emu core speed.
+    const std::chrono::microseconds FPS_targetFrameTime{1000000 / APPLICATION_EMU_CORE_FPS};
 };
 
 }  // namespace UI

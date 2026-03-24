@@ -23,6 +23,7 @@ set(RED_PANDA_DS_INCLUDES
 )
 set(RED_PANDA_DS_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/common/screenWidget.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/app/app.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/mainWindow/mainWindow.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/cpuViewer/cpuViewer.cpp
@@ -43,7 +44,7 @@ set(RED_PANDA_DS_QT_UI_SOURCES
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets OpenGLWidgets Gui)
 qt_standard_project_setup()
 
 # ==================================================================================================
@@ -60,6 +61,7 @@ target_link_libraries(${BINARY_NAME} PRIVATE ${EMU_CORE_LIB}
    Qt6::Core
    Qt6::Widgets
    Qt6::Gui
+   Qt6::OpenGLWidgets
 )
 set_target_properties(${BINARY_NAME} PROPERTIES
    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/
