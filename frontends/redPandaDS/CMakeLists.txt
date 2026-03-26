@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 # Pull in Web Resources
 # ==================================================================================================
 file(DOWNLOAD
-   "https://github.com/qwerasd205/PixelCode/blob/main/dist/ttf/PixelCode.ttf"
+   "https://github.com/qwerasd205/PixelCode/raw/v2.2/dist/ttf/PixelCode.ttf"
    ${CMAKE_BINARY_DIR}/resources/PixelCodeFont/PixelCode.ttf
    SHOW_PROGRESS
 )

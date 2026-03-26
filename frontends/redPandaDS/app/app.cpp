@@ -1,5 +1,5 @@
 #include "app.h"
-
+#include <QFontDatabase>
 #include <QFile>
 
 // Control print statements.
@@ -38,6 +38,14 @@ bool RedPandaDSApp::start() {
     if (app == nullptr || core == nullptr) {
         LogError("Failed to start the application!");
         return false;
+    }
+    QFile fontFile(":/PixelCode.ttf");
+    if (!fontFile.open(QIODevice::ReadOnly)) {
+        LogWarning("Could not load application font!");
+    } else {
+        QByteArray fontData = fontFile.readAll();
+        int id = QFontDatabase::addApplicationFontFromData(fontData);
+        fontFile.close();
     }
     // Apply a global style sheet to the entire application.
     QFile styleSheetFile(":/main.qss");
