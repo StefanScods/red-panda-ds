@@ -27,9 +27,36 @@ private:
      * @param event The current close event.
      */
     void closeEvent(QCloseEvent* event) override;
+    /**
+     * @brief Override the reset event hook.
+     *
+     * @param event The current reset event.
+     */
+    void resizeEvent(QResizeEvent* event) override;
+
+    /**
+     * @brief The main logic function for applying the layout to the main widget.
+     */
+    void layoutMainWidget();
+    /**
+     * @brief Set the screen size factor to the main widget.
+     *
+     * @param targetFactor The factor to set (0-4).
+     */
+    void setScreenSizeFactor(uint32_t targetFactor);
+    /**
+     * @brief Set the screen (LCD) layout as vertical or horizontal
+     *
+     * @param horizontalLayout True to apply horizontal layout. False to apply a vertical layout.
+     */
+    void setLCDLayout(bool horizontalLayout);
 
     Ui::MainWindow* ui = nullptr;
     RedPandaDSApp* app = nullptr;
+
+    uint32_t screenSizeFactor = 0;
+    uint32_t screenGap = 5;
+    bool screenHorizontalLayout = true;
 
     // FPS Control.
     std::chrono::high_resolution_clock::time_point lastFrameStartTime;

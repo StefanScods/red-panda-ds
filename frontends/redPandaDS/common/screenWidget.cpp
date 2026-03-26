@@ -2,6 +2,10 @@
 
 #include "core/core.h"
 
+// Control print statements.
+#define LOG_LEVEL 2
+#include "logger.h"
+
 namespace RedPandaDS {
 namespace UI {
 // ==================================================================================================
@@ -114,6 +118,5 @@ void ScreenWidget::initShaders() {
     shader.setUniformValue("screenTexture",
                            0);  // Force the shader to only render one type of texture.
 }
-// ==================================================================================================
 }  // namespace UI
 }  // namespace RedPandaDS

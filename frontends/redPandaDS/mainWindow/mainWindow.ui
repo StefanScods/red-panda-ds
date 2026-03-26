@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>538</width>
-    <height>255</height>
+    <width>556</width>
+    <height>245</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,51 +17,69 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="RedPandaDS::UI::ScreenWidget" name="topScreenWidget">
-        <property name="minimumSize">
-         <size>
-          <width>256</width>
-          <height>192</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>256</width>
-          <height>192</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="RedPandaDS::UI::ScreenWidget" name="bottomScreenWidget">
-        <property name="minimumSize">
-         <size>
-          <width>256</width>
-          <height>192</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>256</width>
-          <height>192</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
+   <widget class="RedPandaDS::UI::ScreenWidget" name="topScreenWidget">
+    <property name="geometry">
+     <rect>
+      <x>16</x>
+      <y>16</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>256</width>
+      <height>192</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>16777215</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="RedPandaDS::UI::ScreenWidget" name="bottomScreenWidget">
+    <property name="geometry">
+     <rect>
+      <x>284</x>
+      <y>16</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>256</width>
+      <height>192</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>16777215</height>
+     </size>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>538</width>
+     <width>556</width>
      <height>21</height>
     </rect>
    </property>
@@ -80,6 +98,24 @@
     <property name="title">
      <string>Display</string>
     </property>
+    <widget class="QMenu" name="menuForce_Screen_Size">
+     <property name="title">
+      <string>Set Screen Size</string>
+     </property>
+     <addaction name="action1x"/>
+     <addaction name="action2x"/>
+     <addaction name="action3x"/>
+     <addaction name="action4x"/>
+    </widget>
+    <widget class="QMenu" name="menuSet_LCD_Orientation">
+     <property name="title">
+      <string>Set LCD Orientation</string>
+     </property>
+     <addaction name="actionHorizontal"/>
+     <addaction name="actionVertical"/>
+    </widget>
+    <addaction name="menuForce_Screen_Size"/>
+    <addaction name="menuSet_LCD_Orientation"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -96,7 +132,6 @@
    <addaction name="menuDisplay"/>
    <addaction name="menuTools"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionQuit">
    <property name="text">
     <string>Quit</string>
@@ -120,6 +155,54 @@
   <action name="actionView_Memory">
    <property name="text">
     <string>View Memory</string>
+   </property>
+  </action>
+  <action name="action1x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1x</string>
+   </property>
+  </action>
+  <action name="action2x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2x</string>
+   </property>
+  </action>
+  <action name="action3x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3x</string>
+   </property>
+  </action>
+  <action name="action4x">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>4x</string>
+   </property>
+  </action>
+  <action name="actionHorizontal">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Horizontal</string>
+   </property>
+  </action>
+  <action name="actionVertical">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Vertical</string>
    </property>
   </action>
  </widget>
