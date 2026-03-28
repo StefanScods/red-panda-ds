@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include "common.h"
+#include "utils/armEncode.h"
 
 // Control print statements.
 #define LOG_LEVEL 4
@@ -30,6 +31,13 @@ DSEmuCore::~DSEmuCore() {
 // ==================================================================================================
 void DSEmuCore::init() {
     reset();
+
+    // temp program to test
+    writeProgramToMemory(
+        "start:\n"
+        "MOV R0, #0\n"
+        "B start\n",
+        MAIN_RAM_START, bus, arm9->isARM7());
 }
 // ==================================================================================================
 void DSEmuCore::reset() {

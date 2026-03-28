@@ -8,3 +8,8 @@ QLabel[maincpuViewerLabel="true"] {
 QToolTip { 
     font-size: 8pt;
 }
+
+
+QLabel[disassemblyViewerEntryLabel="true"] {
+    font-size: 10pt;
+}

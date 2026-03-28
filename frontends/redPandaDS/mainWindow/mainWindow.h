@@ -28,9 +28,9 @@ private:
      */
     void closeEvent(QCloseEvent* event) override;
     /**
-     * @brief Override the reset event hook.
+     * @brief Override the resize event hook.
      *
-     * @param event The current reset event.
+     * @param event The current resize event.
      */
     void resizeEvent(QResizeEvent* event) override;
 

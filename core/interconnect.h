@@ -133,6 +133,18 @@ public:
      * @param data Data to write
      */
     void write8ARM9(uint32_t addr, uint8_t data);
+    /**
+     * @brief Check to see if an address is valid for the ARM7.
+     *
+     * @param addr Address to check
+     */
+    bool isAddressValidARM7(uint32_t addr);
+    /**
+     * @brief Check to see if an address is valid for the ARM9.
+     *
+     * @param addr Address to check
+     */
+    bool isAddressValidARM9(uint32_t addr);
 };
 
 }  // namespace Core

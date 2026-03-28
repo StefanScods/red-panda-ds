@@ -1,6 +1,7 @@
 #include "app.h"
-#include <QFontDatabase>
+
 #include <QFile>
+#include <QFontDatabase>
 
 // Control print statements.
 #define LOG_LEVEL 2

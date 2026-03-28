@@ -264,6 +264,30 @@ void Interconnect::write8ARM9(uint32_t addr, uint8_t data) {
     }
 }
 // ==================================================================================================
+bool Interconnect::isAddressValidARM7(uint32_t addr) {
+    uint8_t memRegion = addr >> 24;
+    switch (memRegion) {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
+            return true;
+        }
+        default:
+            return false;
+    }
+    return false;
+}
+// ==================================================================================================
+bool Interconnect::isAddressValidARM9(uint32_t addr) {
+    uint8_t memRegion = addr >> 24;
+    switch (memRegion) {
+        case (ARM7MemoryRegionNum::MAIN_RAM): {
+            return true;
+        }
+        default:
+            return false;
+    }
+    return false;
+}
+// ==================================================================================================
 
 }  // namespace Core
 }  // namespace RedPandaDS
