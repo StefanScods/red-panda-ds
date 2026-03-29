@@ -36,6 +36,15 @@ void DSEmuCore::init() {
     writeProgramToMemory(
         "start:\n"
         "MOV R0, #0\n"
+        "loop1:\n"
+        "MOV R1, #0\n"
+        "loop2:\n"
+        "ADD R1, R1, #1\n"
+        "CMP R1, #0xFF000000\n"  
+        "Blt loop2\n" 
+        "ADD R0, R0, #1\n"
+        "CMP R0, #0xFF000000\n"  
+        "Blt loop1\n" 
         "B start\n",
         MAIN_RAM_START, bus, arm9->isARM7());
 }

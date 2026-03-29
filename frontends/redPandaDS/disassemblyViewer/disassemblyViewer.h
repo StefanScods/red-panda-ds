@@ -25,6 +25,17 @@ public:
      */
     void resizeEvent(QResizeEvent* event) override;
 
+    /**
+     * @brief Moves the disassembler viewer container to the active CPU's PC.
+     */
+    void goToPC();
+
+    /**
+     * @brief Handles the text changed event. Moves the disassembler viewer container to the address
+     * specified.
+     */
+    void onJumpToAddressTextBoxChanged();
+
 private:
     DisassemblyConfiguration currentConfig;
     void setNewDisassemblyConfiguration();
@@ -32,7 +43,7 @@ private:
     Ui::DisassemblyViewer* ui = nullptr;
     DisassemblyViewerContainer* viewer = nullptr;
 
-    const RedPandaDSApp* app = nullptr;
+    RedPandaDSApp* app = nullptr;
     Core::DSEmuCore* core = nullptr;
 };
 

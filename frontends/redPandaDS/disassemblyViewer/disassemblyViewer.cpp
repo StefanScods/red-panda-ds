@@ -172,10 +172,10 @@ DisassemblyViewerContainer::DisassemblyViewerContainer(RedPandaDSApp* app, QWidg
     contentLayout->setColumnStretch(0, 0);
     contentLayout->setColumnStretch(1, 0);
     contentLayout->setColumnStretch(2, 0);
-    contentLayout->setColumnStretch(3, 1);
-    contentLayout->setColumnStretch(4, 1);
-    contentLayout->setColumnStretch(5, 1);
-    contentLayout->setColumnStretch(6, 1);
+    contentLayout->setColumnStretch(3, 0);
+    contentLayout->setColumnStretch(4, 0);
+    contentLayout->setColumnStretch(5, 0);
+    contentLayout->setColumnStretch(6, 0);
     contentLayout->setColumnStretch(7, 5);
 
     scrollBar = new QScrollBar(Qt::Vertical, this);
@@ -367,10 +367,12 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     connect(ui->radioButton_cpu_arm7, &QRadioButton::clicked, this, [this]() {
         currentConfig.procType = Processor::arm7;
         setNewDisassemblyConfiguration();
+        goToPC();
     });
     connect(ui->radioButton_cpu_arm9, &QRadioButton::clicked, this, [this]() {
         currentConfig.procType = Processor::arm9;
         setNewDisassemblyConfiguration();
+        goToPC();
     });
     connect(ui->radioButton_mode_auto, &QRadioButton::clicked, this, [this]() {
         currentConfig.formatType = Format::autoDetect;
@@ -384,6 +386,10 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
         currentConfig.formatType = Format::thumb;
         setNewDisassemblyConfiguration();
     });
+    // Jump controls.
+    connect(ui->goToPCButton, &QPushButton::clicked, this, &DisassemblyViewer::goToPC);
+    connect(ui->addressInput, &QLineEdit::textChanged, this,
+            &DisassemblyViewer::onJumpToAddressTextBoxChanged);
 }
 // ==================================================================================================
 DisassemblyViewer::~DisassemblyViewer() {
@@ -393,6 +399,25 @@ DisassemblyViewer::~DisassemblyViewer() {
 void DisassemblyViewer::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
     viewer->setWidth(width());
+}
+// ==================================================================================================
+void DisassemblyViewer::goToPC() {
+    bool arm7 = currentConfig.procType == Processor::arm7;
+    const uint32_t pcVal = arm7 ? app->getEmuCore()->getARM7Core()->readReg(PC_REGISTER_NUM)
+                                : app->getEmuCore()->getARM9Core()->readReg(PC_REGISTER_NUM);
+
+    viewer->setPosition(pcVal);
+}
+// ==================================================================================================
+void DisassemblyViewer::onJumpToAddressTextBoxChanged() {
+    QString text = ui->addressInput->text().trimmed().toLower();
+    if (!text.startsWith("0x")) {
+        text.prepend("0x");
+    }
+    bool ok;
+    uint32_t address = text.toUInt(&ok, 16);
+    if (!ok) return;
+    viewer->setPosition(address);
 }
 // ==================================================================================================
 void DisassemblyViewer::setNewDisassemblyConfiguration() {

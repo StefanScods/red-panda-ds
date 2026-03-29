@@ -7,6 +7,7 @@
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QWheelEvent>
+#include <QLineEdit>
 
 #include "core/core.h"
 
@@ -124,7 +125,7 @@ public:
     void update();
 
 private:
-    uint32_t currentPosition = 0x2000000;
+    uint32_t currentPosition = 0;
     DisassemblyConfiguration config;
 
     QScrollBar* scrollBar = nullptr;
