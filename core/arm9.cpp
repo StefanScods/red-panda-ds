@@ -123,12 +123,14 @@ cycles ARM946ES::cycle() {
     while (currentCycle < targetCycle) {
         // Clear just branched indicator.
         justBranched = false;
-        // Perform fetches and executes in parallel.
-        if (executeCooldown == 0) {
+        // Maintain instruction pipeline.
+        if (instuctionPipeLine[0] == NO_INSTRUCT && instuctionPipeLine[2] != NO_INSTRUCT) {
             advanceInstructionPipeline();
-            if (instuctionPipeLine[0] != NO_INSTRUCT) {
-                executeCooldown = execute();
-            }
+        }
+        // Perform fetches and executes in parallel.
+        if (executeCooldown == 0 && instuctionPipeLine[0] != NO_INSTRUCT) {
+            // Instruction is on the execute stage, execute a new instuction.
+            executeCooldown = execute();
         }
         if (fetchCooldown == 0 && instuctionPipeLine[2] == NO_INSTRUCT) {
             // Instruction pipeline has space, fetch a new instuction.

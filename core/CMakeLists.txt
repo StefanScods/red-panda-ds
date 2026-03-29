@@ -12,6 +12,7 @@ set(EMU_CORE_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/utils/armEncode.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/core.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/events.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/lcd.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/arm7.cpp

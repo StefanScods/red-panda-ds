@@ -3,11 +3,11 @@
 
 #include <QGraphicsOpacityEffect>
 #include <QLabel>
+#include <QLineEdit>
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QWheelEvent>
-#include <QLineEdit>
 
 #include "core/core.h"
 

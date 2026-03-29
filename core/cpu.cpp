@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include "armInterpreter/instructionDisassembler.h"
 #include "interconnect.h"
 
 // Control print statements.
@@ -98,8 +99,8 @@ cycles ARM::ARM_execute() {
     uint32_t nextInstruction = instuctionPipeLine[0];
     instuctionPipeLine[0] = NO_INSTRUCT;
     uint8_t condition = readBits(nextInstruction, 28, 31);
-    LogDebug("Executing " << PrintHex(nextInstruction) << " with condition code "
-                          << PrintHex(condition) << "!");
+    LogDebug("Executing ARM: " << PrintHex(nextInstruction) << " - "
+                               << dissembleARMInstruction(nextInstruction).toString() << "...");
     // TODO!!! Remove this if statement once the execute() is less buggy.
     if (nextInstruction == NO_INSTRUCT) {
         LogError("Trying to execute an empty pipeline / bubble in pipeline!");
@@ -134,6 +135,8 @@ cycles ARM::THUMB_execute() {
     // Make space in the pipeline.
     uint32_t nextInstruction = instuctionPipeLine[0];
     instuctionPipeLine[0] = NO_INSTRUCT;
+    LogDebug("Executing THUMB: " << PrintHex(nextInstruction) << " - "
+                                 << dissembleTHUMBInstruction(nextInstruction).toString() << "...");
     // TODO!!! Remove this if statement once the execute() is less buggy.
     if (nextInstruction == NO_INSTRUCT) {
         LogError("Trying to execute an empty pipeline / bubble in pipeline!");
