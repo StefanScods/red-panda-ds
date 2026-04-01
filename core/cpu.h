@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <queue>
+#include <unordered_set>
 
 #include "types.h"
 #include "utils.h"
@@ -191,7 +192,10 @@ protected:
     cycles cyclesElapsed = 0;
     cycles currentCycle = 0;
     cycles targetCycle = 0;
+    bool hasExecutionLimit = 0;
+    uint32_t executionLimit = 0;
     bool justBranched = false;
+    bool justHitBreakpoint = false;
 
     // Used to keep track of sequencial vs non sequencial accesss.
     uint32_t previousCodeAddr = 0;
@@ -209,6 +213,9 @@ protected:
     cycles data_nonSequencial32BitAccessTimings[0xFF] = {0};
     cycles data_sequencial16BitAccessTimings[0xFF] = {0};
     cycles data_nonSequencial16BitAccessTimings[0xFF] = {0};
+
+    // Breakpoints.
+    std::unordered_set<uint32_t> breakpoints;
 
     /**
      * @brief adds the current value of `cyclesElapsed` to the `currentCycle` and reduces fetch
@@ -305,6 +312,24 @@ public:
     void advanceInstructionPipeline();
 
     /**
+     * @brief Removes any breakpoints from the CPU,
+     */
+    void clearBreakpoints() { breakpoints.clear(); }
+
+    /**
+     * @brief Sets a new group of breakpoints.
+     *
+     * @param newBreakpoints Breakpoints to set.
+     */
+    void setBreakpoints(std::unordered_set<uint32_t> newBreakpoints) {
+        breakpoints = std::move(newBreakpoints);
+    }
+    /**
+     * @brief Returns `true` if the CPU hit a breakpoint and the core should pause.
+     */
+    bool hitBreakpoint() { return justHitBreakpoint; }
+
+    /**
      * @brief Debug function to force PC to a value.
      * @param value
      */
@@ -312,6 +337,8 @@ public:
         pc() = value;
         clearInstructionPipeline();
     }
+
+    uint32_t getAddrOfNextInstructionToExecute();
 
     /**
      * @brief Read a register value.
@@ -446,6 +473,16 @@ public:
      * @param target Target number of cycles to set this component too.
      */
     void setTargetCycle(cycles target) { targetCycle = target; }
+
+    /**
+     * @brief Sets the target number of executions before hitting a "breakpoint".
+     *
+     * @param target Target number of executions to run before pausing the core.
+     */
+    void setExecutionLimit(uint32_t target) {
+        hasExecutionLimit = true;
+        executionLimit = target;
+    }
 
     /**
      * @brief Given the current state of the CPU flags, check if a condition is passed. Returns

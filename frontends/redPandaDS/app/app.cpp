@@ -102,7 +102,7 @@ void RedPandaDSApp::emulationThreadBody() {
         targetTime += FPS_targetFrameTime;
 
         // Do work.
-        core->processNextEvent();
+        core->runApplicationFrame();
 
         Core::NDS_LCD* lcd = core->getNDS_LCD();
         auto& bottom = *lcd->getBottomScreenWorkBuffer();

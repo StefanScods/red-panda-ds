@@ -14,37 +14,47 @@ namespace RedPandaDS {
 namespace UI {
 
 // ==================================================================================================
-DisassemblyViewerEntry::DisassemblyViewerEntry(RedPandaDSApp* app, QGridLayout* parentLayout,
-                                               uint32_t lineId, QWidget* parent)
-    : QWidget(parent), app(app) {
+DisassemblyViewerEntry::DisassemblyViewerEntry(
+    RedPandaDSApp* app, QGridLayout* parentLayout, uint32_t lineId,
+    std::function<void(uint32_t)> toggleBreakpointCallbackFunc, QWidget* parent)
+    : QWidget(parent), app(app), toggleBreakpointCallback(toggleBreakpointCallbackFunc) {
     QGraphicsOpacityEffect* addressLabelEffect = new QGraphicsOpacityEffect(this);
     addressLabelEffect->setOpacity(0.75);
     QGraphicsOpacityEffect* instructionBitsEffect = new QGraphicsOpacityEffect(this);
     instructionBitsEffect->setOpacity(0.75);
 
-    addressLabel = new QLabel(parent);
+    breakpointButton = new QPushButton(this);
+    breakpointButton->setProperty("disassemblyViewerEntryLabel", "true");
+    breakpointButton->setStyleSheet("padding: 0;");
+    breakpointButton->setFlat(true);
+    breakpointButton->setFixedSize(ENTRY_LINE_PIXEL_HEIGHT, ENTRY_LINE_PIXEL_HEIGHT);
+    parentLayout->addWidget(breakpointButton, lineId, 0);
+    addressLabel = new QLabel(this);
     addressLabel->setProperty("disassemblyViewerEntryLabel", "true");
     addressLabel->setGraphicsEffect(addressLabelEffect);
-    parentLayout->addWidget(addressLabel, lineId, 0);
-    instructionBitsLabel = new QLabel(parent);
+    parentLayout->addWidget(addressLabel, lineId, 1);
+    instructionBitsLabel = new QLabel(this);
     instructionBitsLabel->setProperty("disassemblyViewerEntryLabel", "true");
     instructionBitsLabel->setGraphicsEffect(instructionBitsEffect);
-    parentLayout->addWidget(instructionBitsLabel, lineId, 2);
-    opcodeLabel = new QLabel(parent);
+    parentLayout->addWidget(instructionBitsLabel, lineId, 3);
+    opcodeLabel = new QLabel(this);
     opcodeLabel->setProperty("disassemblyViewerEntryLabel", "true");
-    parentLayout->addWidget(opcodeLabel, lineId, 3);
-    destinationLabel = new QLabel(parent);
+    parentLayout->addWidget(opcodeLabel, lineId, 4);
+    destinationLabel = new QLabel(this);
     destinationLabel->setProperty("disassemblyViewerEntryLabel", "true");
-    parentLayout->addWidget(destinationLabel, lineId, 4);
-    operand1Label = new QLabel(parent);
+    parentLayout->addWidget(destinationLabel, lineId, 5);
+    operand1Label = new QLabel(this);
     operand1Label->setProperty("disassemblyViewerEntryLabel", "true");
-    parentLayout->addWidget(operand1Label, lineId, 5);
-    operand2Label = new QLabel(parent);
+    parentLayout->addWidget(operand1Label, lineId, 6);
+    operand2Label = new QLabel(this);
     operand2Label->setProperty("disassemblyViewerEntryLabel", "true");
-    parentLayout->addWidget(operand2Label, lineId, 6);
-    commentLabel = new QLabel(parent);
+    parentLayout->addWidget(operand2Label, lineId, 7);
+    commentLabel = new QLabel(this);
     commentLabel->setProperty("disassemblyViewerEntryLabel", "true");
-    parentLayout->addWidget(commentLabel, lineId, 7);
+    parentLayout->addWidget(commentLabel, lineId, 8);
+
+    connect(breakpointButton, &QPushButton::released, this,
+            &DisassemblyViewerEntry::breakpointButtonToggle);
 }
 // ==================================================================================================
 DisassemblyViewerEntry::~DisassemblyViewerEntry() {
@@ -152,6 +162,34 @@ void DisassemblyViewerEntry::update() {
     }
 }
 // ==================================================================================================
+void DisassemblyViewerEntry::setBreakpointState(BreakpointState::BreakpointState state) {
+    QPalette pal = breakpointButton->palette();
+    switch (state) {
+        case BreakpointState::clear:
+            breakpointButton->setText("");
+            break;
+
+        case BreakpointState::enabled:
+            breakpointButton->setText("●");
+            pal.setColor(QPalette::ButtonText, QColor(255, 92, 92));
+            break;
+
+        case BreakpointState::disabled:
+            breakpointButton->setText("●");
+            pal.setColor(QPalette::ButtonText, QColor(120, 120, 120));
+            break;
+
+        default:
+            break;
+    }
+    breakpointButton->setPalette(pal);
+}
+// ==================================================================================================
+void DisassemblyViewerEntry::breakpointButtonToggle() {
+    LogMsg(PrintHex(targetAddress));
+    toggleBreakpointCallback(targetAddress);
+}
+// ==================================================================================================
 DisassemblyViewerContainer::DisassemblyViewerContainer(RedPandaDSApp* app, QWidget* parent)
     : QWidget(parent), app(app) {
     topHorizontalLayout = new QHBoxLayout(this);
@@ -167,7 +205,7 @@ DisassemblyViewerContainer::DisassemblyViewerContainer(RedPandaDSApp* app, QWidg
     vLine->setFrameShape(QFrame::VLine);
     vLine->setFrameShadow(QFrame::Sunken);
     vLine->setFixedWidth(2);
-    contentLayout->addWidget(vLine, 0, 1, -1, 1);
+    contentLayout->addWidget(vLine, 0, 2, -1, 1);
 
     contentLayout->setColumnStretch(0, 0);
     contentLayout->setColumnStretch(1, 0);
@@ -176,7 +214,8 @@ DisassemblyViewerContainer::DisassemblyViewerContainer(RedPandaDSApp* app, QWidg
     contentLayout->setColumnStretch(4, 0);
     contentLayout->setColumnStretch(5, 0);
     contentLayout->setColumnStretch(6, 0);
-    contentLayout->setColumnStretch(7, 5);
+    contentLayout->setColumnStretch(7, 0);
+    contentLayout->setColumnStretch(8, 5);
 
     scrollBar = new QScrollBar(Qt::Vertical, this);
     scrollBar->setRange(0, INT_MAX);
@@ -184,12 +223,25 @@ DisassemblyViewerContainer::DisassemblyViewerContainer(RedPandaDSApp* app, QWidg
     topHorizontalLayout->addWidget(viewport);
     topHorizontalLayout->addWidget(scrollBar);
 
+    std::function<void(uint32_t)> toggleBreakpointCallback = [this](uint32_t address) {
+        Core::DSEmuCore* core = this->app->getEmuCore();
+        core->toggleBreakpoint(address);
+    };
+
     for (int i = 0; i < MAX_NUM_ENTRY_LINES; ++i) {
-        entries[i] = new DisassemblyViewerEntry(app, contentLayout, i, contentWidget);
+        entries[i] = new DisassemblyViewerEntry(app, contentLayout, i, toggleBreakpointCallback,
+                                                contentWidget);
         entries[i]->setFixedHeight(ENTRY_LINE_PIXEL_HEIGHT);
         contentLayout->addWidget(entries[i]);
     }
     setMaximumHeight(ENTRY_LINE_PIXEL_HEIGHT * MAX_NUM_ENTRY_LINES);
+
+    currentPCIndicator = new QFrame(this);
+    currentPCIndicator->setFrameStyle(QFrame::Box | QFrame::Plain);
+    currentPCIndicator->setStyleSheet("border: 1px solid #FF5C5C;");
+    currentPCIndicator->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    currentPCIndicator->setMouseTracking(false);
+    currentPCIndicator->setFixedHeight(ENTRY_LINE_PIXEL_HEIGHT + 1);
 
     // Hook up callback functions.
     connect(scrollBar, &QScrollBar::sliderMoved, this, &DisassemblyViewerContainer::onScroll);
@@ -204,8 +256,10 @@ DisassemblyViewerContainer::~DisassemblyViewerContainer() {
 void DisassemblyViewerContainer::update() {
     if (parentWidget()->isHidden()) return;
     contentWidget->hide();
+    currentPCIndicator->hide();
 
-    Core::Interconnect* interconnect = app->getEmuCore()->getInterconnect();
+    Core::DSEmuCore* core = app->getEmuCore();
+    Core::Interconnect* interconnect = core->getInterconnect();
 
     int numLinesInView = height() / ENTRY_LINE_PIXEL_HEIGHT + 1;
 
@@ -213,9 +267,12 @@ void DisassemblyViewerContainer::update() {
     bool arm7 = config.procType == Processor::arm7;
     bool armMode = config.formatType == Format::arm;
     if (config.formatType == Format::autoDetect) {
-        armMode = arm7 ? !app->getEmuCore()->getARM7Core()->getThumbMode()
-                       : !app->getEmuCore()->getARM9Core()->getThumbMode();
+        armMode =
+            arm7 ? !core->getARM7Core()->getThumbMode() : !core->getARM9Core()->getThumbMode();
     }
+
+    uint32_t currentPC = arm7 ? core->getARM7Core()->getAddrOfNextInstructionToExecute()
+                              : core->getARM9Core()->getAddrOfNextInstructionToExecute();
 
     uint32_t addrMask = armMode ? (~0b11) : (~0b1);
 
@@ -278,9 +335,26 @@ void DisassemblyViewerContainer::update() {
             }
         }
 
+        if (currentPC == addr) {
+            currentPCIndicator->show();
+
+            QPoint globalPos = entries[i]->mapToGlobal(QPoint(0, -ENTRY_LINE_PIXEL_HEIGHT - 5));
+            QPoint parentPos = currentPCIndicator->parentWidget()->mapFromGlobal(globalPos);
+            currentPCIndicator->setFixedWidth(viewport->width());
+            currentPCIndicator->move(parentPos);
+        }
+
+        BreakpointState::BreakpointState bkptState = BreakpointState::clear;
+        if (core->isEnabledBreakpoint(addr)) {
+            bkptState = BreakpointState::enabled;
+        } else if (core->isDisabledBreakpoint(addr)) {
+            bkptState = BreakpointState::disabled;
+        }
+
         // Set the target instruction and render it.
         entries[i]->setTargetInstruction(addr, supportedAddress, instruction, addrSize, armMode);
         entries[i]->update();
+        entries[i]->setBreakpointState(bkptState);
         addr += addrSize;
     }
     contentWidget->show();
@@ -354,7 +428,7 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     ui->setupUi(this);
 
     viewer = new DisassemblyViewerContainer(app, this);
-    ui->verticalLayout->insertWidget(ui->verticalLayout->indexOf(ui->line), viewer);
+    ui->verticalLayout->insertWidget(ui->verticalLayout->indexOf(ui->line_2) + 1, viewer);
 
     // Set default config.
     currentConfig.formatType = Format::autoDetect;
@@ -362,17 +436,26 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     setNewDisassemblyConfiguration();
 
     // Hook up callback functions.
-    connect(ui->closeButton, &QPushButton::clicked, this, &QWidget::close);
+    connect(ui->closeButton, &QPushButton::clicked, this, &DisassemblyViewer::close);
+    connect(app->getRefreshTimer(), &QTimer::timeout, this, &DisassemblyViewer::update);
     // Radio buttons.
     connect(ui->radioButton_cpu_arm7, &QRadioButton::clicked, this, [this]() {
+        bool selectSameProc = currentConfig.procType == Processor::arm7;
         currentConfig.procType = Processor::arm7;
         setNewDisassemblyConfiguration();
         goToPC();
+        if (selectSameProc) return;
+        this->core->disableAllBreakpoints();
+        this->core->changeDebugCPU(false);
     });
     connect(ui->radioButton_cpu_arm9, &QRadioButton::clicked, this, [this]() {
+        bool selectSameProc = currentConfig.procType == Processor::arm9;
         currentConfig.procType = Processor::arm9;
         setNewDisassemblyConfiguration();
         goToPC();
+        if (selectSameProc) return;
+        this->core->disableAllBreakpoints();
+        this->core->changeDebugCPU(true);
     });
     connect(ui->radioButton_mode_auto, &QRadioButton::clicked, this, [this]() {
         currentConfig.formatType = Format::autoDetect;
@@ -390,6 +473,9 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     connect(ui->goToPCButton, &QPushButton::clicked, this, &DisassemblyViewer::goToPC);
     connect(ui->addressInput, &QLineEdit::textChanged, this,
             &DisassemblyViewer::onJumpToAddressTextBoxChanged);
+    // Debugger controls.
+    connect(ui->toggleExecution, &QPushButton::clicked, this, &DisassemblyViewer::togglePaused);
+    connect(ui->stepCPU, &QPushButton::clicked, this, &DisassemblyViewer::stepCPU);
 }
 // ==================================================================================================
 DisassemblyViewer::~DisassemblyViewer() {
@@ -401,12 +487,46 @@ void DisassemblyViewer::resizeEvent(QResizeEvent* event) {
     viewer->setWidth(width());
 }
 // ==================================================================================================
+void DisassemblyViewer::closeEvent(QCloseEvent* event) {
+    core->disableAllBreakpoints();
+    currentConfig.procType = Processor::arm9;
+    setNewDisassemblyConfiguration();
+    event->accept();
+}
+// ==================================================================================================
+void DisassemblyViewer::update() {
+    switch (core->getState()) {
+        case Core::ApplicationState::stopped:
+            ui->toggleExecution->setText("Pause");
+            ui->toggleExecution->setDisabled(true);
+            ui->stepCPU->setDisabled(true);
+            break;
+        case Core::ApplicationState::running:
+            ui->toggleExecution->setText("Pause");
+            ui->toggleExecution->setDisabled(false);
+            ui->stepCPU->setDisabled(false);
+            break;
+        case Core::ApplicationState::paused:
+            ui->toggleExecution->setText("Continue");
+            ui->toggleExecution->setDisabled(false);
+            ui->stepCPU->setDisabled(false);
+            break;
+        default:
+            break;
+    }
+}
+// ==================================================================================================
 void DisassemblyViewer::goToPC() {
-    bool arm7 = currentConfig.procType == Processor::arm7;
-    const uint32_t pcVal = arm7 ? app->getEmuCore()->getARM7Core()->readReg(PC_REGISTER_NUM)
-                                : app->getEmuCore()->getARM9Core()->readReg(PC_REGISTER_NUM);
-
+    const uint32_t pcVal = app->getEmuCore()->getDebugCPU()->readReg(PC_REGISTER_NUM);
     viewer->setPosition(pcVal);
+}
+// ==================================================================================================
+void DisassemblyViewer::togglePaused() {
+    core->togglePausedState();
+}
+// ==================================================================================================
+void DisassemblyViewer::stepCPU() {
+    core->setStepCPUEvent();
 }
 // ==================================================================================================
 void DisassemblyViewer::onJumpToAddressTextBoxChanged() {

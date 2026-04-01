@@ -87,6 +87,9 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="separator"/>
+    <addaction name="actionPause_Emulation"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuSave_State">
@@ -203,6 +206,11 @@
    </property>
    <property name="text">
     <string>Vertical</string>
+   </property>
+  </action>
+  <action name="actionPause_Emulation">
+   <property name="text">
+    <string>Pause Emulation</string>
    </property>
   </action>
  </widget>

@@ -129,8 +129,27 @@ cycles ARM946ES::cycle() {
         }
         // Perform fetches and executes in parallel.
         if (executeCooldown == 0 && instuctionPipeLine[0] != NO_INSTRUCT) {
+            if (!justHitBreakpoint) {
+                // Check to see if PC is currently equal to a breakpoint.
+                uint32_t pcCorrected =
+                    pc() - 2 * (getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE);
+                if (breakpoints.contains(pcCorrected)) {
+                    justHitBreakpoint = true;
+                    break;
+                }
+            }
+            if (hasExecutionLimit) {
+                if (executionLimit == 0) {
+                    hasExecutionLimit = false;
+                    justHitBreakpoint = true;
+                    break;
+                }
+                executionLimit--;
+            }
             // Instruction is on the execute stage, execute a new instuction.
             executeCooldown = execute();
+            // Clear the just hit a breakpoint indicator.
+            justHitBreakpoint = false;
         }
         if (fetchCooldown == 0 && instuctionPipeLine[2] == NO_INSTRUCT) {
             // Instruction pipeline has space, fetch a new instuction.

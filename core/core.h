@@ -2,6 +2,7 @@
 #define CORE_H
 
 #include <queue>
+#include <unordered_set>
 
 #include "cpu.h"
 #include "events.h"
@@ -13,6 +14,14 @@ namespace Core {
 
 constexpr int ARM9_CYCLE_RATIO = 1;
 constexpr int ARM7_CYCLE_RATIO = 2;
+
+namespace ApplicationState {
+enum ApplicationState {
+    stopped = 0,
+    paused,
+    running,
+};
+}
 
 class DSEmuCore {
 public:
@@ -49,6 +58,13 @@ public:
         eventQueue.push(newEvent);
     }
 
+    ApplicationState::ApplicationState getState() { return state; }
+    void togglePausedState();
+
+    void runApplicationFrame();
+
+    void setStepCPUEvent();
+
     /**
      * @brief Processes the next event.
      *
@@ -56,14 +72,30 @@ public:
      */
     cycles processNextEvent();
 
+    // Breakpoint helpers
+    void changeDebugCPU(bool targetARM9) { cpuToDebug = targetARM9 ? (ARM*)arm9 : (ARM*)arm7; }
+    ARM* getDebugCPU() { return cpuToDebug; }
+    void toggleBreakpoint(uint32_t addr);
+    void addBreakpoint(uint32_t addr);
+    void removeBreakpoint(uint32_t addr);
+    void disableBreakpoint(uint32_t addr);
+    void disableAllBreakpoints();
+    bool isEnabledBreakpoint(uint32_t addr) const { return enabledBreakpoints.contains(addr); }
+    bool isDisabledBreakpoint(uint32_t addr) const { return disabledBreakpoints.contains(addr); }
+
 private:
     // Components.
     Interconnect* bus = nullptr;
     ARM7TDMI* arm7 = nullptr;
     ARM946ES* arm9 = nullptr;
     NDS_LCD* ndsLCD = nullptr;
+    ARM* cpuToDebug = nullptr;
+
+    std::unordered_set<uint32_t> enabledBreakpoints;
+    std::unordered_set<uint32_t> disabledBreakpoints;
 
     // Event queue and cycle counter.
+    ApplicationState::ApplicationState state;
     std::priority_queue<CoreEvent*, std::vector<CoreEvent*>, CompareCoreEvents> eventQueue;
     cycles currentCycle = 0;
 };

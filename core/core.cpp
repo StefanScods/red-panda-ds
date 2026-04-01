@@ -50,11 +50,41 @@ void DSEmuCore::init() {
 }
 // ==================================================================================================
 void DSEmuCore::reset() {
+    state = ApplicationState::running;
+
     eventQueue = {};
     cycles currentCycle = 0;
     ndsLCD->reset();
     arm7->reset();
     arm9->reset();
+    // Start by debugging the ARM9.
+    changeDebugCPU(true);
+}
+// ==================================================================================================
+void DSEmuCore::togglePausedState() {
+    if (state != ApplicationState::running) {
+        state = ApplicationState::running;
+    } else {
+        state = ApplicationState::paused;
+    }
+}
+// ==================================================================================================
+void DSEmuCore::runApplicationFrame() {
+    switch (state) {
+        case ApplicationState::stopped:
+        case ApplicationState::paused:
+            break;
+        case ApplicationState::running:
+            processNextEvent();
+            break;
+        default:
+            break;
+    }
+}
+// ==================================================================================================
+void DSEmuCore::setStepCPUEvent() {
+    cpuToDebug->setExecutionLimit(1);
+    state = ApplicationState::running;
 }
 // ==================================================================================================
 cycles DSEmuCore::processNextEvent() {
@@ -71,10 +101,16 @@ cycles DSEmuCore::processNextEvent() {
     cycles cyclesElapsed = 0;
     switch (nextEvent->target) {
         case EventTargetComponent::AnyCPU:
-            // For now just always drive the arm9.
-            finishedARM9 = true;
-            arm9->setTargetCycle(nextEvent->timestamp / ARM9_CYCLE_RATIO);
-            cyclesElapsed = arm9->cycle();
+            // Drive the CPU being debugged.
+            if (getDebugCPU() == arm7) {
+                finishedARM7 = true;
+                arm7->setTargetCycle(nextEvent->timestamp / ARM7_CYCLE_RATIO);
+                cyclesElapsed = arm7->cycle() * ARM7_CYCLE_RATIO;
+            } else {
+                finishedARM9 = true;
+                arm9->setTargetCycle(nextEvent->timestamp / ARM9_CYCLE_RATIO);
+                cyclesElapsed = arm9->cycle();
+            }
             break;
         case EventTargetComponent::ARM7:
             finishedARM7 = true;
@@ -102,6 +138,11 @@ cycles DSEmuCore::processNextEvent() {
         arm7->cycle();
     }
 
+    // Hit a breakpoint -> pause the core.
+    if (arm9->hitBreakpoint() || arm7->hitBreakpoint()) {
+        state = ApplicationState::paused;
+    }
+
     // Check if the event is finished.
     if (currentCycle >= nextEvent->timestamp) {
         // Trigger an on event finish function if defined.
@@ -116,6 +157,37 @@ cycles DSEmuCore::processNextEvent() {
     return cyclesElapsed;
 }
 // ==================================================================================================
-
+void DSEmuCore::addBreakpoint(uint32_t addr) {
+    enabledBreakpoints.insert(addr);
+    disabledBreakpoints.erase(addr);
+    cpuToDebug->setBreakpoints(enabledBreakpoints);
+}
+// ==================================================================================================
+void DSEmuCore::removeBreakpoint(uint32_t addr) {
+    enabledBreakpoints.erase(addr);
+    disabledBreakpoints.erase(addr);
+    cpuToDebug->setBreakpoints(enabledBreakpoints);
+}
+// ==================================================================================================
+void DSEmuCore::disableBreakpoint(uint32_t addr) {
+    enabledBreakpoints.erase(addr);
+    disabledBreakpoints.insert(addr);
+    cpuToDebug->setBreakpoints(enabledBreakpoints);
+}
+// ==================================================================================================
+void DSEmuCore::disableAllBreakpoints() {
+    disabledBreakpoints.insert(enabledBreakpoints.begin(), enabledBreakpoints.end());
+    enabledBreakpoints.clear();
+    cpuToDebug->setBreakpoints(enabledBreakpoints);
+}
+// ==================================================================================================
+void DSEmuCore::toggleBreakpoint(uint32_t addr) {
+    if (!enabledBreakpoints.contains(addr)) {
+        addBreakpoint(addr);
+    } else {
+        removeBreakpoint(addr);
+    }
+}
+// ==================================================================================================
 }  // namespace Core
 }  // namespace RedPandaDS

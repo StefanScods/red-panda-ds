@@ -4,10 +4,12 @@
 #include <QGraphicsOpacityEffect>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 #include <QResizeEvent>
 #include <QScrollBar>
 #include <QVBoxLayout>
 #include <QWheelEvent>
+#include <functional>
 
 #include "core/core.h"
 
@@ -23,6 +25,9 @@ enum Processor : uint8_t { arm7, arm9 };
 namespace Format {
 enum Format : uint8_t { autoDetect, arm, thumb };
 }
+namespace BreakpointState {
+enum BreakpointState : uint8_t { clear, enabled, disabled };
+}
 
 struct DisassemblyConfiguration {
     Processor::Processor procType;
@@ -34,7 +39,7 @@ class RedPandaDSApp;
 
 class DisassemblyViewerEntry : public QWidget {
 public:
-    DisassemblyViewerEntry(RedPandaDSApp* app, QGridLayout* parentLayout, uint32_t lineId,
+    DisassemblyViewerEntry(RedPandaDSApp* app, QGridLayout* parentLayout, uint32_t lineId,  std::function<void(uint32_t)> toggleBreakpointCallbackFunc,
                            QWidget* parent = nullptr);
     ~DisassemblyViewerEntry();
 
@@ -54,6 +59,10 @@ public:
      */
     void update();
 
+    void setBreakpointState(BreakpointState::BreakpointState state);
+
+    void breakpointButtonToggle();
+
 private:
     bool isValidInstruction = 0;
     uint32_t targetAddress = 0;
@@ -67,6 +76,7 @@ private:
     uint32_t prevTargetInstructionSize = 0;
     bool prevIsARMModeInstruction = 0;
 
+    QPushButton* breakpointButton = nullptr;
     QLabel* addressLabel = nullptr;
     QLabel* instructionBitsLabel = nullptr;
     QLabel* opcodeLabel = nullptr;
@@ -76,6 +86,7 @@ private:
     QLabel* commentLabel = nullptr;
 
     RedPandaDSApp* app = nullptr;
+    std::function<void(uint32_t)> toggleBreakpointCallback;
 };
 
 class DisassemblyViewerContainer : public QWidget {
@@ -135,6 +146,7 @@ private:
     QGridLayout* contentLayout = nullptr;
     QWidget* contentWidget = nullptr;
     DisassemblyViewerEntry* entries[MAX_NUM_ENTRY_LINES] = {nullptr};
+    QFrame* currentPCIndicator = nullptr;
 
     RedPandaDSApp* app = nullptr;
 };

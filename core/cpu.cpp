@@ -442,6 +442,13 @@ void ARM::advanceInstructionPipeline() {
     }
 }
 // ==================================================================================================
+uint32_t ARM::getAddrOfNextInstructionToExecute() {
+    uint32_t instructionSize = getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE;
+    if (instuctionPipeLine[0] != NO_INSTRUCT) return pc() - 2 * instructionSize;
+    if (instuctionPipeLine[1] != NO_INSTRUCT) return pc() - 1 * instructionSize;
+    return pc();
+}
+// ==================================================================================================
 uint32_t ARM::readModeReg(ProcessorModes::ProcessorModes mode, uint32_t regNum) const {
     switch (mode) {
         case ProcessorModes::System:
