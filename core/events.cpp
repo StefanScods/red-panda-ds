@@ -14,6 +14,7 @@ StandardFrameEvent::StandardFrameEvent(DSEmuCore* d_core, cycles currentTimestam
     timestamp = currentTimestamp + NDS_ARM9_FRAME_CYCLES;
     target = EventTargetComponent::AnyCPU;
     onEventFinishCallback = [this]() {
+        core->endNDSFrame();
         // On event finished, add the next frame to the event queue.
         core->addEventToQueue<StandardFrameEvent>(timestamp);
     };

@@ -17,6 +17,11 @@ public:
     MainWindow(RedPandaDSApp* app, QWidget* parent = nullptr);
     ~MainWindow();
 
+    /**
+     * @brief Helper function to handle changes to the core execution mode.
+     */
+    void handleCoreExecutionModeChange();
+
 public slots:
     void onEmulatorCoreUpdate();
 

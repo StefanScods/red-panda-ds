@@ -30,6 +30,17 @@ inline T underflowSafeSubtract(T op1, T op2) {
 }
 
 /**
+ * @brief Helper function to get the cycle count after apply a cycle ratio.
+ *
+ * @param value Cycle count to apply ratio to.
+ * @param ratioFactor Ratio to apply.
+ * @return cycles
+ */
+inline cycles applyCycleRatio(cycles value, cycles ratioFactor) {
+    return value / ratioFactor + (value % ratioFactor != 0);
+}
+
+/**
  * @brief Convert a value into a hexadecimal string .
  *
  *

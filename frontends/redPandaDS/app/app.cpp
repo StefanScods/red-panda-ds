@@ -65,6 +65,12 @@ bool RedPandaDSApp::start() {
 int RedPandaDSApp::run() {
     // Initialize the emulator.
     core->init();
+    // Set core callbacks.
+    core->setOnFrameEndCallback([this] {
+        QMetaObject::invokeMethod(mainWindow, &MainWindow::onEmulatorCoreUpdate,
+                                  Qt::QueuedConnection);
+    });
+    core->setOnStateChangeCallback([this] { this->handleCoreExecutionModeChange(); });
 
     timer->start(APPLICATION_REFRESH_RATE);
 
@@ -89,21 +95,9 @@ bool RedPandaDSApp::exit() {
 // ==================================================================================================
 void RedPandaDSApp::emulationThreadBody() {
     LogDebug("Starting emulation thread.");
-    auto targetTime = std::chrono::high_resolution_clock::now();
-
-    // Add the first frame to the event queue.
-    core->addEventToQueue<Core::StandardFrameEvent>(0);
-    // For now set PC to main ram.
-    core->getARM7Core()->setPC(MAIN_RAM_START);
-    core->getARM9Core()->setPC(MAIN_RAM_START);
 
     uint32_t aaaaa = 0;
     while (running) {
-        targetTime += FPS_targetFrameTime;
-
-        // Do work.
-        core->runApplicationFrame();
-
         Core::NDS_LCD* lcd = core->getNDS_LCD();
         auto& bottom = *lcd->getBottomScreenWorkBuffer();
         auto& top = *lcd->getTopScreenWorkBuffer();
@@ -132,19 +126,19 @@ void RedPandaDSApp::emulationThreadBody() {
         bottom[(y)*Core::DS_LCD_WIDTH + (50 + 1)] = 0xff00ffff;
         bottom[(y + 1) * Core::DS_LCD_WIDTH + (50 + 1)] = 0xff00ffff;
 
-        // auto start = std::chrono::high_resolution_clock::now();
-        // auto target = start + std::chrono::microseconds(15000);
-        // while (std::chrono::high_resolution_clock::now() < target) {
-        //     std::this_thread::yield();
-        // }
-
-        // Target 60 FPS.
-        std::this_thread::sleep_until(targetTime);
-        // Let the rest of the emulator know the core has finished a "frame".
-        QMetaObject::invokeMethod(
-            mainWindow, [this] { mainWindow->onEmulatorCoreUpdate(); }, Qt::QueuedConnection);
+        // Do work.
+        core->runApplicationIteration();
     }
     LogDebug("Exiting emulation thread.");
+}
+// ==================================================================================================
+void RedPandaDSApp::handleCoreExecutionModeChange() {
+    if (mainWindow != nullptr) {
+        mainWindow->handleCoreExecutionModeChange();
+    }
+    if (disassemblyViewer != nullptr) {
+        disassemblyViewer->handleCoreExecutionModeChange();
+    }
 }
 // ==================================================================================================
 void RedPandaDSApp::openARM7Viewer() {

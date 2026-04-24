@@ -19,6 +19,7 @@ set(EMU_CORE_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/arm9.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/interconnect.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/cpu.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/debugger.cpp
 
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_decodeAndExecute.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/armInterpreter/arm_branch.cpp

@@ -1,8 +1,8 @@
 #ifndef RED_PANDA_DS_UI_DISASSEMBLY_VIEWER_H
 #define RED_PANDA_DS_UI_DISASSEMBLY_VIEWER_H
 
-#include <QScrollArea>
 #include <QCloseEvent>
+#include <QScrollArea>
 
 #include "core/core.h"
 #include "disassemblyViewer/disassemblyViewerContainer.h"
@@ -33,6 +33,11 @@ public:
     void closeEvent(QCloseEvent* event) override;
 
     /**
+     * @brief Helper function to handle changes to the core execution mode.
+     */
+    void handleCoreExecutionModeChange();
+
+    /**
      * @brief Callback function to refresh the widget with new content from the emulator core.
      */
     void update();
@@ -43,12 +48,12 @@ public:
     void goToPC();
 
     /**
-     * @brief Toggles emulator core's execution status. 
+     * @brief Toggles emulator core's execution status.
      */
     void togglePaused();
-    
+
     /**
-     * @brief Callback function for stepping the CPU. 
+     * @brief Callback function for stepping the CPU.
      */
     void stepCPU();
 

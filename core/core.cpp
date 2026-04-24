@@ -20,6 +20,7 @@ DSEmuCore::DSEmuCore() {
     bus->init();
     bus->bindARM7(arm7);
     bus->bindARM9(arm9);
+    debugger.bindCore(this);
 }
 // ==================================================================================================
 DSEmuCore::~DSEmuCore() {
@@ -33,6 +34,9 @@ void DSEmuCore::init() {
     reset();
 
     // temp program to test
+    // For now set PC to main ram.
+    arm7->setPC(MAIN_RAM_START);
+    arm9->setPC(MAIN_RAM_START);
     writeProgramToMemory(
         "start:\n"
         "MOV R0, #0\n"
@@ -50,26 +54,20 @@ void DSEmuCore::init() {
 }
 // ==================================================================================================
 void DSEmuCore::reset() {
-    state = ApplicationState::running;
+    setState(ApplicationState::running);
 
     eventQueue = {};
     cycles currentCycle = 0;
     ndsLCD->reset();
     arm7->reset();
     arm9->reset();
-    // Start by debugging the ARM9.
-    changeDebugCPU(true);
+    debugger.reset();
+
+    addEventToQueue<Core::StandardFrameEvent>(0);
+    endOfFrameTargetTime = std::chrono::high_resolution_clock::now();
 }
 // ==================================================================================================
-void DSEmuCore::togglePausedState() {
-    if (state != ApplicationState::running) {
-        state = ApplicationState::running;
-    } else {
-        state = ApplicationState::paused;
-    }
-}
-// ==================================================================================================
-void DSEmuCore::runApplicationFrame() {
+void DSEmuCore::runApplicationIteration() {
     switch (state) {
         case ApplicationState::stopped:
         case ApplicationState::paused:
@@ -80,11 +78,6 @@ void DSEmuCore::runApplicationFrame() {
         default:
             break;
     }
-}
-// ==================================================================================================
-void DSEmuCore::setStepCPUEvent() {
-    cpuToDebug->setExecutionLimit(1);
-    state = ApplicationState::running;
 }
 // ==================================================================================================
 cycles DSEmuCore::processNextEvent() {
@@ -102,25 +95,25 @@ cycles DSEmuCore::processNextEvent() {
     switch (nextEvent->target) {
         case EventTargetComponent::AnyCPU:
             // Drive the CPU being debugged.
-            if (getDebugCPU() == arm7) {
+            if (debugger.getDebugCPU() == arm7) {
                 finishedARM7 = true;
-                arm7->setTargetCycle(nextEvent->timestamp / ARM7_CYCLE_RATIO);
+                arm7->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM7_CYCLE_RATIO));
                 cyclesElapsed = arm7->cycle() * ARM7_CYCLE_RATIO;
             } else {
                 finishedARM9 = true;
-                arm9->setTargetCycle(nextEvent->timestamp / ARM9_CYCLE_RATIO);
-                cyclesElapsed = arm9->cycle();
+                arm9->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM9_CYCLE_RATIO));
+                cyclesElapsed = arm9->cycle() * ARM9_CYCLE_RATIO;
             }
             break;
         case EventTargetComponent::ARM7:
             finishedARM7 = true;
-            arm7->setTargetCycle(nextEvent->timestamp / ARM7_CYCLE_RATIO);
+            arm7->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM7_CYCLE_RATIO));
             cyclesElapsed = arm7->cycle() * ARM7_CYCLE_RATIO;
             break;
         case EventTargetComponent::ARM9:
             finishedARM9 = true;
-            arm9->setTargetCycle(nextEvent->timestamp / ARM9_CYCLE_RATIO);
-            cyclesElapsed = arm9->cycle();
+            arm9->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM9_CYCLE_RATIO));
+            cyclesElapsed = arm9->cycle() * ARM9_CYCLE_RATIO;
             break;
 
         default:
@@ -140,7 +133,7 @@ cycles DSEmuCore::processNextEvent() {
 
     // Hit a breakpoint -> pause the core.
     if (arm9->hitBreakpoint() || arm7->hitBreakpoint()) {
-        state = ApplicationState::paused;
+        setState(ApplicationState::paused);
     }
 
     // Check if the event is finished.
@@ -153,40 +146,45 @@ cycles DSEmuCore::processNextEvent() {
         DELETE_DYNAMIC_POINTER(nextEvent);
         eventQueue.pop();
     }
-
     return cyclesElapsed;
 }
 // ==================================================================================================
-void DSEmuCore::addBreakpoint(uint32_t addr) {
-    enabledBreakpoints.insert(addr);
-    disabledBreakpoints.erase(addr);
-    cpuToDebug->setBreakpoints(enabledBreakpoints);
-}
-// ==================================================================================================
-void DSEmuCore::removeBreakpoint(uint32_t addr) {
-    enabledBreakpoints.erase(addr);
-    disabledBreakpoints.erase(addr);
-    cpuToDebug->setBreakpoints(enabledBreakpoints);
-}
-// ==================================================================================================
-void DSEmuCore::disableBreakpoint(uint32_t addr) {
-    enabledBreakpoints.erase(addr);
-    disabledBreakpoints.insert(addr);
-    cpuToDebug->setBreakpoints(enabledBreakpoints);
-}
-// ==================================================================================================
-void DSEmuCore::disableAllBreakpoints() {
-    disabledBreakpoints.insert(enabledBreakpoints.begin(), enabledBreakpoints.end());
-    enabledBreakpoints.clear();
-    cpuToDebug->setBreakpoints(enabledBreakpoints);
-}
-// ==================================================================================================
-void DSEmuCore::toggleBreakpoint(uint32_t addr) {
-    if (!enabledBreakpoints.contains(addr)) {
-        addBreakpoint(addr);
-    } else {
-        removeBreakpoint(addr);
+void DSEmuCore::endNDSFrame() {
+    // Run any end of frame functions which need to run.
+    if (onFrameEndCallback != nullptr) {
+        onFrameEndCallback();
     }
+    // Target 60 FPS.
+    auto now = std::chrono::high_resolution_clock::now();
+    if (now < endOfFrameTargetTime) {
+        // Finished frame fast, sleep and set the next target.
+        std::this_thread::sleep_until(endOfFrameTargetTime);
+        endOfFrameTargetTime += FPS_targetFrameTime;
+    } else {
+        // Missed the frame target. Drop FPS but keep targeting 60 fps moving forward,
+        endOfFrameTargetTime = now + FPS_targetFrameTime;
+    }
+}
+// ==================================================================================================
+void DSEmuCore::setState(ApplicationState::ApplicationState newState) {
+    if (state == newState) return;
+    state = newState;
+    if (onStateChangeCallback != nullptr) {
+        onStateChangeCallback();
+    }
+}
+// ==================================================================================================
+void DSEmuCore::togglePausedState() {
+    if (state != ApplicationState::running) {
+        setState(ApplicationState::running);
+    } else {
+        setState(ApplicationState::paused);
+    }
+}
+// ==================================================================================================
+void DSEmuCore::stepCPU() {
+    debugger.getDebugCPU()->setExecutionLimit(1);
+    setState(ApplicationState::running);
 }
 // ==================================================================================================
 }  // namespace Core

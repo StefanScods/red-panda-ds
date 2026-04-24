@@ -186,7 +186,6 @@ void DisassemblyViewerEntry::setBreakpointState(BreakpointState::BreakpointState
 }
 // ==================================================================================================
 void DisassemblyViewerEntry::breakpointButtonToggle() {
-    LogMsg(PrintHex(targetAddress));
     toggleBreakpointCallback(targetAddress);
 }
 // ==================================================================================================
@@ -225,7 +224,7 @@ DisassemblyViewerContainer::DisassemblyViewerContainer(RedPandaDSApp* app, QWidg
 
     std::function<void(uint32_t)> toggleBreakpointCallback = [this](uint32_t address) {
         Core::DSEmuCore* core = this->app->getEmuCore();
-        core->toggleBreakpoint(address);
+        core->debugger.toggleBreakpoint(address);
     };
 
     for (int i = 0; i < MAX_NUM_ENTRY_LINES; ++i) {
@@ -345,9 +344,9 @@ void DisassemblyViewerContainer::update() {
         }
 
         BreakpointState::BreakpointState bkptState = BreakpointState::clear;
-        if (core->isEnabledBreakpoint(addr)) {
+        if (core->debugger.isEnabledBreakpoint(addr)) {
             bkptState = BreakpointState::enabled;
-        } else if (core->isDisabledBreakpoint(addr)) {
+        } else if (core->debugger.isDisabledBreakpoint(addr)) {
             bkptState = BreakpointState::disabled;
         }
 
@@ -434,6 +433,7 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     currentConfig.formatType = Format::autoDetect;
     currentConfig.procType = Processor::arm9;
     setNewDisassemblyConfiguration();
+    handleCoreExecutionModeChange();
 
     // Hook up callback functions.
     connect(ui->closeButton, &QPushButton::clicked, this, &DisassemblyViewer::close);
@@ -443,19 +443,19 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
         bool selectSameProc = currentConfig.procType == Processor::arm7;
         currentConfig.procType = Processor::arm7;
         setNewDisassemblyConfiguration();
+        if (!selectSameProc) {
+            this->core->debugger.changeDebugCPU(false);
+        }
         goToPC();
-        if (selectSameProc) return;
-        this->core->disableAllBreakpoints();
-        this->core->changeDebugCPU(false);
     });
     connect(ui->radioButton_cpu_arm9, &QRadioButton::clicked, this, [this]() {
         bool selectSameProc = currentConfig.procType == Processor::arm9;
         currentConfig.procType = Processor::arm9;
         setNewDisassemblyConfiguration();
+        if (!selectSameProc) {
+            this->core->debugger.changeDebugCPU(true);
+        }
         goToPC();
-        if (selectSameProc) return;
-        this->core->disableAllBreakpoints();
-        this->core->changeDebugCPU(true);
     });
     connect(ui->radioButton_mode_auto, &QRadioButton::clicked, this, [this]() {
         currentConfig.formatType = Format::autoDetect;
@@ -488,13 +488,13 @@ void DisassemblyViewer::resizeEvent(QResizeEvent* event) {
 }
 // ==================================================================================================
 void DisassemblyViewer::closeEvent(QCloseEvent* event) {
-    core->disableAllBreakpoints();
+    core->debugger.disableAllBreakpoints();
     currentConfig.procType = Processor::arm9;
     setNewDisassemblyConfiguration();
     event->accept();
 }
 // ==================================================================================================
-void DisassemblyViewer::update() {
+void DisassemblyViewer::handleCoreExecutionModeChange() {
     switch (core->getState()) {
         case Core::ApplicationState::stopped:
             ui->toggleExecution->setText("Pause");
@@ -512,12 +512,17 @@ void DisassemblyViewer::update() {
             ui->stepCPU->setDisabled(false);
             break;
         default:
+            LogErrorPrefixed("Unsupported core state " << core->getState(), "DisassemblyViewer");
             break;
     }
 }
 // ==================================================================================================
+void DisassemblyViewer::update() {
+}
+// ==================================================================================================
 void DisassemblyViewer::goToPC() {
-    const uint32_t pcVal = app->getEmuCore()->getDebugCPU()->readReg(PC_REGISTER_NUM);
+    const uint32_t pcVal =
+        app->getEmuCore()->debugger.getDebugCPU()->getAddrOfNextInstructionToExecute();
     viewer->setPosition(pcVal);
 }
 // ==================================================================================================
@@ -526,7 +531,7 @@ void DisassemblyViewer::togglePaused() {
 }
 // ==================================================================================================
 void DisassemblyViewer::stepCPU() {
-    core->setStepCPUEvent();
+    core->stepCPU();
 }
 // ==================================================================================================
 void DisassemblyViewer::onJumpToAddressTextBoxChanged() {

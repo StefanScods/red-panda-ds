@@ -17,7 +17,6 @@
 namespace RedPandaDS {
 namespace UI {
 
-#define APPLICATION_EMU_CORE_FPS 60  // fps
 #define APPLICATION_REFRESH_RATE 15  // ms
 
 class RedPandaDSApp {
@@ -60,6 +59,11 @@ public:
      */
     QTimer* getRefreshTimer() { return timer; }
 
+    /**
+     * @brief Main callback function for the fronted to handle changes to the core execution mode.
+     */
+    void handleCoreExecutionModeChange();
+
     // Widget openers.
     void openARM7Viewer();
     void openARM9Viewer();
@@ -85,9 +89,6 @@ private:
 
     std::thread emulationThread;
     bool running = false;
-
-    // Emu core speed.
-    const std::chrono::microseconds FPS_targetFrameTime{1000000 / APPLICATION_EMU_CORE_FPS};
 };
 
 }  // namespace UI

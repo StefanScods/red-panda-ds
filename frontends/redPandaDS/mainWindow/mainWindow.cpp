@@ -27,6 +27,8 @@ MainWindow::MainWindow(RedPandaDSApp* app, QWidget* parent)
 
     // Hook up callback functions.
     connect(ui->actionQuit, &QAction::triggered, qApp, &QCoreApplication::quit);
+    connect(ui->actionPause_Emulation, &QAction::triggered, this,
+            [this, app]() { app->getEmuCore()->togglePausedState(); });
     connect(ui->action_viewarm7, &QAction::triggered, this,
             [this, app]() { app->openARM7Viewer(); });
     connect(ui->action_viewarm9, &QAction::triggered, this,
@@ -89,6 +91,27 @@ void MainWindow::onEmulatorCoreUpdate() {
 void MainWindow::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);
     layoutMainWidget();
+}
+// ==================================================================================================
+void MainWindow::handleCoreExecutionModeChange() {
+    Core::ApplicationState::ApplicationState appState = app->getEmuCore()->getState();
+    switch (appState) {
+        case Core::ApplicationState::stopped:
+            ui->actionPause_Emulation->setText("Pause Emulation");
+            ui->actionPause_Emulation->setEnabled(false);
+            break;
+        case Core::ApplicationState::running:
+            ui->actionPause_Emulation->setText("Pause Emulation");
+            ui->actionPause_Emulation->setEnabled(true);
+            break;
+        case Core::ApplicationState::paused:
+            ui->actionPause_Emulation->setText("Continue Emulation");
+            ui->actionPause_Emulation->setEnabled(true);
+            break;
+        default:
+            LogErrorPrefixed("Unsupported core state " << appState, "MainWindow");
+            break;
+    }
 }
 // ==================================================================================================
 void MainWindow::layoutMainWidget() {

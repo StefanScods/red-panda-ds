@@ -39,7 +39,8 @@ class RedPandaDSApp;
 
 class DisassemblyViewerEntry : public QWidget {
 public:
-    DisassemblyViewerEntry(RedPandaDSApp* app, QGridLayout* parentLayout, uint32_t lineId,  std::function<void(uint32_t)> toggleBreakpointCallbackFunc,
+    DisassemblyViewerEntry(RedPandaDSApp* app, QGridLayout* parentLayout, uint32_t lineId,
+                           std::function<void(uint32_t)> toggleBreakpointCallbackFunc,
                            QWidget* parent = nullptr);
     ~DisassemblyViewerEntry();
 
