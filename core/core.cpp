@@ -198,15 +198,11 @@ void DSEmuCore::endNDSFrame() {
         onFrameEndCallback();
     }
     // Target 60 FPS.
-    auto now = std::chrono::high_resolution_clock::now();
-    if (now < endOfFrameTargetTime) {
-        // Finished frame fast, sleep and set the next target.
-        std::this_thread::sleep_until(endOfFrameTargetTime);
-        endOfFrameTargetTime += FPS_targetFrameTime;
-    } else {
-        // Missed the frame target. Drop FPS but keep targeting 60 fps moving forward,
-        endOfFrameTargetTime = now + FPS_targetFrameTime;
+    // Finished frame fast, sleep and set the next target.
+    while (std::chrono::high_resolution_clock::now() < endOfFrameTargetTime) {
+        std::this_thread::yield();
     }
+    endOfFrameTargetTime = std::chrono::high_resolution_clock::now() + FPS_targetFrameTime;
 }
 // ==================================================================================================
 void DSEmuCore::setState(ApplicationState::ApplicationState newState) {

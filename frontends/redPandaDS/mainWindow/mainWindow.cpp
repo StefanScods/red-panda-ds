@@ -88,7 +88,7 @@ void MainWindow::onEmulatorCoreUpdate() {
     double FPS = 0;
     FPS = FPS_sampleCount / FPS_sampleTotal;
     // Update the window title.
-    std::string title = app->APP_TITLE + " - " + std::format("{:.0f}", FPS);
+    std::string title = app->APP_TITLE + " - " + std::format("{:.1f}", FPS);
     setWindowTitle(title.c_str());
 
     // Update the screens.
