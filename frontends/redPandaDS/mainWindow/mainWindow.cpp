@@ -26,9 +26,17 @@ MainWindow::MainWindow(RedPandaDSApp* app, QWidget* parent)
     ui->bottomScreenWidget->show();
 
     // Hook up callback functions.
-    connect(ui->actionQuit, &QAction::triggered, qApp, &QCoreApplication::quit);
+
+    connect(ui->actionOpen_ROM, &QAction::triggered, this, [this, app]() { app->openROM(); });
+
+    connect(ui->actionReset, &QAction::triggered, this, [this, app]() { app->resetEmulation(); });
     connect(ui->actionPause_Emulation, &QAction::triggered, this,
             [this, app]() { app->getEmuCore()->togglePausedState(); });
+    connect(ui->actionStop_Emulation, &QAction::triggered, this,
+            [this, app]() { app->stopEmulation(); });
+
+    connect(ui->actionQuit, &QAction::triggered, qApp, &QCoreApplication::quit);
+
     connect(ui->action_viewarm7, &QAction::triggered, this,
             [this, app]() { app->openARM7Viewer(); });
     connect(ui->action_viewarm9, &QAction::triggered, this,
@@ -46,6 +54,7 @@ MainWindow::MainWindow(RedPandaDSApp* app, QWidget* parent)
             [this]() { this->setLCDLayout(true); });
     connect(ui->actionVertical, &QAction::triggered, this, [this]() { this->setLCDLayout(false); });
 
+    handleCoreExecutionModeChange();
     // Set the default screen size and layout.
     setScreenSizeFactor(4);
     setLCDLayout(true);
@@ -79,7 +88,7 @@ void MainWindow::onEmulatorCoreUpdate() {
     double FPS = 0;
     FPS = FPS_sampleCount / FPS_sampleTotal;
     // Update the window title.
-    std::string title = "Red Panda DS - " + std::format("{:.2f}", FPS);
+    std::string title = app->APP_TITLE + " - " + std::format("{:.0f}", FPS);
     setWindowTitle(title.c_str());
 
     // Update the screens.
@@ -99,14 +108,20 @@ void MainWindow::handleCoreExecutionModeChange() {
         case Core::ApplicationState::stopped:
             ui->actionPause_Emulation->setText("Pause Emulation");
             ui->actionPause_Emulation->setEnabled(false);
+            ui->actionReset->setEnabled(false);
+            ui->actionStop_Emulation->setEnabled(false);
             break;
         case Core::ApplicationState::running:
             ui->actionPause_Emulation->setText("Pause Emulation");
             ui->actionPause_Emulation->setEnabled(true);
+            ui->actionReset->setEnabled(true);
+            ui->actionStop_Emulation->setEnabled(true);
             break;
         case Core::ApplicationState::paused:
             ui->actionPause_Emulation->setText("Continue Emulation");
             ui->actionPause_Emulation->setEnabled(true);
+            ui->actionReset->setEnabled(true);
+            ui->actionStop_Emulation->setEnabled(true);
             break;
         default:
             LogErrorPrefixed("Unsupported core state " << appState, "MainWindow");

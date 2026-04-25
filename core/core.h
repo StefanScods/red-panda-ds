@@ -55,6 +55,30 @@ public:
     void reset();
 
     /**
+     * @brief Starts execution of the NDS core.
+     */
+    void startExecution();
+
+    /**
+     * @brief Stops execution of the NDS core.
+     */
+    void stopExecution();
+
+    /**
+     * @brief Loads a ROM file.
+     *
+     * @param romFile The path to the ROM file to load.
+     *
+     * @return `bool`
+     */
+    bool loadROM(const std::string& romFile);
+
+    /**
+     * @brief Closes the current ROM file.
+     */
+    void closeROM();
+
+    /**
      * @brief Run the main application state machine.
      */
     void runApplicationIteration();

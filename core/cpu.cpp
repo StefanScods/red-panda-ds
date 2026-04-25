@@ -75,10 +75,15 @@ void ARM::reset() {
     regUND[1] = 0;
 
     // Control vars.
+    fetchCooldown = 0;
+    executeCooldown = 0;
     currentCycle = 0;
     cyclesElapsed = 0;
     targetCycle = 0;
+    hasExecutionLimit = 0;
+    executionLimit = 0;
     justBranched = false;
+    justHitBreakpoint = false;
 
     // CPU instruction Pipeline.
     clearInstructionPipeline();

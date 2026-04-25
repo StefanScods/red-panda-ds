@@ -17,6 +17,8 @@ void DebuggerInterface::reset() {
     changeDebugCPU(true);
     enabledBreakpoints.clear();
     disabledBreakpoints.clear();
+    core->arm9->clearBreakpoints();
+    core->arm7->clearBreakpoints();
 }
 // ==================================================================================================
 void DebuggerInterface::changeDebugCPU(bool targetARM9) {

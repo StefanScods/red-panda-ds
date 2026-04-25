@@ -1,6 +1,7 @@
 #include "app.h"
 
 #include <QFile>
+#include <QFileDialog>
 #include <QFontDatabase>
 
 #include "core/events.h"
@@ -20,7 +21,6 @@ RedPandaDSApp::RedPandaDSApp(std::vector<char*>& args) {
     int argc = args.size();
     char** argv = args.data();
     app = new QApplication(argc, argv);
-    mainWindow = new MainWindow(this);
     timer = new QTimer(app);
 }
 // ==================================================================================================
@@ -63,20 +63,20 @@ bool RedPandaDSApp::start() {
 }
 // ==================================================================================================
 int RedPandaDSApp::run() {
+    timer->start(APPLICATION_REFRESH_RATE);
     // Initialize the emulator.
     core->init();
+
+    // Open the main widnow.
+    mainWindow = new MainWindow(this);
+    mainWindow->setWindowTitle(APP_TITLE.c_str());
+
     // Set core callbacks.
     core->setOnFrameEndCallback([this] {
         QMetaObject::invokeMethod(mainWindow, &MainWindow::onEmulatorCoreUpdate,
                                   Qt::QueuedConnection);
     });
     core->setOnStateChangeCallback([this] { this->handleCoreExecutionModeChange(); });
-
-    timer->start(APPLICATION_REFRESH_RATE);
-
-    // Start the emulation thread.
-    running = true;
-    emulationThread = std::thread(&RedPandaDSApp::emulationThreadBody, this);
 
     // Show the main window.
     mainWindow->show();
@@ -86,16 +86,62 @@ int RedPandaDSApp::run() {
 bool RedPandaDSApp::exit() {
     LogMsg("Exiting RedPandaDS...");
     // Exit the emulation thread.
+    shutdownEmulationThread();
+    return true;
+}
+// ==================================================================================================
+void RedPandaDSApp::openROM() {
+    // Open a file dialog to select a ROM file.
+    QString fileName = QFileDialog::getOpenFileName(mainWindow, "Open ROM", "",
+                                                    "All Files (*);;NDS ROM Files (*.nds)");
+    // Handle cancelled dialogs.
+    if (fileName.isEmpty()) return;
+    // Load the selected path.
+    if (!loadROM(fileName.toStdString())) {
+        app->quit();
+        return;
+    }
+}
+// ==================================================================================================
+bool RedPandaDSApp::loadROM(const std::string& filepath) {
+    // Close any running emulation thread.
+    shutdownEmulationThread();
+    if (!core->loadROM(filepath)) {
+        return false;
+    }
+    // Start the emulation thread.
+    running = true;
+    emulationThread = std::thread(&RedPandaDSApp::emulationThreadBody, this);
+    return true;
+}
+// ==================================================================================================
+void RedPandaDSApp::shutdownEmulationThread() {
     running = false;
     if (emulationThread.joinable()) {
         emulationThread.join();
     }
-    return true;
+}
+// ==================================================================================================
+void RedPandaDSApp::resetEmulation() {
+    shutdownEmulationThread();
+    core->reset();
+    // Restart the emulation thread.
+    running = true;
+    emulationThread = std::thread(&RedPandaDSApp::emulationThreadBody, this);
+}
+// ==================================================================================================
+void RedPandaDSApp::stopEmulation() {
+    shutdownEmulationThread();
+    core->closeROM();
+    // Clear the application title (queue it to happen after any close rom events).
+    QMetaObject::invokeMethod(
+        mainWindow, [this]() { mainWindow->setWindowTitle(APP_TITLE.c_str()); },
+        Qt::QueuedConnection);
 }
 // ==================================================================================================
 void RedPandaDSApp::emulationThreadBody() {
     LogDebug("Starting emulation thread.");
-
+    core->startExecution();
     uint32_t aaaaa = 0;
     while (running) {
         Core::NDS_LCD* lcd = core->getNDS_LCD();

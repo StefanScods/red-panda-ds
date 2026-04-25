@@ -32,6 +32,22 @@ DSEmuCore::~DSEmuCore() {
 // ==================================================================================================
 void DSEmuCore::init() {
     reset();
+}
+// ==================================================================================================
+void DSEmuCore::reset() {
+    setState(ApplicationState::stopped);
+
+    currentCycle = 0;
+
+    ndsLCD->reset();
+    arm7->reset();
+    arm9->reset();
+    debugger.changeDebugCPU(true);
+
+    eventQueue = {};
+    addEventToQueue<Core::StandardFrameEvent>(0);
+
+    endOfFrameTargetTime = std::chrono::high_resolution_clock::now();
 
     // temp program to test
     // For now set PC to main ram.
@@ -51,20 +67,47 @@ void DSEmuCore::init() {
         "Bne loop1\n"
         "B start\n",
         MAIN_RAM_START, bus, arm9->isARM7());
+
+    // Signal to the reset of the emulator to update if a function is provided.
+    if (onFrameEndCallback != nullptr) {
+        onFrameEndCallback();
+    }
 }
 // ==================================================================================================
-void DSEmuCore::reset() {
+void DSEmuCore::startExecution() {
+    if (getState() != ApplicationState::stopped) {
+        LogError("Emulation core already started!");
+        return;
+    }
     setState(ApplicationState::running);
-
-    eventQueue = {};
-    cycles currentCycle = 0;
-    ndsLCD->reset();
-    arm7->reset();
-    arm9->reset();
+}
+// ==================================================================================================
+void DSEmuCore::stopExecution() {
+    if (getState() == ApplicationState::stopped) {
+        LogError("Emulation core already stopped!");
+        return;
+    }
+    setState(ApplicationState::stopped);
+}
+// ==================================================================================================
+bool DSEmuCore::loadROM(const std::string& romFile) {
+    LogDebug("Loading ROM \"" << romFile << "\"...");
+    // Reset the debugger.
     debugger.reset();
-
-    addEventToQueue<Core::StandardFrameEvent>(0);
-    endOfFrameTargetTime = std::chrono::high_resolution_clock::now();
+    reset();
+    return true;
+}
+// ==================================================================================================
+void DSEmuCore::closeROM() {
+    stopExecution();
+    // Clear the display.
+    ndsLCD->reset();
+    // Remove all breakpoints.
+    debugger.reset();
+    // Signal to the reset of the emulator to update if a function is provided.
+    if (onFrameEndCallback != nullptr) {
+        onFrameEndCallback();
+    }
 }
 // ==================================================================================================
 void DSEmuCore::runApplicationIteration() {

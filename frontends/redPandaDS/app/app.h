@@ -24,6 +24,8 @@ public:
     RedPandaDSApp(std::vector<char*>& args);
     ~RedPandaDSApp();
 
+    const std::string APP_TITLE = "Red Panda DS";
+
     /**
      * @brief Starts the application. Returns `false` upon failure.
      *
@@ -42,6 +44,36 @@ public:
      * @return `int`
      */
     bool exit();
+
+    /**
+     * @brief Opens a ROM file via a file select dialog.
+     */
+    void openROM();
+
+    /**
+     * @brief Loads a ROM file.
+     *
+     * @param filepath The path to the ROM file to load.
+     *
+     * @return `bool`
+     */
+    bool loadROM(const std::string& filepath);
+
+    /**
+     * @brief Cleanly stops the current emulation thread if one exists.
+     */
+    void shutdownEmulationThread();
+
+    /**
+     * @brief Callback function to reset the emulation.
+     */
+    void resetEmulation();
+
+    /**
+     * @brief Callback function to stop the emulation.
+     */
+    void stopEmulation();
+
     /**
      * @brief Main execution loop of the emulator. Drives the emulator core at a fixed FPS.
      */
