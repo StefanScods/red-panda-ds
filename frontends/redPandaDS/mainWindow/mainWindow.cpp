@@ -45,6 +45,8 @@ MainWindow::MainWindow(RedPandaDSApp* app, QWidget* parent)
             [this, app]() { app->openMemoryViewer(); });
     connect(ui->actionOpen_Disassembly, &QAction::triggered, this,
             [this, app]() { app->openDisassemblyViewer(); });
+    connect(ui->actionOpen_Cartridge_Info, &QAction::triggered, this,
+            [this, app]() { app->openCartridgeInfo(); });
     // Hook up set screen size actions  callback functions.
     connect(ui->action1x, &QAction::triggered, this, [this]() { this->setScreenSizeFactor(1); });
     connect(ui->action2x, &QAction::triggered, this, [this]() { this->setScreenSizeFactor(2); });
@@ -88,7 +90,11 @@ void MainWindow::onEmulatorCoreUpdate() {
     double FPS = 0;
     FPS = FPS_sampleCount / FPS_sampleTotal;
     // Update the window title.
-    std::string title = app->APP_TITLE + " - " + std::format("{:.1f}", FPS);
+    Core::NDS_Cartridge* cart = app->getEmuCore()->getNDS_Cartridge();
+    std::string title = app->APP_TITLE;
+    if (cart->isOpen()) {
+        title += " - " + cart->getHeader().getGameTitle() + " - " + std::format("{:.1f}", FPS);
+    }
     setWindowTitle(title.c_str());
 
     // Update the screens.
@@ -110,18 +116,21 @@ void MainWindow::handleCoreExecutionModeChange() {
             ui->actionPause_Emulation->setEnabled(false);
             ui->actionReset->setEnabled(false);
             ui->actionStop_Emulation->setEnabled(false);
+            ui->actionOpen_Cartridge_Info->setEnabled(false);
             break;
         case Core::ApplicationState::running:
             ui->actionPause_Emulation->setText("Pause Emulation");
             ui->actionPause_Emulation->setEnabled(true);
             ui->actionReset->setEnabled(true);
             ui->actionStop_Emulation->setEnabled(true);
+            ui->actionOpen_Cartridge_Info->setEnabled(true);
             break;
         case Core::ApplicationState::paused:
             ui->actionPause_Emulation->setText("Continue Emulation");
             ui->actionPause_Emulation->setEnabled(true);
             ui->actionReset->setEnabled(true);
             ui->actionStop_Emulation->setEnabled(true);
+            ui->actionOpen_Cartridge_Info->setEnabled(true);
             break;
         default:
             LogErrorPrefixed("Unsupported core state " << appState, "MainWindow");

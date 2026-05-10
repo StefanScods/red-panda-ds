@@ -10,6 +10,20 @@ namespace RedPandaDS {
 namespace Core {
 
 // ==================================================================================================
+std::string CartridgeHeader::getGameTitle() const {
+    std::string result;
+    for (unsigned int i = 0; i < NDS_CARTRIDGE_GAME_TITLE_WIDTH; i++) {
+        if (gameTitle[i] == 0) break;
+        result += gameTitle[i];
+    }
+    return result;
+}
+// ==================================================================================================
+std::string CartridgeHeader::getGameCode() const {
+    return std::string(reinterpret_cast<const char*>(&gameCode),
+                       reinterpret_cast<const char*>(&gameCode) + sizeof(gameCode));
+}
+// ==================================================================================================
 NDS_Cartridge::NDS_Cartridge() {
     reset();
 }
@@ -20,6 +34,10 @@ void NDS_Cartridge::reset() {
         file.close();
     }
     header = {};
+}
+// ==================================================================================================
+bool NDS_Cartridge::isOpen() {
+    return file.is_open();
 }
 // ==================================================================================================
 bool NDS_Cartridge::loadROMFromFile(const std::string& filepath) {
@@ -121,7 +139,7 @@ bool NDS_Cartridge::loadHeader() {
     file.read(reinterpret_cast<char*>(&header.totalUsedRomSize), sizeof(header.totalUsedRomSize));
     // 0x084
     file.read(reinterpret_cast<char*>(&header.romHeaderSize), sizeof(header.romHeaderSize));
-    // 0x088 
+    // 0x088
     file.read(reinterpret_cast<char*>(header.unknown), NDS_CARTRIDGE_UNKNOWN_WIDTH);
     // 0x08C
     file.read(reinterpret_cast<char*>(header.reserved3), NDS_CARTRIDGE_RESERVED_3_WIDTH);
@@ -164,6 +182,14 @@ bool NDS_Cartridge::loadHeader() {
         LogError("Nintendo logo checksum failed!");
         LogDebug("Expected: " << PrintHex(header.nintendoLogoChecksum));
         LogDebug("Actual: " << PrintHex(calculatedNintendoLogoChecksum));
+        return false;
+    }
+
+    // Todo
+    // Catch non-nds games.
+    if (header.unitCode != 0x0 && header.unitCode != 0x2) {
+        LogError("Only NDS games are currently supported!");
+        LogDebug("Unit code: " << PrintHex(header.unitCode));
         return false;
     }
 

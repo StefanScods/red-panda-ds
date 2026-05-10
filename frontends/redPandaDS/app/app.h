@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 
+#include "cartridgeInfo/cartridgeInfo.h"
 #include "common.h"
 #include "core/core.h"
 #include "cpuViewer/cpuViewer.h"
@@ -101,6 +102,7 @@ public:
     void openARM9Viewer();
     void openMemoryViewer();
     void openDisassemblyViewer();
+    void openCartridgeInfo();
 
 signals:
     void emulatorCoreUpdate();
@@ -115,6 +117,7 @@ private:
     CPUViewer* arm9Viewer = nullptr;
     MemoryViewer* memoryViewer = nullptr;
     DisassemblyViewer* disassemblyViewer = nullptr;
+    CartridgeInfo* cartridgeInfo = nullptr;
 
     // Other QT components.
     QTimer* timer = nullptr;

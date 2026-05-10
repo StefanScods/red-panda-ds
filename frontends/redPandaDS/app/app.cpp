@@ -185,6 +185,10 @@ void RedPandaDSApp::handleCoreExecutionModeChange() {
     if (disassemblyViewer != nullptr) {
         disassemblyViewer->handleCoreExecutionModeChange();
     }
+
+    if (core->getState() == Core::ApplicationState::stopped && cartridgeInfo != nullptr) {
+        cartridgeInfo->close();
+    }
 }
 // ==================================================================================================
 void RedPandaDSApp::openARM7Viewer() {
@@ -210,6 +214,12 @@ void RedPandaDSApp::openMemoryViewer() {
         memoryViewer = new MemoryViewer(this, core);
     }
     memoryViewer->isHidden() ? memoryViewer->show() : memoryViewer->raise();
+}
+void RedPandaDSApp::openCartridgeInfo() {
+    if (cartridgeInfo == nullptr) {
+        cartridgeInfo = new CartridgeInfo(this, core);
+    }
+    cartridgeInfo->isHidden() ? cartridgeInfo->show() : cartridgeInfo->raise();
 }
 // ==================================================================================================
 

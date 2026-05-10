@@ -2,6 +2,11 @@
     font: 12pt "Pixel Code";
 }
 
+
+QLabel[boldLabel="true"] {
+    font-weight: bold;
+}
+
 QLabel[maincpuViewerLabel="true"] {
     font-weight: bold;
 }

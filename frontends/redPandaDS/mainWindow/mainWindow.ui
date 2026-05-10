@@ -134,6 +134,7 @@
     <addaction name="actionView_Memory"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Disassembly"/>
+    <addaction name="actionOpen_Cartridge_Info"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSave_State"/>
@@ -231,6 +232,11 @@
   <action name="actionStop_Emulation">
    <property name="text">
     <string>Stop Emulation</string>
+   </property>
+  </action>
+  <action name="actionOpen_Cartridge_Info">
+   <property name="text">
+    <string>Open Cartridge Info</string>
    </property>
   </action>
  </widget>

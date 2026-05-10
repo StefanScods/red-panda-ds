@@ -120,6 +120,9 @@ struct CartridgeHeader {
     uint32_t debugSize;
     // 0x168
     uint32_t debugRamAddress;
+
+    std::string getGameTitle() const;
+    std::string getGameCode() const;
 };
 
 class NDS_Cartridge {
@@ -132,6 +135,13 @@ public:
     void reset();
 
     /**
+     * @brief Returns `true` if a ROM file is loaded in the 'cartridge'.
+     *
+     * @return `bool`
+     */
+    bool isOpen();
+
+    /**
      * @brief Loads a ROM file and creates a "cartridge" interface. Returns false upon failure.
      *
      * @param filepath Path to the ROM file to load.
@@ -139,6 +149,13 @@ public:
      * @return `bool`
      */
     bool loadROMFromFile(const std::string& filepath);
+
+    /**
+     * @brief Get a read-only interface to the cartridge header.
+     *
+     * @return `const CartridgeHeader&`
+     */
+    const CartridgeHeader& getHeader() const { return header; }
 
 private:
     /**

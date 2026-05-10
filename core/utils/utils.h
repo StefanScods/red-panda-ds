@@ -423,10 +423,10 @@ inline uint16_t getCRC16(const uint8_t* data, uint16_t size, uint32_t initialDat
         // Apply the polynomial and shifts.
         for (uint32_t j = 0; j < 8; j++) {
             uint16_t shifted = crc >> 1;
-            
+
             bool carry = crc & 0b1;
-            if(carry) shifted = shifted ^ 0xA001;
-            
+            if (carry) shifted = shifted ^ 0xA001;
+
             crc = shifted;
         }
     }
