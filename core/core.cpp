@@ -17,6 +17,7 @@ DSEmuCore::DSEmuCore() {
     arm9 = new ARM946ES();
     bus = new Interconnect();
     ndsLCD = new NDS_LCD();
+    ndsCartridge = new NDS_Cartridge();
     bus->init();
     bus->bindARM7(arm7);
     bus->bindARM9(arm9);
@@ -28,6 +29,7 @@ DSEmuCore::~DSEmuCore() {
     DELETE_DYNAMIC_POINTER(arm9);
     DELETE_DYNAMIC_POINTER(bus);
     DELETE_DYNAMIC_POINTER(ndsLCD);
+    DELETE_DYNAMIC_POINTER(ndsCartridge);
 }
 // ==================================================================================================
 void DSEmuCore::init() {
@@ -40,6 +42,7 @@ void DSEmuCore::reset() {
     currentCycle = 0;
 
     ndsLCD->reset();
+    ndsCartridge->reset();
     arm7->reset();
     arm9->reset();
     debugger.changeDebugCPU(true);
@@ -94,7 +97,12 @@ bool DSEmuCore::loadROM(const std::string& romFile) {
     LogDebug("Loading ROM \"" << romFile << "\"...");
     // Reset the debugger.
     debugger.reset();
+    // Reset the rest of the core.
     reset();
+    // Load the cartridge.
+    if (!ndsCartridge->loadROMFromFile(romFile)) {
+        return false;
+    }
     return true;
 }
 // ==================================================================================================

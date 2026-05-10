@@ -405,6 +405,34 @@ inline uint32_t getLSB(uint32_t value) {
     return 32;
 }
 
+/**
+ * @brief Returns the 16-Bit Cyclic Redundancy Check (CRC16) checksum of the passed data.
+ * See https://problemkaputt.de/gbatek.htm#biosmiscfunctions
+ *
+ * @param data Data to checksum.
+ * @param size The number of bytes to check.
+ * @param initialData Optional argument. Set initial CRC data.
+ *
+ * @return uint16_t
+ */
+inline uint16_t getCRC16(const uint8_t* data, uint16_t size, uint32_t initialData = 0xFFFF) {
+    uint16_t crc = initialData;
+    for (uint32_t i = 0; i < size; i++) {
+        // Process the next byte,
+        crc ^= data[i];
+        // Apply the polynomial and shifts.
+        for (uint32_t j = 0; j < 8; j++) {
+            uint16_t shifted = crc >> 1;
+            
+            bool carry = crc & 0b1;
+            if(carry) shifted = shifted ^ 0xA001;
+            
+            crc = shifted;
+        }
+    }
+    return crc;
+}
+
 }  // namespace Core
 }  // namespace RedPandaDS
 

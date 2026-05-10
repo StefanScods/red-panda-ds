@@ -6,6 +6,7 @@
 #include <thread>
 #include <unordered_set>
 
+#include "cartridge.h"
 #include "cpu.h"
 #include "debugger.h"
 #include "events.h"
@@ -43,6 +44,7 @@ public:
     ARM7TDMI* getARM7Core() const { return arm7; }
     ARM946ES* getARM9Core() const { return arm9; }
     NDS_LCD* getNDS_LCD() const { return ndsLCD; }
+    NDS_Cartridge* getNDS_Cartridge() const { return ndsCartridge; }
 
     /**
      * @brief Initializes the core.
@@ -151,6 +153,7 @@ private:
     ARM7TDMI* arm7 = nullptr;
     ARM946ES* arm9 = nullptr;
     NDS_LCD* ndsLCD = nullptr;
+    NDS_Cartridge* ndsCartridge = nullptr;
 
     // Callbacks.
     std::function<void()> onFrameEndCallback = nullptr;
