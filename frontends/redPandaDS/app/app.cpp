@@ -125,6 +125,9 @@ void RedPandaDSApp::shutdownEmulationThread() {
 void RedPandaDSApp::resetEmulation() {
     shutdownEmulationThread();
     core->reset();
+    if (!core->reloadCurrentROM()) {
+        return;
+    }
     // Restart the emulation thread.
     running = true;
     emulationThread = std::thread(&RedPandaDSApp::emulationThreadBody, this);

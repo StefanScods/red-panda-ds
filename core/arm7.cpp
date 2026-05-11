@@ -16,7 +16,15 @@ namespace Core {
 ARM7TDMI::ARM7TDMI() {
     arm9 = false;
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
-    // TODO!!! finish this.
+    // BIOS.
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
     // Main RAM.
     code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 9;
     code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 2;
@@ -26,6 +34,55 @@ ARM7TDMI::ARM7TDMI() {
     data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 2;
     data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 9;
     data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::MAIN_RAM] = 1;
+    // WRAM.
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::WRAM] = 1;
+    // I/O.
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::IO] = 1;
+    // VRAM.
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 2;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 2;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 1;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 1;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 2;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 2;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 1;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::VRAM] = 1;
+    // GBA ROM.
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 16;
+    code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 16;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 12;
+    code_sequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 12;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 10;
+    code_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 10;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 6;
+    code_sequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 6;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 15;
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 15;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 12;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 12;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 9;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 9;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM1] = 6;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::GBAROM2] = 6;
+    // GBA RAM.
+    data_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::GBARAM] = 9;
+    data_sequencial32BitAccessTimings[ARM7MemoryRegionNum::GBARAM] = 10;
+    data_nonSequencial16BitAccessTimings[ARM7MemoryRegionNum::GBARAM] = 9;
+    data_sequencial16BitAccessTimings[ARM7MemoryRegionNum::GBARAM] = 10;
 }
 // ==================================================================================================
 ARM7TDMI::~ARM7TDMI() {

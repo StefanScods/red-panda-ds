@@ -205,14 +205,14 @@ protected:
     uint32_t instuctionPipeLine[INSTUCTION_PIPELINE_LENGTH];
 
     // Cycle timing map.
-    cycles code_sequencial32BitAccessTimings[0xFF] = {0};
-    cycles code_nonSequencial32BitAccessTimings[0xFF] = {0};
-    cycles code_sequencial16BitAccessTimings[0xFF] = {0};
-    cycles code_nonSequencial16BitAccessTimings[0xFF] = {0};
-    cycles data_sequencial32BitAccessTimings[0xFF] = {0};
-    cycles data_nonSequencial32BitAccessTimings[0xFF] = {0};
-    cycles data_sequencial16BitAccessTimings[0xFF] = {0};
-    cycles data_nonSequencial16BitAccessTimings[0xFF] = {0};
+    cycles code_sequencial32BitAccessTimings[0x100] = {0xFF};
+    cycles code_nonSequencial32BitAccessTimings[0x100] = {0xFF};
+    cycles code_sequencial16BitAccessTimings[0x100] = {0xFF};
+    cycles code_nonSequencial16BitAccessTimings[0x100] = {0xFF};
+    cycles data_sequencial32BitAccessTimings[0x100] = {0xFF};
+    cycles data_nonSequencial32BitAccessTimings[0x100] = {0xFF};
+    cycles data_sequencial16BitAccessTimings[0x100] = {0xFF};
+    cycles data_nonSequencial16BitAccessTimings[0x100] = {0xFF};
 
     // Breakpoints.
     std::unordered_set<uint32_t> breakpoints;

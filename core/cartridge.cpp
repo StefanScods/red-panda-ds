@@ -25,10 +25,10 @@ std::string CartridgeHeader::getGameCode() const {
 }
 // ==================================================================================================
 NDS_Cartridge::NDS_Cartridge() {
-    reset();
+    closeROM();
 }
 // ==================================================================================================
-void NDS_Cartridge::reset() {
+void NDS_Cartridge::closeROM() {
     loadedFilePath.clear();
     if (file.is_open()) {
         file.close();
@@ -36,11 +36,17 @@ void NDS_Cartridge::reset() {
     header = {};
 }
 // ==================================================================================================
+void NDS_Cartridge::reset() {
+}
+// ==================================================================================================
 bool NDS_Cartridge::isOpen() {
     return file.is_open();
 }
 // ==================================================================================================
 bool NDS_Cartridge::loadROMFromFile(const std::string& filepath) {
+    if (file.is_open()) {
+        closeROM();
+    }
     // Load the file path.
     loadedFilePath = filepath;
     file.open(filepath, std::ios::binary);
@@ -54,6 +60,13 @@ bool NDS_Cartridge::loadROMFromFile(const std::string& filepath) {
     }
 
     return true;
+}
+// ==================================================================================================
+void NDS_Cartridge::readFromROM(uint32_t addr, uint32_t size, uint8_t* destBuffer) {
+    assert(isOpen());
+    assert(destBuffer != nullptr);
+    file.seekg(addr, std::ios_base::beg);
+    file.read(reinterpret_cast<char*>(destBuffer), size);
 }
 // ==================================================================================================
 bool NDS_Cartridge::loadHeader() {
@@ -185,7 +198,7 @@ bool NDS_Cartridge::loadHeader() {
         return false;
     }
 
-    // Todo
+    // Todo!!! Support DSI games.
     // Catch non-nds games.
     if (header.unitCode != 0x0 && header.unitCode != 0x2) {
         LogError("Only NDS games are currently supported!");

@@ -52,25 +52,6 @@ void DSEmuCore::reset() {
 
     endOfFrameTargetTime = std::chrono::high_resolution_clock::now();
 
-    // temp program to test
-    // For now set PC to main ram.
-    arm7->setPC(MAIN_RAM_START);
-    arm9->setPC(MAIN_RAM_START);
-    writeProgramToMemory(
-        "start:\n"
-        "MOV R0, #0\n"
-        "loop1:\n"
-        "MOV R1, #0\n"
-        "loop2:\n"
-        "ADD R1, R1, #1\n"
-        "CMP R1, #0xFF00\n"
-        "Bne loop2\n"
-        "ADD R0, R0, #1\n"
-        "CMP R0, #0xFF00\n"
-        "Bne loop1\n"
-        "B start\n",
-        MAIN_RAM_START, bus, arm9->isARM7());
-
     // Signal to the reset of the emulator to update if a function is provided.
     if (onFrameEndCallback != nullptr) {
         onFrameEndCallback();
@@ -82,7 +63,8 @@ void DSEmuCore::startExecution() {
         LogError("Emulation core already started!");
         return;
     }
-    setState(ApplicationState::running);
+    setState(ApplicationState::paused);  // TODO!!! start execution by "pausing". Wait until ROM
+                                         // load is fully supported to switch back to running.
 }
 // ==================================================================================================
 void DSEmuCore::stopExecution() {
@@ -103,11 +85,31 @@ bool DSEmuCore::loadROM(const std::string& romFile) {
     if (!ndsCartridge->loadROMFromFile(romFile)) {
         return false;
     }
+    // Now that the ROM is loaded, copy the boot vector to RAM.
+    const CartridgeHeader& cartHeader = ndsCartridge->getHeader();
+    bus->loadProgramFromROM(cartHeader.arm9RamAddress, cartHeader.arm9Size,
+                            cartHeader.arm9RomOffset, ndsCartridge);
+    bus->loadProgramFromROM(cartHeader.arm7RamAddress, cartHeader.arm7Size,
+                            cartHeader.arm7RomOffset, ndsCartridge);
+    // Now set the CPUs start vector address.
+    arm9->setPC(cartHeader.arm9EntryAddress);
+    arm7->setPC(cartHeader.arm7EntryAddress);
+
     return true;
+}
+// ==================================================================================================
+bool DSEmuCore::reloadCurrentROM() {
+    if (!ndsCartridge->isOpen()) return true;
+    // Make a copy of the file path string.
+    std::string filePathToLoad = ndsCartridge->getLoadedROMFilePath();
+    // Reload the ROM.
+    return loadROM(filePathToLoad);
 }
 // ==================================================================================================
 void DSEmuCore::closeROM() {
     stopExecution();
+    // Close the ROM.
+    ndsCartridge->closeROM();
     // Clear the display.
     ndsLCD->reset();
     // Remove all breakpoints.

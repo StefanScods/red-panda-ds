@@ -76,6 +76,13 @@ public:
     bool loadROM(const std::string& romFile);
 
     /**
+     * @brief Reloads the current ROM file if one is loaded.
+     *
+     * @return `bool`
+     */
+    bool reloadCurrentROM();
+
+    /**
      * @brief Closes the current ROM file.
      */
     void closeROM();

@@ -16,7 +16,11 @@ namespace Core {
 ARM946ES::ARM946ES() {
     arm9 = true;
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
-    // TODO!!! finish this.
+    // TCM
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
     // Main RAM.
     code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 18;
     code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 18;
@@ -26,6 +30,82 @@ ARM946ES::ARM946ES() {
     data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 4;
     data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 18;
     data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 2;
+    // WRAM.
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 8;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 8;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 4;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 4;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 8;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 2;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 8;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::WRAM] = 2;
+    // I/O
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::IO] = 8;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::IO] = 8;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::IO] = 4;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::IO] = 4;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::IO] = 8;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::IO] = 2;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::IO] = 8;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::IO] = 2;
+    // Palette RAM.
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 10;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 10;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 5;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 5;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 10;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 4;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 8;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::PALETTES] = 2;
+    // VRAM.
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 10;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 10;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 5;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 5;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 10;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 4;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 8;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::VRAM] = 2;
+    // OAM.
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::OAM] = 8;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::OAM] = 8;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::OAM] = 4;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::OAM] = 4;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::OAM] = 8;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::OAM] = 2;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::OAM] = 8;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::OAM] = 2;
+    // GBA ROM.
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 38;
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 38;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 38;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 38;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 19;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 19;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 19;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 19;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 38;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 38;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 24;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 24;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 26;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 26;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM1] = 12;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::GBAROM2] = 12;
+    // GBA RAM.
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::GBARAM] = 26;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::GBARAM] = 20;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::GBARAM] = 26;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::GBARAM] = 20;
+    // BIOS.
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 8;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 8;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 4;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 4;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 8;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 2;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 8;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 2;
 }
 // ==================================================================================================
 ARM946ES::~ARM946ES() {

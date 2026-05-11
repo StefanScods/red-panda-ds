@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include "cartridge.h"
 #include "memoryDefines.h"
 
 namespace RedPandaDS {
@@ -145,6 +146,17 @@ public:
      * @param addr Address to check
      */
     bool isAddressValidARM9(uint32_t addr);
+
+    /**
+     * @brief Loads a section of program into RAM from the ROM.
+     *
+     * @param destAddr The target address (within RAM) to place the program.
+     * @param size The size of the program to copy.
+     * @param srcAddr The address in ROM where the program segment starts.
+     * @param cart The cartridge holding the ROM.
+     */
+    void loadProgramFromROM(uint32_t destAddr, uint32_t size, uint32_t srcAddr,
+                            NDS_Cartridge* cart);
 };
 
 }  // namespace Core

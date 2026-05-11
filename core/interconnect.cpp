@@ -288,6 +288,19 @@ bool Interconnect::isAddressValidARM9(uint32_t addr) {
     return false;
 }
 // ==================================================================================================
+void Interconnect::loadProgramFromROM(uint32_t destAddr, uint32_t size, uint32_t srcAddr,
+                                      NDS_Cartridge* cart) {
+    uint8_t memRegion = destAddr >> 24;
+    if (memRegion != ARM7MemoryRegionNum::MAIN_RAM) {
+        LogError("Trying to copy program into memory region other than main RAM! Target address: "
+                 << PrintHex(destAddr));
+        return;
+    }
+    LogDebug("Reading " << size << "byte(s) from ROM address " << PrintHex(srcAddr)
+                        << " into RAM address " << PrintHex(destAddr));
+    cart->readFromROM(srcAddr, size, (mainRAM + (destAddr & MAIN_RAM_MASK)));
+}
+// ==================================================================================================
 
 }  // namespace Core
 }  // namespace RedPandaDS

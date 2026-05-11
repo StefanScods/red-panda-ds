@@ -130,7 +130,19 @@ public:
     NDS_Cartridge();
 
     /**
-     * @brief Reset the cartridge componentent.
+     * @brief Get the loaded ROM file path.
+     *
+     * @return `const std::string&`
+     */
+    const std::string& getLoadedROMFilePath() const { return loadedFilePath; }
+
+    /**
+     * @brief Close the current ROM.
+     */
+    void closeROM();
+
+    /**
+     * @brief Reset the cartridge componentent without clearing the selected ROM.
      */
     void reset();
 
@@ -156,6 +168,15 @@ public:
      * @return `const CartridgeHeader&`
      */
     const CartridgeHeader& getHeader() const { return header; }
+
+    /**
+     * @brief Reads from the opened ROM file.
+     *
+     * @param addr Address of the ROM file.
+     * @param size Number of bytes to read.
+     * @param destBuffer Output buffer to read into.
+     */
+    void readFromROM(uint32_t addr, uint32_t size, uint8_t* destBuffer);
 
 private:
     /**

@@ -37,6 +37,7 @@ enum ARM9MemoryRegionNum {
     OAM = 0x07,
     GBAROM1 = 0x08,
     GBAROM2 = 0x09,
+    GBARAM = 0x0A,
     BIOS = 0xFF
 };
 }
