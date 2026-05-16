@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "types.h"
 
@@ -20,6 +21,18 @@ namespace Core {
 #define NDS_CARTRIDGE_RESERVED_4_WIDTH 0x18
 #define NDS_CARTRIDGE_RESERVED_5_WIDTH 0x10
 #define NDS_CARTRIDGE_UNKNOWN_WIDTH 4
+
+#define NDS_CARTRIDGE_ICON_TITLE_WIDTH 0x2400
+#define NDS_CARTRIDGE_TITLE_MAX_SIZE 0x100
+#define NDS_CARTRIDGE_ICON_DIMENSION 32
+#define NDS_CARTRIDGE_ICON_NUM_PALETTES 16
+#define NDS_CARTRIDGE_ICON_CHUNK_DIMENSION 8
+constexpr unsigned int NDS_CARTRIDGE_ICON_CHUNK_SIZE =
+    NDS_CARTRIDGE_ICON_CHUNK_DIMENSION * NDS_CARTRIDGE_ICON_CHUNK_DIMENSION;
+constexpr unsigned int NDS_CARTRIDGE_ICON_CHUNKS_PER_ROW =
+    NDS_CARTRIDGE_ICON_DIMENSION / NDS_CARTRIDGE_ICON_CHUNK_DIMENSION;
+constexpr unsigned int NDS_CARTRIDGE_ICON_NUM_CHUNKS =
+    NDS_CARTRIDGE_ICON_DIMENSION * NDS_CARTRIDGE_ICON_DIMENSION / NDS_CARTRIDGE_ICON_CHUNK_SIZE;
 
 struct CartridgeHeader {
     // 0x000
@@ -170,6 +183,20 @@ public:
     const CartridgeHeader& getHeader() const { return header; }
 
     /**
+     * @brief Get a read-only interface to the cartridge english title.
+     *
+     * @return `const std::string&`
+     */
+    const std::string& getEngTitleString() const { return engTitleString; }
+
+    /**
+     * @brief Get a read-only interface to the cartridge icon pixel data.
+     *
+     * @return `const std::vector<uint32_t>&`
+     */
+    const std::vector<uint32_t> getIconPixels() const { return iconPixels; }
+
+    /**
      * @brief Reads from the opened ROM file.
      *
      * @param addr Address of the ROM file.
@@ -187,10 +214,21 @@ private:
      */
     bool loadHeader();
 
+    /**
+     * @brief Helper function for `loadROMFromFile()`. Loads the icon and title string from the
+     * ROM. Returns false upon failure.
+     *
+     * @return `bool`
+     */
+    bool loadIconAndTitle();
+
     std::ifstream file;
 
     std::string loadedFilePath;
     CartridgeHeader header;
+    std::string engTitleString;
+    std::vector<uint32_t> iconPixels;
+    std::vector<uint32_t> iconPalettes;
 };
 
 }  // namespace Core

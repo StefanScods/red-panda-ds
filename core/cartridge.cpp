@@ -34,6 +34,11 @@ void NDS_Cartridge::closeROM() {
         file.close();
     }
     header = {};
+    engTitleString = "";
+    iconPixels.clear();
+    iconPixels.resize(NDS_CARTRIDGE_ICON_DIMENSION * NDS_CARTRIDGE_ICON_DIMENSION);
+    iconPalettes.clear();
+    iconPalettes.resize(NDS_CARTRIDGE_ICON_NUM_PALETTES);
 }
 // ==================================================================================================
 void NDS_Cartridge::reset() {
@@ -56,6 +61,11 @@ bool NDS_Cartridge::loadROMFromFile(const std::string& filepath) {
     }
     // Start parsing the header.
     if (!loadHeader()) {
+        return false;
+    }
+
+    // Load the title and the icon.
+    if (!loadIconAndTitle()) {
         return false;
     }
 
@@ -206,6 +216,55 @@ bool NDS_Cartridge::loadHeader() {
         return false;
     }
 
+    return true;
+}
+// ==================================================================================================
+bool NDS_Cartridge::loadIconAndTitle() {
+    uint8_t* iconTitleData = new uint8_t[NDS_CARTRIDGE_ICON_TITLE_WIDTH];
+    if (iconTitleData == nullptr) {
+        return false;
+    }
+    readFromROM(header.iconTitleOffset, NDS_CARTRIDGE_ICON_TITLE_WIDTH, iconTitleData);
+
+    // Extract the english title string.
+    uint16_t* tileData = reinterpret_cast<uint16_t*>(iconTitleData + 0x0340);
+    for (unsigned int i = 0; i < NDS_CARTRIDGE_TITLE_MAX_SIZE; i++) {
+        if (tileData[i] == 0) break;
+        engTitleString += static_cast<char>(tileData[i]);
+    }
+
+    // Extract the palettes.
+    iconPalettes[0] = 0xFFFFFFFF;
+    uint16_t* paletteData = reinterpret_cast<uint16_t*>(iconTitleData + 0x0220);
+    for (unsigned int i = 1; i < NDS_CARTRIDGE_ICON_NUM_PALETTES; i++) {
+        uint8_t r = readBits(paletteData[i], 0, 4) << 3;
+        uint8_t g = readBits(paletteData[i], 5, 9) << 3;
+        uint8_t b = readBits(paletteData[i], 10, 14) << 3;
+
+        uint32_t paletteColour = (0xFF << 24) | (r << 16) | (g << 8) | b;
+        iconPalettes[i] = paletteColour;
+    }
+
+    // Extract the icon data.
+    uint32_t* pixelData = reinterpret_cast<uint32_t*>(iconTitleData + 0x0020);
+    for (unsigned int chunkNum = 0; chunkNum < NDS_CARTRIDGE_ICON_NUM_CHUNKS; chunkNum++) {
+        unsigned int tileX = chunkNum % NDS_CARTRIDGE_ICON_CHUNKS_PER_ROW;
+        unsigned int tileY = chunkNum / NDS_CARTRIDGE_ICON_CHUNKS_PER_ROW;
+        for (unsigned int i = 0; i < NDS_CARTRIDGE_ICON_CHUNK_SIZE; i++) {
+            unsigned int chunkX = i % NDS_CARTRIDGE_ICON_CHUNK_DIMENSION;
+            unsigned int chunkY = i / NDS_CARTRIDGE_ICON_CHUNK_DIMENSION;
+            uint32_t chunkData = pixelData[chunkNum * NDS_CARTRIDGE_ICON_CHUNK_DIMENSION + chunkY];
+
+            unsigned int x = tileX * NDS_CARTRIDGE_ICON_CHUNK_DIMENSION + chunkX;
+            unsigned int y = tileY * NDS_CARTRIDGE_ICON_CHUNK_DIMENSION + chunkY;
+            iconPixels[y * NDS_CARTRIDGE_ICON_DIMENSION + x] =
+                iconPalettes[(chunkData >> (chunkX * 4)) & 0xF];
+        }
+    }
+
+    // TODO!!! extract DSI icon frames + animation data.
+
+    delete[] iconTitleData;
     return true;
 }
 // ==================================================================================================

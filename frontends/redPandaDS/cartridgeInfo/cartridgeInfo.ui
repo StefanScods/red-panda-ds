@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>138</width>
-    <height>100</height>
+    <width>178</width>
+    <height>143</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,23 +17,35 @@
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="1">
-      <widget class="QLabel" name="gameCodeValue">
+      <widget class="QLabel" name="gameTitleInternalValue">
        <property name="text">
         <string>TextLabel</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
+       </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="gameTitleValue">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>TextLabel</string>
+        <string>Title - English:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+       </property>
+       <property name="boldLabel" stdset="0">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Game Title:</string>
+        <string>Game Code</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
        </property>
        <property name="boldLabel" stdset="0">
         <bool>true</bool>
@@ -41,14 +53,53 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>GameCode</string>
+        <string>Internal Title:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
        </property>
        <property name="boldLabel" stdset="0">
         <bool>true</bool>
        </property>
       </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="gameCodeValue">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="gameTitleEnglishValue">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Icon:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+       </property>
+       <property name="boldLabel" stdset="0">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QGraphicsView" name="iconValue"/>
      </item>
     </layout>
    </item>
