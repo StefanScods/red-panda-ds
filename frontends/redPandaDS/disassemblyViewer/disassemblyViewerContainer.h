@@ -22,6 +22,9 @@ enum Processor : uint8_t { arm7, arm9 };
 namespace Format {
 enum Format : uint8_t { autoDetect, arm, thumb };
 }
+namespace DisassemblyImmBase {
+enum DisassemblyImmBase : uint8_t { hex, decimal };
+}
 namespace BreakpointState {
 enum BreakpointState : uint8_t { clear, enabled, disabled };
 }
@@ -29,6 +32,7 @@ enum BreakpointState : uint8_t { clear, enabled, disabled };
 struct DisassemblyConfiguration {
     Processor::Processor procType;
     Format::Format formatType;
+    DisassemblyImmBase::DisassemblyImmBase immBase;
 };
 
 // Forward delcare.
@@ -49,9 +53,10 @@ public:
      * @param newInstruction The new instruction to assign
      * @param newInstructionSize The size of the instruction (2 or 4 bytes).
      * @param armMode True if the instruction is an ARM instruction.
+     * @param immBaseHex True if the immediates should be displayed in hex base.
      */
     void setTargetInstruction(uint32_t newAddress, bool validInstruction, uint32_t newInstruction,
-                              uint32_t newInstructionSize, bool armMode);
+                              uint32_t newInstructionSize, bool armMode, bool immBaseHex = 0);
     /**
      * @brief Callback function to refresh the widget with new content from the emulator core.
      */
@@ -67,12 +72,14 @@ private:
     uint32_t targetInstruction = 0;
     uint32_t targetInstructionSize = 0;
     bool isARMModeInstruction = 0;
+    bool displayInHex = 0;
 
     bool prevIsValidInstruction = 0;
     uint32_t prevTargetAddress = 0;
     uint32_t prevTargetInstruction = 0;
     uint32_t prevTargetInstructionSize = 0;
     bool prevIsARMModeInstruction = 0;
+    bool prevDisplayInHex = 0;
 
     QPushButton* breakpointButton = nullptr;
     QLabel* addressLabel = nullptr;

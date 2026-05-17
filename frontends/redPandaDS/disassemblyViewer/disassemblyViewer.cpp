@@ -63,12 +63,14 @@ DisassemblyViewerEntry::~DisassemblyViewerEntry() {
 // ==================================================================================================
 void DisassemblyViewerEntry::setTargetInstruction(uint32_t newAddress, bool validInstruction,
                                                   uint32_t newInstruction,
-                                                  uint32_t newInstructionSize, bool armMode) {
+                                                  uint32_t newInstructionSize, bool armMode,
+                                                  bool immBaseHex) {
     targetAddress = newAddress;
     isValidInstruction = validInstruction;
     targetInstruction = newInstruction;
     targetInstructionSize = newInstructionSize;
     isARMModeInstruction = armMode;
+    displayInHex = immBaseHex;
 }
 // ==================================================================================================
 void DisassemblyViewerEntry::update() {
@@ -76,7 +78,7 @@ void DisassemblyViewerEntry::update() {
     if (prevTargetAddress == targetAddress && prevTargetInstruction == targetInstruction &&
         prevIsValidInstruction == isValidInstruction &&
         prevTargetInstructionSize == targetInstructionSize &&
-        prevIsARMModeInstruction == isARMModeInstruction) {
+        prevIsARMModeInstruction == isARMModeInstruction && prevDisplayInHex == displayInHex) {
         // Label hasn't changed
         return;
     }
@@ -85,13 +87,14 @@ void DisassemblyViewerEntry::update() {
     prevIsValidInstruction = isValidInstruction;
     prevTargetInstructionSize = targetInstructionSize;
     prevIsARMModeInstruction = isARMModeInstruction;
+    prevDisplayInHex = displayInHex;
 
     // Render new label.
     std::stringstream ss;
     std::string temp;
 
     // Address.
-    ss << "0x" << std::hex << std::setfill('0') << std::setw(8) << targetAddress;
+    ss << PrintHexPadded(targetAddress, 8);
     addressLabel->setText(QString::fromStdString(ss.str()));
 
     // Clear the rest of the labels.
@@ -107,23 +110,21 @@ void DisassemblyViewerEntry::update() {
 
     // Disassemble the target instruction based on THUMB or ARM mode.
     Core::InstructionDisassembly disassembly =
-        isARMModeInstruction ? Core::dissembleARMInstruction(targetInstruction, false)
-                             : Core::dissembleTHUMBInstruction(targetInstruction, false);
+        isARMModeInstruction ? Core::dissembleARMInstruction(targetInstruction, displayInHex)
+                             : Core::dissembleTHUMBInstruction(targetInstruction, displayInHex);
 
     // Instruction Data.
     ss.str("");
     ss.clear();
     if (isARMModeInstruction) {
-        ss << "0x" << std::hex << std::setfill('0') << std::setw(8) << targetInstruction;
+        ss << PrintHexPadded(targetInstruction, 8);
     } else {
         if (targetInstructionSize == 4) {
-            ss << "0x" << std::hex << std::setfill('0') << std::setw(4)
-               << Core::readBits(targetInstruction, 16, 31);
+            ss << PrintHexPadded(Core::readBits(targetInstruction, 16, 31), 4);
             ss << " ";
-            ss << "0x" << std::hex << std::setfill('0') << std::setw(4)
-               << Core::readBits(targetInstruction, 0, 15);
+            ss << PrintHexPadded(Core::readBits(targetInstruction, 0, 15), 4);
         } else {
-            ss << "0x" << std::hex << std::setfill('0') << std::setw(4) << targetInstruction;
+            ss << PrintHexPadded(targetInstruction, 4);
         }
     }
     instructionBitsLabel->setText(QString::fromStdString(ss.str()));
@@ -352,7 +353,8 @@ void DisassemblyViewerContainer::update() {
         }
 
         // Set the target instruction and render it.
-        entries[i]->setTargetInstruction(addr, supportedAddress, instruction, addrSize, armMode);
+        entries[i]->setTargetInstruction(addr, supportedAddress, instruction, addrSize, armMode,
+                                         config.immBase == DisassemblyImmBase::hex);
         entries[i]->update();
         entries[i]->setBreakpointState(bkptState);
         addr += addrSize;
@@ -433,6 +435,7 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     // Set default config.
     currentConfig.formatType = Format::autoDetect;
     currentConfig.procType = Processor::arm9;
+    currentConfig.immBase = DisassemblyImmBase::decimal;
     setNewDisassemblyConfiguration();
     handleCoreExecutionModeChange();
 
@@ -468,6 +471,14 @@ DisassemblyViewer::DisassemblyViewer(RedPandaDSApp* app, Core::DSEmuCore* core, 
     });
     connect(ui->radioButton_mode_thumb, &QRadioButton::clicked, this, [this]() {
         currentConfig.formatType = Format::thumb;
+        setNewDisassemblyConfiguration();
+    });
+    connect(ui->radioButton_format_hex, &QRadioButton::clicked, this, [this]() {
+        currentConfig.immBase = DisassemblyImmBase::hex;
+        setNewDisassemblyConfiguration();
+    });
+    connect(ui->radioButton_format_decimal, &QRadioButton::clicked, this, [this]() {
+        currentConfig.immBase = DisassemblyImmBase::decimal;
         setNewDisassemblyConfiguration();
     });
     // Jump controls.
@@ -555,6 +566,8 @@ void DisassemblyViewer::setNewDisassemblyConfiguration() {
     ui->radioButton_mode_auto->setChecked(false);
     ui->radioButton_mode_arm->setChecked(false);
     ui->radioButton_mode_thumb->setChecked(false);
+    ui->radioButton_format_decimal->setChecked(false);
+    ui->radioButton_format_hex->setChecked(false);
     // Set UI values.
     switch (currentConfig.formatType) {
         case Format::autoDetect:
@@ -575,6 +588,16 @@ void DisassemblyViewer::setNewDisassemblyConfiguration() {
             break;
         case Processor::arm9:
             ui->radioButton_cpu_arm9->setChecked(true);
+            break;
+        default:
+            break;
+    }
+    switch (currentConfig.immBase) {
+        case DisassemblyImmBase::hex:
+            ui->radioButton_format_hex->setChecked(true);
+            break;
+        case DisassemblyImmBase::decimal:
+            ui->radioButton_format_decimal->setChecked(true);
             break;
         default:
             break;

@@ -30,10 +30,10 @@
      </property>
      <item>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="1">
-        <widget class="QRadioButton" name="radioButton_cpu_arm7">
+       <item row="1" column="2">
+        <widget class="QRadioButton" name="radioButton_mode_arm">
          <property name="text">
-          <string>arm7</string>
+          <string>ARM</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
@@ -49,7 +49,17 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Target CPU: </string>
+          <string>Target CPU:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5" rowspan="2">
+        <widget class="QRadioButton" name="radioButton_format_hex">
+         <property name="text">
+          <string>Hex</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -66,10 +76,17 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QRadioButton" name="radioButton_cpu_arm9">
+       <item row="0" column="4" rowspan="2">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>arm9</string>
+          <string>Immediate Base:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QRadioButton" name="radioButton_cpu_arm7">
+         <property name="text">
+          <string>arm7</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
@@ -86,10 +103,10 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
-        <widget class="QRadioButton" name="radioButton_mode_arm">
+       <item row="0" column="2">
+        <widget class="QRadioButton" name="radioButton_cpu_arm9">
          <property name="text">
-          <string>ARM</string>
+          <string>arm9</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>
@@ -100,6 +117,16 @@
         <widget class="QRadioButton" name="radioButton_mode_auto">
          <property name="text">
           <string>Auto</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="6" rowspan="2">
+        <widget class="QRadioButton" name="radioButton_format_decimal">
+         <property name="text">
+          <string>Decimal</string>
          </property>
          <property name="autoExclusive">
           <bool>false</bool>

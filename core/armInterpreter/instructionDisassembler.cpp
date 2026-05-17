@@ -38,7 +38,7 @@ std::string InstructionDisassembly::toString() {
 std::string getImmString(uint32_t val, bool useHex) {
     std::string imm = "#";
     if (useHex) {
-        imm += std::format("0x{:08X}", val);
+        imm += std::format("0x{:X}", val);
     } else {
         imm += std::format("{}", val);
     }
@@ -47,7 +47,7 @@ std::string getImmString(uint32_t val, bool useHex) {
 std::string getImmStringSigned(int32_t val, bool useHex) {
     std::string imm = "#";
     if (useHex) {
-        imm += std::format("0x{:08X}", val);
+        imm += std::format("0x{:X}", val);
     } else {
         imm += std::format("{}", val);
     }
