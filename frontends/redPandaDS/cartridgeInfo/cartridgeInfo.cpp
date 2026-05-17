@@ -50,7 +50,7 @@ void CartridgeInfo::update() {
     const Core::CartridgeHeader& cartHeader = cart->getHeader();
 
     ui->gameTitleInternalValue->setText(cartHeader.getGameTitle().c_str());
-    
+
     // TODO!!! Handle other prefixes.
     std::string fullGameCode = "NTR-" + cartHeader.getGameCode();
     ui->gameCodeValue->setText(fullGameCode.c_str());

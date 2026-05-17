@@ -27,7 +27,8 @@ DisassemblyViewerEntry::DisassemblyViewerEntry(
     breakpointButton->setProperty("disassemblyViewerEntryLabel", "true");
     breakpointButton->setStyleSheet("padding: 0;");
     breakpointButton->setFlat(true);
-    breakpointButton->setFixedSize(ENTRY_LINE_PIXEL_HEIGHT, ENTRY_LINE_PIXEL_HEIGHT);
+    breakpointButton->setFixedSize(DisassemblyViewerContainer::ENTRY_LINE_PIXEL_HEIGHT,
+                                   DisassemblyViewerContainer::ENTRY_LINE_PIXEL_HEIGHT);
     parentLayout->addWidget(breakpointButton, lineId, 0);
     addressLabel = new QLabel(this);
     addressLabel->setProperty("disassemblyViewerEntryLabel", "true");

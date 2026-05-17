@@ -37,6 +37,8 @@
 
 // ========= Log Helpers ==========================================================================
 #define PrintHex(x) "0x" << std::hex << (uint32_t)(x) << std::dec
+#define PrintHexPadded(x, width) \
+    "0x" << std::hex << std::setw(width) << std::setfill('0') << (uint32_t)(x) << std::dec
 
 // ========= Debug ================================================================================
 #if LOG_LEVEL >= 3

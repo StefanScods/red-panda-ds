@@ -16,9 +16,6 @@
 namespace RedPandaDS {
 namespace UI {
 
-#define ENTRY_LINE_PIXEL_HEIGHT 20
-#define MAX_NUM_ENTRY_LINES 100
-
 namespace Processor {
 enum Processor : uint8_t { arm7, arm9 };
 }
@@ -92,6 +89,9 @@ private:
 
 class DisassemblyViewerContainer : public QWidget {
 public:
+    static const unsigned int ENTRY_LINE_PIXEL_HEIGHT = 20;
+    static const unsigned int MAX_NUM_ENTRY_LINES = 100;
+
     DisassemblyViewerContainer(RedPandaDSApp* app, QWidget* parent = nullptr);
     ~DisassemblyViewerContainer();
 
