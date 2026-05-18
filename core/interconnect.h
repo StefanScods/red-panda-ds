@@ -53,6 +53,14 @@ public:
      */
     uint32_t read32ARM7(uint32_t addr);
     /**
+     * @brief Read 32 bits from the specified IO address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint32_t
+     */
+    uint32_t read32IOARM7(uint32_t addr);
+    /**
      * @brief Read 16 bits from the specified address.
      *
      * @param addr Address to read from
@@ -60,6 +68,14 @@ public:
      * @return uint16_t
      */
     uint16_t read16ARM7(uint32_t addr);
+    /**
+     * @brief Read 16 bits from the specified IO address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint16_t
+     */
+    uint16_t read16IOARM7(uint32_t addr);
     /**
      * @brief Read 8 bits from the specified address.
      *
@@ -69,12 +85,27 @@ public:
      */
     uint8_t read8ARM7(uint32_t addr);
     /**
+     * @brief Read 8 bits from the specified IO address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint8_t
+     */
+    uint8_t read8IOARM7(uint32_t addr);
+    /**
      * @brief Write 32 bits to the specified address.
      *
      * @param addr Address to write to
      * @param data Data to write
      */
     void write32ARM7(uint32_t addr, uint32_t data);
+    /**
+     * @brief Write 32 bits to the specified IO address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write32IOARM7(uint32_t addr, uint32_t data);
     /**
      * @brief Write 16 bits to the specified address.
      *
@@ -83,12 +114,26 @@ public:
      */
     void write16ARM7(uint32_t addr, uint16_t data);
     /**
+     * @brief Write 16 bits to the specified IO address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write16IOARM7(uint32_t addr, uint16_t data);
+    /**
      * @brief Write 8 bits to the specified address.
      *
      * @param addr Address to write to
      * @param data Data to write
      */
     void write8ARM7(uint32_t addr, uint8_t data);
+    /**
+     * @brief Write 8 bits to the specified IO address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write8IOARM7(uint32_t addr, uint8_t data);
     /**
      * @brief Read 32 bits from the specified address.
      *
@@ -98,6 +143,14 @@ public:
      */
     uint32_t read32ARM9(uint32_t addr);
     /**
+     * @brief Read 32 bits from the specified IO address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint32_t
+     */
+    uint32_t read32IOARM9(uint32_t addr);
+    /**
      * @brief Read 16 bits from the specified address.
      *
      * @param addr Address to read from
@@ -105,6 +158,14 @@ public:
      * @return uint16_t
      */
     uint16_t read16ARM9(uint32_t addr);
+    /**
+     * @brief Read 16 bits from the specified IO address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint16_t
+     */
+    uint16_t read16IOARM9(uint32_t addr);
     /**
      * @brief Read 8 bits from the specified address.
      *
@@ -114,12 +175,27 @@ public:
      */
     uint8_t read8ARM9(uint32_t addr);
     /**
+     * @brief Read 8 bits from the specified IO address.
+     *
+     * @param addr Address to read from
+     *
+     * @return uint8_t
+     */
+    uint8_t read8IOARM9(uint32_t addr);
+    /**
      * @brief Write 32 bits to the specified address.
      *
      * @param addr Address to write to
      * @param data Data to write
      */
     void write32ARM9(uint32_t addr, uint32_t data);
+    /**
+     * @brief Write 32 bits to the specified IO address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write32IOARM9(uint32_t addr, uint32_t data);
     /**
      * @brief Write 16 bits to the specified address.
      *
@@ -128,6 +204,13 @@ public:
      */
     void write16ARM9(uint32_t addr, uint16_t data);
     /**
+     * @brief Write 16 bits to the specified IO address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write16IOARM9(uint32_t addr, uint16_t data);
+    /**
      * @brief Write 8 bits to the specified address.
      *
      * @param addr Address to write to
@@ -135,17 +218,36 @@ public:
      */
     void write8ARM9(uint32_t addr, uint8_t data);
     /**
+     * @brief Write 8 bits to the specified IO address.
+     *
+     * @param addr Address to write to
+     * @param data Data to write
+     */
+    void write8IOARM9(uint32_t addr, uint8_t data);
+    /**
      * @brief Check to see if an address is valid for the ARM7.
      *
      * @param addr Address to check
      */
     bool isAddressValidARM7(uint32_t addr);
     /**
+     * @brief Check to see if an IO address is valid for the ARM7.
+     *
+     * @param addr Address to check
+     */
+    bool isIOAddressValidARM7(uint32_t addr);
+    /**
      * @brief Check to see if an address is valid for the ARM9.
      *
      * @param addr Address to check
      */
     bool isAddressValidARM9(uint32_t addr);
+    /**
+     * @brief Check to see if an IO address is valid for the ARM9.
+     *
+     * @param addr Address to check
+     */
+    bool isIOAddressValidARM9(uint32_t addr);
 
     /**
      * @brief Loads a section of program into RAM from the ROM.

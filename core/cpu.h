@@ -214,6 +214,11 @@ protected:
     cycles data_sequencial16BitAccessTimings[0x100] = {0xFF};
     cycles data_nonSequencial16BitAccessTimings[0x100] = {0xFF};
 
+    // Interrupt control.
+    bool IME;
+    uint32_t IE;
+    uint32_t IF;
+
     // Breakpoints.
     std::unordered_set<uint32_t> breakpoints;
 
@@ -232,6 +237,8 @@ protected:
 public:
     ARM();
     ~ARM();
+
+    friend class Interconnect;
 
     /**
      * @brief Get the name of the CPU.
@@ -431,11 +438,50 @@ public:
     void setCPSR(uint32_t data);
 
     /**
-     * @brief Read from the CPSR
+     * @brief Read from the CPSR.
      *
      * @return `uint32_t`
      */
     uint32_t readCPSR() { return cpsr; }
+
+    /**
+     * @brief Write to the IME.
+     *
+     * @param data The data to write.
+     */
+    void writeIME(uint32_t data) { IME = (data & 0b1); }
+    /**
+     * @brief Read from the IME.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readIME() { return IME & 0b1; }
+
+    /**
+     * @brief Write to the IE.
+     *
+     * @param data The data to write.
+     */
+    void writeIE(uint32_t data) { IE = data; }
+    /**
+     * @brief Read from the IE.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readIE() { return IE; }
+
+    /**
+     * @brief Write to the IF.
+     *
+     * @param data The data to write.
+     */
+    void writeIF(uint32_t data) { IF = data; }
+    /**
+     * @brief Read from the IF.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readIF() { return IF; }
 
     /**
      * @brief Read the bus.

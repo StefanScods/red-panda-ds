@@ -85,6 +85,11 @@ void ARM::reset() {
     justBranched = false;
     justHitBreakpoint = false;
 
+    // Interrupt control.
+    IME = 0;
+    IE = 0;
+    IF = 0;
+
     // CPU instruction Pipeline.
     clearInstructionPipeline();
 
