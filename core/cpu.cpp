@@ -504,6 +504,13 @@ void ARM::setCPSR(uint32_t data) {
     }
 }
 // ==================================================================================================
+void ARM::setAPSR(uint32_t data) {
+    // Clear flags.
+    cpsr = cpsr & ~(0xF0000000);
+    // Set flags.
+    cpsr = cpsr | (data & (0xF0000000));
+}
+// ==================================================================================================
 void ARM::fixupIfTargetingPC(uint32_t destReg) {
     if (destReg != PC_REGISTER_NUM) return;
     branch(pc());

@@ -259,7 +259,7 @@ public:
     /**
      * @brief Set all vars back to their initial value.
      */
-    void reset();
+    virtual void reset();
 
     /**
      * @brief Execute the instruction at instuctionPipeLine[0]. This clears instuctionPipeLine[0].
@@ -443,6 +443,20 @@ public:
      * @return `uint32_t`
      */
     uint32_t readCPSR() { return cpsr; }
+
+    /**
+     * @brief Write to the APSR.
+     *
+     * @param data The data to write.
+     */
+    void setAPSR(uint32_t data);
+
+    /**
+     * @brief Read from the APSR.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readAPSR() { return cpsr & 0xF0000000; }
 
     /**
      * @brief Write to the IME.
@@ -855,6 +869,27 @@ public:
 };
 
 /**
+ * @brief Layout of ARM946E-S's control register.
+ *
+ */
+struct co_controlReg_layout {
+    bool mmuEnable = false;
+    bool unifiedCacheEnable = false;
+    bool endianness = false;
+    bool instructionCacheEnable = false;
+    bool exceptionVectors = false;
+    bool cacheReplacement = false;
+    bool preARMv5Mode = false;
+    bool dtcmEnable = false;
+    bool dtcmLoadEnable = false;
+    bool itcmEnable = false;
+    bool tcmLoadEnable = false;
+
+    uint32_t read();
+    void write(uint32_t data);
+};
+
+/**
  * @brief CPU model for the ARM946E-S. The ARM946E-S is NDS primary processor. CPU targets the
  * ARMv5TE instuction set.
  */
@@ -864,7 +899,33 @@ public:
     ARM946ES();
     ~ARM946ES();
 
+    // Coprocessor registers.
+    uint32_t co_mainIdReg;
+    uint32_t co_cacheTypeAndSize;
+    uint32_t co_TCMPhysicalSize;
+    co_controlReg_layout co_controlReg;
+    uint32_t co_puDataUnifiedCachabilityBits;
+    uint32_t co_puInstructionCachabilityBits;
+    uint32_t co_puDataWriteBufferabilityBits;
+    uint32_t co_puDataUnifiedAccessPermissions;
+    uint32_t co_puInstructionAccessPermissions;
+    uint32_t co_puDataUnifiedExtendedAccessPermissions;
+    uint32_t co_puInstructionExtendedAccessPermissions;
+    uint32_t co_puDataUnifiedRegions[8];
+    uint32_t co_puInstructionRegions[8];
+    uint32_t co_cacheDataLockdown;
+    uint32_t co_cacheInstructionLockdown;
+    uint32_t co_dataTCMBaseAndVirtualSize;
+    uint32_t co_instructionTCMBaseAndVirtualSize;
+    uint32_t co_processIdRegs[16];
+    uint32_t co_implDefinedAndDebugRegs[16];
+
+    // Coprocessor access functions.
+    busPayload readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2);
+    busPayload writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2, uint32_t data);
+
     // Function overrides.
+    void reset() override;
     cycles cycle() override;
     std::string getCPUName() override { return "ARM946ES"; }
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;

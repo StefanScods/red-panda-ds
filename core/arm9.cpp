@@ -111,6 +111,96 @@ ARM946ES::ARM946ES() {
 ARM946ES::~ARM946ES() {
 }
 // ==================================================================================================
+busPayload ARM946ES::readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2) {
+    // Create a result -> temp data represents an error.
+    busPayload result;
+    result.size = 4;
+    result.numCycles = 1;
+    result.data = INVALID_MEM_32BIT;
+    // Create a unique keep for all coprocessor commands.
+    uint32_t op1_32 = op1;
+    uint32_t Cn_32 = Cn;
+    uint32_t Cm_32 = Cm;
+    uint32_t op2_32 = op2;
+    uint32_t key = (op1_32 << 24) | (Cn_32 << 16) | (Cm_32 << 8) | op2_32;
+    // Match the key to a coprocessor read command.
+    switch (key) {
+            //  Control Register.
+        case 0x00010000: {
+            result.data = co_controlReg.read();
+            break;
+        }
+        default:
+            LogError("Cannot read from CoProcessor 15 with the following settings:\n\tCn = "
+                     << Cn_32 << "\n\tCm = " << Cm_32 << "\n\top1 = " << op1_32
+                     << "\n\top2 = " << op2_32);
+            return result;
+    }
+    return result;
+}
+// ==================================================================================================
+busPayload ARM946ES::writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2, uint32_t data) {
+    // Create a result -> temp data represents an error.
+    busPayload result;
+    result.size = 4;
+    result.numCycles = 1;
+    result.data = INVALID_MEM_32BIT;
+    // Create a unique keep for all coprocessor commands.
+    uint32_t op1_32 = op1;
+    uint32_t Cn_32 = Cn;
+    uint32_t Cm_32 = Cm;
+    uint32_t op2_32 = op2;
+    uint32_t key = (op1_32 << 24) | (Cn_32 << 16) | (Cm_32 << 8) | op2_32;
+    // Match the key to a coprocessor write command.
+    switch (key) {
+        //  Control Register.
+        case 0x00010000: {
+            co_controlReg.write(data);
+            break;
+        }
+        default:
+            LogError("Cannot write to CoProcessor 15 with the following settings:\n\tCn = "
+                     << Cn_32 << "\n\tCm = " << Cm_32 << "\n\top1 = " << op1_32
+                     << "\n\top2 = " << op2_32);
+            break;
+    }
+    return result;
+}
+// ==================================================================================================
+void ARM946ES::reset() {
+    ARM::reset();
+
+    // CPU Constants.
+    co_mainIdReg = 0x41059461;
+    co_cacheTypeAndSize = 0x0F0D2112;
+    co_TCMPhysicalSize = 0x00140180;
+
+    co_controlReg.write(0);
+
+    co_puDataUnifiedCachabilityBits = 0;
+    co_puInstructionCachabilityBits = 0;
+    co_puDataWriteBufferabilityBits = 0;
+
+    co_puDataUnifiedAccessPermissions = 0;
+    co_puInstructionAccessPermissions = 0;
+    co_puDataUnifiedExtendedAccessPermissions = 0;
+    co_puInstructionExtendedAccessPermissions = 0;
+
+    std::fill(std::begin(co_puDataUnifiedRegions), std::end(co_puDataUnifiedRegions), 0);
+
+    std::fill(std::begin(co_puInstructionRegions), std::end(co_puInstructionRegions), 0);
+
+    co_cacheDataLockdown = 0;
+    co_cacheInstructionLockdown = 0;
+
+    co_dataTCMBaseAndVirtualSize = 0;
+    co_instructionTCMBaseAndVirtualSize = 0;
+
+    std::fill(std::begin(co_processIdRegs), std::end(co_processIdRegs), 0);
+
+    std::fill(std::begin(co_implDefinedAndDebugRegs), std::end(co_implDefinedAndDebugRegs), 0);
+}
+// ==================================================================================================
 busPayload ARM946ES::readBus(uint32_t address, uint32_t size, bool codeRead) {
     uint32_t& previousAddr = codeRead ? previousCodeAddr : previousDataAddr;
     /**
@@ -253,6 +343,90 @@ cycles ARM946ES::cycle() {
     return cyclesRan;
 }
 // ==================================================================================================
+uint32_t co_controlReg_layout::read() {
+    uint32_t result = 0;
+    writeBit(result, 0, mmuEnable);
+    writeBit(result, 2, unifiedCacheEnable);
+    writeBit(result, 3, 1);  // Write Buffer (always on).
+    writeBit(result, 4, 1);  // Exception Handling (always on).
+    writeBit(result, 5, 1);  // 26bit-address faults (always on).
+    writeBit(result, 6, 1);  // Abort Model (pre v4) (always on).
+    writeBit(result, 7, endianness);
+    writeBit(result, 12, instructionCacheEnable);
+    writeBit(result, 13, exceptionVectors);
+    writeBit(result, 14, cacheReplacement);
+    writeBit(result, 15, preARMv5Mode);
+    writeBit(result, 16, dtcmEnable);
+    writeBit(result, 17, dtcmLoadEnable);
+    writeBit(result, 18, itcmEnable);
+    writeBit(result, 19, tcmLoadEnable);
+    // All other bits are zero.
+    return result;
+}
+// ==================================================================================================
+void co_controlReg_layout::write(uint32_t data) {
+    mmuEnable = readBit(data, 0);
+    if (mmuEnable) {
+        LogError(
+            "Writing to ARM946E-S MMU/PU Enable via control register is currently unsupported");
+    }
 
+    unifiedCacheEnable = readBit(data, 2);
+    if (unifiedCacheEnable) {
+        LogError(
+            "Writing to ARM946E-S Data/Unified Cache Enable via control register is currently "
+            "unsupported");
+    }
+
+    endianness = readBit(data, 7);
+    if (endianness) {
+        LogError("Writing ARM946E-S Endianness to Big Endian is currently unsupported");
+    }
+
+    instructionCacheEnable = readBit(data, 12);
+    if (instructionCacheEnable) {
+        LogError(
+            "Writing to ARM946E-S Instruction Cache Enable via control register is currently "
+            "unsupported");
+    }
+
+    exceptionVectors = readBit(data, 13);
+    if (exceptionVectors) {
+        LogError("Writing ARM946E-S Exception Vectors to high vectors is currently unsupported");
+    }
+
+    cacheReplacement = readBit(data, 14);
+    if (cacheReplacement) {
+        LogError(
+            "Writing ARM946E-S Cache Replacement policy to Round-Robin is currently unsupported");
+    }
+
+    preARMv5Mode = readBit(data, 15);
+    if (preARMv5Mode) {
+        LogError("Writing ARM946E-S Pre-ARMv5 compatibility mode is currently unsupported");
+    }
+
+    dtcmEnable = readBit(data, 16);
+    if (dtcmEnable) {
+        LogError("Writing to ARM946E-S DTCM Enable via control register is currently unsupported");
+    }
+
+    dtcmLoadEnable = readBit(data, 17);
+    if (dtcmLoadEnable) {
+        LogError("Writing ARM946E-S DTCM Load Mode to write-only is currently unsupported");
+    }
+
+    itcmEnable = readBit(data, 18);
+    if (itcmEnable) {
+        LogError("Writing to ARM946E-S ITCM Enable via control register is currently unsupported");
+    }
+
+    tcmLoadEnable = readBit(data, 19);
+    if (tcmLoadEnable) {
+        LogError("Writing ARM946E-S ITCM Load Mode to write-only is currently unsupported");
+    }
+    // All other bits are fixed.
+};
+// ==================================================================================================
 }  // namespace Core
 }  // namespace RedPandaDS

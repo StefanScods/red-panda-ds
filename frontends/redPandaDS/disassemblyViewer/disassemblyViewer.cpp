@@ -522,6 +522,7 @@ void DisassemblyViewer::handleCoreExecutionModeChange() {
             ui->toggleExecution->setText("Continue");
             ui->toggleExecution->setDisabled(false);
             ui->stepCPU->setDisabled(false);
+            goToPC();
             break;
         default:
             LogErrorPrefixed("Unsupported core state " << core->getState(), "DisassemblyViewer");

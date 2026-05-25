@@ -827,7 +827,8 @@ void dissembleARMInstruction_coProc(InstructionDisassembly& result, uint32_t ins
     // Check that the coproc is supported.
     uint8_t coproc = readBits(instruction, 8, 11);
     if (readBits(instruction, 24, 25) != 0b11 && ((coproc & 0b1110) == 0b1010)) {
-        LogError("Coprocessor " << coproc << " is not supported!");
+        LogWarningPrefixed("Coprocessor " << (uint32_t)coproc << " is not supported!",
+                           "Disassembly");
     }
     result.destination = "p" + std::to_string(coproc);
     switch (opcode) {
