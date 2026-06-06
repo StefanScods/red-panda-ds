@@ -13,6 +13,9 @@ namespace Core {
 #define MAIN_RAM_SIZE 0x00400000  // 4 Mb
 #define MAIN_RAM_MASK 0x003FFFFF
 
+#define ITCM_SIZE 0x8000
+#define DTCM_SIZE 0x4000
+
 namespace ARM7MemoryRegionNum {
 enum ARM7MemoryRegionNum {
     BIOS = 0x00,

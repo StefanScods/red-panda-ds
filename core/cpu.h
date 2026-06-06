@@ -149,6 +149,9 @@ inline const char* toString(ProcessorModes mode) {
 
 extern std::vector<std::string> g_regNames;
 
+// ==================================================================================================
+// Base CPU class.
+// ==================================================================================================
 /**
  * @brief The base CPU object to implement common logic shared between the NDS's
  * two CPUs.
@@ -850,7 +853,9 @@ public:
     cycles THUMB_BKPT(uint32_t instruct);
     cycles THUMB_SVC(uint32_t instruct);
 };
-
+// ==================================================================================================
+// ARM7TDMI
+// ==================================================================================================
 /**
  * @brief CPU model for the ARM7TDMI. The ARM7TDMI is mainly responsible for handling NDS I/O and
  * is the primary processor of the GBA. CPU targets the ARMv4 instruction set.
@@ -867,12 +872,13 @@ public:
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };
-
+// ==================================================================================================
+// ARM946ES Control Register
+// ==================================================================================================
 /**
  * @brief Layout of ARM946E-S's control register.
- *
  */
-struct co_controlReg_layout {
+struct ARM946ES_ControlReg_Layout {
     bool mmuEnable = false;
     bool unifiedCacheEnable = false;
     bool endianness = false;
@@ -888,7 +894,57 @@ struct co_controlReg_layout {
     uint32_t read();
     void write(uint32_t data);
 };
+// ==================================================================================================
+// ARM946ES Cache
+// ==================================================================================================
+constexpr unsigned int ARM946ES_CacheLine_Bytes = 32;
+constexpr unsigned int ARM946ES_Cache_LinesPerSet = 4;
 
+constexpr unsigned int ARM946ES_DataCache_Size = 4 * 1024;
+constexpr unsigned int ARM946ES_InstructionCache_Size = 8 * 1024;
+
+constexpr unsigned int ARM946ES_DataCache_NumLines =
+    ARM946ES_DataCache_Size / ARM946ES_CacheLine_Bytes;
+constexpr unsigned int ARM946ES_DataCache_NumSets =
+    ARM946ES_DataCache_NumLines / ARM946ES_Cache_LinesPerSet;
+constexpr unsigned int ARM946ES_InstructionCache_NumLines =
+    ARM946ES_InstructionCache_Size / ARM946ES_CacheLine_Bytes;
+constexpr unsigned int ARM946ES_InstructionCache_NumSets =
+    ARM946ES_InstructionCache_NumLines / ARM946ES_Cache_LinesPerSet;
+
+/**
+ * @brief Layout of a ARM946E-S's cache line.
+ */
+struct ARM946ES_CacheLine {
+    bool dirty;
+    bool valid;
+    uint32_t tag;
+    uint8_t data[ARM946ES_CacheLine_Bytes];
+};
+/**
+ * @brief Layout of a ARM946E-S's cache set.
+ */
+struct ARM946ES_CacheSet {
+    ARM946ES_CacheLine ways[ARM946ES_Cache_LinesPerSet];
+};
+// ==================================================================================================
+// ARM946ES Protection Unit
+// ==================================================================================================
+constexpr unsigned int ARM946ES_PU_NumRegions = 8;
+
+/**
+ * @brief PU Region control layout.
+ */
+struct ARM946ES_PU_Region {
+    bool enabled;
+    uint32_t size;
+    uint32_t baseAddress;
+};
+
+
+// ==================================================================================================
+// ARM946ES
+// ==================================================================================================
 /**
  * @brief CPU model for the ARM946E-S. The ARM946E-S is NDS primary processor. CPU targets the
  * ARMv5TE instuction set.
@@ -899,11 +955,28 @@ public:
     ARM946ES();
     ~ARM946ES();
 
+    // Instruciton tightly coupled memory.
+    uint8_t* itcm;
+    uint32_t itcmBase;
+    uint32_t itcmVirtSize;
+    // Data tightly coupled memory.
+    uint8_t* dtcm;
+    uint32_t dtcmBase;
+    uint32_t dtcmVirtSize;
+
+    // Data cache.
+    ARM946ES_CacheSet instructionCache[ARM946ES_InstructionCache_NumSets];
+    ARM946ES_CacheSet dataCache[ARM946ES_DataCache_NumSets];
+
+    // Protection unit.
+    ARM946ES_PU_Region puInstructionRegion[ARM946ES_PU_NumRegions];
+    ARM946ES_PU_Region puDataRegion[ARM946ES_PU_NumRegions];
+
     // Coprocessor registers.
     uint32_t co_mainIdReg;
     uint32_t co_cacheTypeAndSize;
     uint32_t co_TCMPhysicalSize;
-    co_controlReg_layout co_controlReg;
+    ARM946ES_ControlReg_Layout co_controlReg;
     uint32_t co_puDataUnifiedCachabilityBits;
     uint32_t co_puInstructionCachabilityBits;
     uint32_t co_puDataWriteBufferabilityBits;
@@ -923,6 +996,22 @@ public:
     // Coprocessor access functions.
     busPayload readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2);
     busPayload writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2, uint32_t data);
+
+
+    void setITCMBaseAndSize(uint32_t data);
+    void setDTCMBaseAndSize(uint32_t data);
+
+
+    /**
+     * @brief Invalidates the entire instruction cache.
+     */
+    void invalidateInstructionCache();
+    /**
+     * @brief Invalidates the entire data cache.
+     */
+    void invalidateDataCache();
+
+    void writeToPURegionControl(bool instruction, uint8_t regionNum, uint32_t data);
 
     // Function overrides.
     void reset() override;

@@ -7,6 +7,10 @@
 
 // Control print statements.
 #define LOG_LEVEL 2
+#include <common.h>
+
+#include <cstring>
+
 #include "logger.h"
 
 namespace RedPandaDS {
@@ -106,9 +110,15 @@ ARM946ES::ARM946ES() {
     data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 2;
     data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 8;
     data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::BIOS] = 2;
+
+    // TCM set up.
+    itcm = new uint8_t[ITCM_SIZE];
+    dtcm = new uint8_t[DTCM_SIZE];
 }
 // ==================================================================================================
 ARM946ES::~ARM946ES() {
+    DELETE_DYNAMIC_ARRAY_POINTER(itcm);
+    DELETE_DYNAMIC_ARRAY_POINTER(dtcm);
 }
 // ==================================================================================================
 busPayload ARM946ES::readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2) {
@@ -158,10 +168,94 @@ busPayload ARM946ES::writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op
             co_controlReg.write(data);
             break;
         }
+
+        // Protection Unit.
+        // Data Region.
+        case 0x00060000:
+        case 0x00060100:
+        case 0x00060200:
+        case 0x00060300:
+        case 0x00060400:
+        case 0x00060500:
+        case 0x00060600:
+        case 0x00060700: {
+            writeToPURegionControl(false, Cm_32, data);
+            break;
+        }
+        // Instruction Region.
+        case 0x01060000:
+        case 0x01060100:
+        case 0x01060200:
+        case 0x01060300:
+        case 0x01060400:
+        case 0x01060500:
+        case 0x01060600:
+        case 0x01060700: {
+            writeToPURegionControl(true, Cm_32, data);
+            break;
+        }
+        // Cachability Bits.
+        case 0x00020000: {
+            co_puDataUnifiedCachabilityBits = data & 0x000000FF;
+            break;
+        }
+        case 0x00020001:{
+            co_puInstructionCachabilityBits = data & 0x000000FF;
+            break;
+        }
+        // Cache Write-Bufferability Bits for Data Protection Regions.
+        case 0x00030000:{
+            co_puDataWriteBufferabilityBits = data & 0x000000FF;
+            break;
+        }
+        // Access Permission Protection Region.
+        case 0x00050000:{
+            co_puDataUnifiedAccessPermissions = data & 0x0000FFFF;
+            break;
+        }
+        case 0x00050001:{
+            co_puInstructionAccessPermissions = data & 0x0000FFFF;
+            break;
+        }
+        case 0x00050002:{
+            co_puDataUnifiedExtendedAccessPermissions = data;
+            break;
+        }
+        case 0x00050003:{
+            co_puInstructionExtendedAccessPermissions = data;
+            break;
+        }
+
+        // Cache control.
+        case 0x00070500: {
+            invalidateInstructionCache();
+            break;
+        }
+        case 0x00070600: {
+            invalidateDataCache();
+            break;
+        }
+        case 0x00070a04: {
+            // Drain write buffer.
+            // TODO!!!: No write buffer is currently implemented.
+            break;
+        }
+
+        // Data / Instruction TCM Size/Base.
+        case 0x00090100: {
+            setDTCMBaseAndSize(data);
+            break;
+        }
+        case 0x00090101: {
+            setITCMBaseAndSize(data);
+            break;
+        }
+
+
         default:
             LogError("Cannot write to CoProcessor 15 with the following settings:\n\tCn = "
                      << Cn_32 << "\n\tCm = " << Cm_32 << "\n\top1 = " << op1_32
-                     << "\n\top2 = " << op2_32);
+                     << "\n\top2 = " << op2_32 << "\n\tcoproc key = " << PrintHexPadded(key, 8));
             break;
     }
     return result;
@@ -169,6 +263,24 @@ busPayload ARM946ES::writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op
 // ==================================================================================================
 void ARM946ES::reset() {
     ARM::reset();
+
+    // TCM.
+    memset(itcm, 0, ITCM_SIZE);
+    itcmBase = 0x00000000;
+    itcmVirtSize = 0x00000000;
+    memset(dtcm, 0, DTCM_SIZE);
+    dtcmBase = 0x27C0000;
+    dtcmVirtSize = 0x00000000;
+
+    // Cache.
+    invalidateInstructionCache();
+    invalidateDataCache();
+
+    // Protection Unit.
+    for (unsigned int i = 0; i < ARM946ES_PU_NumRegions; i++) {
+        writeToPURegionControl(true, i, 0);
+        writeToPURegionControl(false, i, 0);
+    }
 
     // CPU Constants.
     co_mainIdReg = 0x41059461;
@@ -343,7 +455,58 @@ cycles ARM946ES::cycle() {
     return cyclesRan;
 }
 // ==================================================================================================
-uint32_t co_controlReg_layout::read() {
+void ARM946ES::setITCMBaseAndSize(uint32_t data) {
+    uint8_t virtSizeShift = readBits(data, 1, 4);
+    virtSizeShift = std::min(virtSizeShift, (uint8_t)23);
+    virtSizeShift = std::max(virtSizeShift, (uint8_t)3);
+    itcmVirtSize = 512 << virtSizeShift;
+
+    itcmBase = readBits(data, 12, 4) << 12;
+    if (itcmBase != 0) {
+        LogWarning("ITCM base should be fixed at zero?");
+    }
+}
+// ==================================================================================================
+void ARM946ES::setDTCMBaseAndSize(uint32_t data) {
+    uint8_t virtSizeShift = readBits(data, 1, 4);
+    virtSizeShift = std::min(virtSizeShift, (uint8_t)23);
+    virtSizeShift = std::max(virtSizeShift, (uint8_t)3);
+    dtcmVirtSize = 512 << virtSizeShift;
+
+    dtcmBase = readBits(data, 12, 4) << 12;
+}
+// ==================================================================================================
+void ARM946ES::invalidateInstructionCache() {
+    for (uint32_t i = 0; i < ARM946ES_InstructionCache_NumSets; i++) {
+        instructionCache[i].ways[0].valid = false;
+        instructionCache[i].ways[1].valid = false;
+        instructionCache[i].ways[2].valid = false;
+        instructionCache[i].ways[3].valid = false;
+        // All other data can stay as is as long as valid is false;
+    }
+}
+// ===================================================================================================
+void ARM946ES::invalidateDataCache() {
+    for (uint32_t i = 0; i < ARM946ES_DataCache_NumSets; i++) {
+        dataCache[i].ways[0].valid = false;
+        dataCache[i].ways[1].valid = false;
+        dataCache[i].ways[2].valid = false;
+        dataCache[i].ways[3].valid = false;
+        // All other data can stay as is as long as valid is false;
+    }
+}
+// ==================================================================================================
+void ARM946ES::writeToPURegionControl(bool instruction, uint8_t regionNum, uint32_t data) {
+    assert(regionNum < ARM946ES_PU_NumRegions);
+    ARM946ES_PU_Region* regionToModify =
+        instruction ? &puInstructionRegion[regionNum] : &puDataRegion[regionNum];
+
+    regionToModify->enabled = readBit(data, 0);
+    regionToModify->size = std::max(2 << 11, 2 << readBits(data, 1, 5));
+    regionToModify->baseAddress = 4096 * readBits(data, 12, 31);
+}
+// ==================================================================================================
+uint32_t ARM946ES_ControlReg_Layout::read() {
     uint32_t result = 0;
     writeBit(result, 0, mmuEnable);
     writeBit(result, 2, unifiedCacheEnable);
@@ -364,7 +527,7 @@ uint32_t co_controlReg_layout::read() {
     return result;
 }
 // ==================================================================================================
-void co_controlReg_layout::write(uint32_t data) {
+void ARM946ES_ControlReg_Layout::write(uint32_t data) {
     mmuEnable = readBit(data, 0);
     if (mmuEnable) {
         LogError(
