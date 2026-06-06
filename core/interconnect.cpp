@@ -227,9 +227,30 @@ void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
 }
 // ==================================================================================================
 uint32_t Interconnect::read32ARM9(uint32_t addr) {
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Word align mem accesses.
     addr &= ~0x3;
-    // Memory map.
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && !arm9Interface->co_controlReg.itcmLoadEnable &&
+        addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->itcmBase) & (ITCM_SIZE - 1);
+        uint32_t val = *reinterpret_cast<uint32_t*>(arm9Interface->itcm + offset);
+        LogDebug("ITCM - 32 bit read at " << hexString(addr) << ": " << hexString(val));
+        return val;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && !arm9Interface->co_controlReg.dtcmLoadEnable &&
+        addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->dtcmBase) & (DTCM_SIZE - 1);
+        uint32_t val = *reinterpret_cast<uint32_t*>(arm9Interface->dtcm + offset);
+        LogDebug("DTCM - 32 bit read at " << hexString(addr) << ": " << hexString(val));
+        return val;
+    }
+
+    // Standard Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
@@ -250,9 +271,30 @@ uint32_t Interconnect::read32ARM9(uint32_t addr) {
 }
 // ==================================================================================================
 uint16_t Interconnect::read16ARM9(uint32_t addr) {
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Half word align mem accesses.
     addr &= ~0x1;
-    // Memory map.
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && !arm9Interface->co_controlReg.itcmLoadEnable &&
+        addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->itcmBase) & (ITCM_SIZE - 1);
+        uint16_t val = *reinterpret_cast<uint16_t*>(arm9Interface->itcm + offset);
+        LogDebug("ITCM - 16 bit read at " << hexString(addr) << ": " << hexString(val));
+        return val;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && !arm9Interface->co_controlReg.dtcmLoadEnable &&
+        addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->dtcmBase) & (DTCM_SIZE - 1);
+        uint16_t val = *reinterpret_cast<uint16_t*>(arm9Interface->dtcm + offset);
+        LogDebug("DTCM - 16 bit read at " << hexString(addr) << ": " << hexString(val));
+        return val;
+    }
+
+    // Standard Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
@@ -272,7 +314,28 @@ uint16_t Interconnect::read16ARM9(uint32_t addr) {
 }
 // ==================================================================================================
 uint8_t Interconnect::read8ARM9(uint32_t addr) {
-    // Memory map.
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && !arm9Interface->co_controlReg.itcmLoadEnable &&
+        addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->itcmBase) & (ITCM_SIZE - 1);
+        uint8_t val = arm9Interface->itcm[offset];
+        LogDebug("ITCM - 8 bit read at " << hexString(addr) << ": " << hexString(val));
+        return val;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && !arm9Interface->co_controlReg.dtcmLoadEnable &&
+        addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->dtcmBase) & (DTCM_SIZE - 1);
+        uint8_t val = arm9Interface->dtcm[offset];
+        LogDebug("DTCM - 8 bit read at " << hexString(addr) << ": " << hexString(val));
+        return val;
+    }
+
+    // Standard Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
@@ -292,9 +355,28 @@ uint8_t Interconnect::read8ARM9(uint32_t addr) {
 }
 // ==================================================================================================
 void Interconnect::write32ARM9(uint32_t addr, uint32_t data) {
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Byte align mem accesses.
     addr &= ~0x3;
-    // Memory map.
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->itcmBase) & (ITCM_SIZE - 1);
+        *reinterpret_cast<uint32_t*>(arm9Interface->itcm + offset) = data;
+        LogDebug("ITCM - 32 bit write at " << hexString(addr) << ": " << hexString(data));
+        return;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->dtcmBase) & (DTCM_SIZE - 1);
+        *reinterpret_cast<uint32_t*>(arm9Interface->dtcm + offset) = data;
+        LogDebug("DTCM - 32 bit write at " << hexString(addr) << ": " << hexString(data));
+        return;
+    }
+
+    // Standard Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
@@ -314,9 +396,28 @@ void Interconnect::write32ARM9(uint32_t addr, uint32_t data) {
 }
 // ==================================================================================================
 void Interconnect::write16ARM9(uint32_t addr, uint16_t data) {
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Byte align mem accesses.
     addr &= ~0x1;
-    // Memory map.
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->itcmBase) & (ITCM_SIZE - 1);
+        *reinterpret_cast<uint16_t*>(arm9Interface->itcm + offset) = data;
+        LogDebug("ITCM - 16 bit write at " << hexString(addr) << ": " << hexString(data));
+        return;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->dtcmBase) & (DTCM_SIZE - 1);
+        *reinterpret_cast<uint16_t*>(arm9Interface->dtcm + offset) = data;
+        LogDebug("DTCM - 16 bit write at " << hexString(addr) << ": " << hexString(data));
+        return;
+    }
+
+    // Standard Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
@@ -336,7 +437,28 @@ void Interconnect::write16ARM9(uint32_t addr, uint16_t data) {
 }
 // ==================================================================================================
 void Interconnect::write8ARM9(uint32_t addr, uint8_t data) {
-    // Memory map.
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && !arm9Interface->co_controlReg.itcmLoadEnable &&
+        addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->itcmBase) & (ITCM_SIZE - 1);
+        arm9Interface->itcm[offset] = data;
+        LogDebug("ITCM - 8 bit write at " << hexString(addr) << ": " << hexString(data));
+        return;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && !arm9Interface->co_controlReg.dtcmLoadEnable &&
+        addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        uint32_t offset = (addr - arm9Interface->dtcmBase) & (DTCM_SIZE - 1);
+        arm9Interface->dtcm[offset] = data;
+        LogDebug("DTCM - 8 bit write at " << hexString(addr) << ": " << hexString(data));
+        return;
+    }
+
+    // Standard Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
@@ -378,6 +500,21 @@ bool Interconnect::isAddressValidARM7(uint32_t addr) {
 // ==================================================================================================
 bool Interconnect::isAddressValidARM9(uint32_t addr) {
     uint8_t memRegion = addr >> 24;
+    ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
+
+    // Instruction TCM.
+    if (arm9Interface->co_controlReg.itcmEnable && !arm9Interface->co_controlReg.itcmLoadEnable &&
+        addr >= arm9Interface->itcmBase &&
+        addr < (arm9Interface->itcmBase + arm9Interface->itcmVirtSize)) {
+        return true;
+    }
+    // Data TCM.
+    if (arm9Interface->co_controlReg.dtcmEnable && !arm9Interface->co_controlReg.dtcmLoadEnable &&
+        addr >= arm9Interface->dtcmBase &&
+        addr < (arm9Interface->dtcmBase + arm9Interface->dtcmVirtSize)) {
+        return true;
+    }
+
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
             return true;

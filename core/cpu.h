@@ -889,7 +889,7 @@ struct ARM946ES_ControlReg_Layout {
     bool dtcmEnable = false;
     bool dtcmLoadEnable = false;
     bool itcmEnable = false;
-    bool tcmLoadEnable = false;
+    bool itcmLoadEnable = false;
 
     uint32_t read();
     void write(uint32_t data);
@@ -940,7 +940,6 @@ struct ARM946ES_PU_Region {
     uint32_t size;
     uint32_t baseAddress;
 };
-
 
 // ==================================================================================================
 // ARM946ES
@@ -997,10 +996,9 @@ public:
     busPayload readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2);
     busPayload writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2, uint32_t data);
 
-
+    // TCM control functions.
     void setITCMBaseAndSize(uint32_t data);
     void setDTCMBaseAndSize(uint32_t data);
-
 
     /**
      * @brief Invalidates the entire instruction cache.
@@ -1011,6 +1009,13 @@ public:
      */
     void invalidateDataCache();
 
+    /**
+     * @brief Writes to a Protection Unit's region control.
+     *
+     * @param instruction True if editing the intruction region. False for data region.
+     * @param regionNum The region number between 0-7.
+     * @param data The data to write to the region control.
+     */
     void writeToPURegionControl(bool instruction, uint8_t regionNum, uint32_t data);
 
     // Function overrides.

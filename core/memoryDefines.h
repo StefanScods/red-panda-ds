@@ -35,7 +35,7 @@ enum ARM7MemoryRegionNum {
 
 namespace ARM9MemoryRegionNum {
 enum ARM9MemoryRegionNum {
-    INSTUCTION_TCM = 0x00,
+    TCM = 0x00,
     MAIN_RAM = 0x02,
     WRAM = 0x03,
     IO = 0x04,

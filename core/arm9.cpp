@@ -21,10 +21,14 @@ ARM946ES::ARM946ES() {
     arm9 = true;
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
     // TCM
-    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
-    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
-    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
-    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::INSTUCTION_TCM] = 1;
+    code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    code_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    code_sequencial16BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    data_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    data_sequencial32BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    data_nonSequencial16BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
+    data_sequencial16BitAccessTimings[ARM9MemoryRegionNum::TCM] = 1;
     // Main RAM.
     code_nonSequencial32BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 18;
     code_sequencial32BitAccessTimings[ARM9MemoryRegionNum::MAIN_RAM] = 18;
@@ -135,7 +139,12 @@ busPayload ARM946ES::readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t o
     uint32_t key = (op1_32 << 24) | (Cn_32 << 16) | (Cm_32 << 8) | op2_32;
     // Match the key to a coprocessor read command.
     switch (key) {
-            //  Control Register.
+        //  TCM Physical Size
+        case 0x00000002: {
+            result.data = 0x00140180;
+            break;
+        }
+        //  Control Register.
         case 0x00010000: {
             result.data = co_controlReg.read();
             break;
@@ -199,29 +208,29 @@ busPayload ARM946ES::writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op
             co_puDataUnifiedCachabilityBits = data & 0x000000FF;
             break;
         }
-        case 0x00020001:{
+        case 0x00020001: {
             co_puInstructionCachabilityBits = data & 0x000000FF;
             break;
         }
         // Cache Write-Bufferability Bits for Data Protection Regions.
-        case 0x00030000:{
+        case 0x00030000: {
             co_puDataWriteBufferabilityBits = data & 0x000000FF;
             break;
         }
         // Access Permission Protection Region.
-        case 0x00050000:{
+        case 0x00050000: {
             co_puDataUnifiedAccessPermissions = data & 0x0000FFFF;
             break;
         }
-        case 0x00050001:{
+        case 0x00050001: {
             co_puInstructionAccessPermissions = data & 0x0000FFFF;
             break;
         }
-        case 0x00050002:{
+        case 0x00050002: {
             co_puDataUnifiedExtendedAccessPermissions = data;
             break;
         }
-        case 0x00050003:{
+        case 0x00050003: {
             co_puInstructionExtendedAccessPermissions = data;
             break;
         }
@@ -250,7 +259,6 @@ busPayload ARM946ES::writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op
             setITCMBaseAndSize(data);
             break;
         }
-
 
         default:
             LogError("Cannot write to CoProcessor 15 with the following settings:\n\tCn = "
@@ -321,6 +329,17 @@ busPayload ARM946ES::readBus(uint32_t address, uint32_t size, bool codeRead) {
      */
     bool sequencial = address == previousAddr + 4 || address == previousAddr + 2;
     uint8_t memRegion = (address) >> 24;
+    // Override mem region for special cases.
+    // Instruction TCM.
+    if (co_controlReg.itcmEnable && !co_controlReg.itcmLoadEnable && address >= itcmBase &&
+        address < (itcmBase + itcmVirtSize)) {
+        memRegion = ARM9MemoryRegionNum::TCM;
+    }
+    // Data TCM.
+    if (co_controlReg.dtcmEnable && !co_controlReg.dtcmLoadEnable && address >= dtcmBase &&
+        address < (dtcmBase + dtcmVirtSize)) {
+        memRegion = ARM9MemoryRegionNum::TCM;
+    }
 
     // Preform the read and determine the cycle map to read.
     cycles* cycleMapSequential = nullptr;
@@ -328,21 +347,21 @@ busPayload ARM946ES::readBus(uint32_t address, uint32_t size, bool codeRead) {
     uint32_t data;
     switch (size) {
         case (32):  // 32 Bit read.
-            data = bus->read32ARM7(address);
+            data = bus->read32ARM9(address);
             cycleMapSequential =
                 codeRead ? code_sequencial32BitAccessTimings : data_sequencial32BitAccessTimings;
             cycleMapNonSequential = codeRead ? code_nonSequencial32BitAccessTimings
                                              : data_nonSequencial32BitAccessTimings;
             break;
         case (16):  // 16 Bit read.
-            data = bus->read16ARM7(address);
+            data = bus->read16ARM9(address);
             cycleMapSequential =
                 codeRead ? code_sequencial16BitAccessTimings : data_sequencial16BitAccessTimings;
             cycleMapNonSequential = codeRead ? code_nonSequencial16BitAccessTimings
                                              : data_nonSequencial16BitAccessTimings;
             break;
         case (8):  // 8 Bit read.
-            data = bus->read8ARM7(address);
+            data = bus->read8ARM9(address);
             //  8bit data accesses have the same timings as 16bit data.
             // There are no code 8 bit accesses.
             cycleMapSequential = data_sequencial16BitAccessTimings;
@@ -368,23 +387,32 @@ busPayload ARM946ES::writeBus(uint32_t address, uint32_t data, uint32_t size) {
      */
     bool sequencial = address == previousAddr + 4 || address == previousAddr + 2;
     uint8_t memRegion = (address) >> 24;
+    // Override mem region for special cases.
+    // Instruction TCM.
+    if (co_controlReg.itcmEnable && address >= itcmBase && address < (itcmBase + itcmVirtSize)) {
+        memRegion = ARM9MemoryRegionNum::TCM;
+    }
+    // Data TCM.
+    if (co_controlReg.dtcmEnable && address >= dtcmBase && address < (dtcmBase + dtcmVirtSize)) {
+        memRegion = ARM9MemoryRegionNum::TCM;
+    }
 
     // Preform the read and determine the cycle map to read.
     cycles* cycleMapSequential = nullptr;
     cycles* cycleMapNonSequential = nullptr;
     switch (size) {
         case (32):  // 32 Bit write.
-            bus->write32ARM7(address, data);
+            bus->write32ARM9(address, data);
             cycleMapSequential = data_sequencial32BitAccessTimings;
             cycleMapNonSequential = data_nonSequencial32BitAccessTimings;
             break;
         case (16):  // 16 Bit write.
-            bus->write16ARM7(address, data & 0xFFFF);
+            bus->write16ARM9(address, data & 0xFFFF);
             cycleMapSequential = data_sequencial16BitAccessTimings;
             cycleMapNonSequential = data_nonSequencial16BitAccessTimings;
             break;
         case (8):
-            bus->write8ARM7(address, data & 0xFF);
+            bus->write8ARM9(address, data & 0xFF);
             //  8bit data accesses have the same timings as 16bit data.
             cycleMapSequential = data_sequencial16BitAccessTimings;
             cycleMapNonSequential = data_nonSequencial16BitAccessTimings;
@@ -465,6 +493,9 @@ void ARM946ES::setITCMBaseAndSize(uint32_t data) {
     if (itcmBase != 0) {
         LogWarning("ITCM base should be fixed at zero?");
     }
+
+    LogDebug("Setting ITCM Base: " << PrintHexPadded(itcmBase, 8));
+    LogDebug("Setting ITCM Size: " << PrintHex(itcmVirtSize));
 }
 // ==================================================================================================
 void ARM946ES::setDTCMBaseAndSize(uint32_t data) {
@@ -474,6 +505,9 @@ void ARM946ES::setDTCMBaseAndSize(uint32_t data) {
     dtcmVirtSize = 512 << virtSizeShift;
 
     dtcmBase = readBits(data, 12, 4) << 12;
+
+    LogDebug("Setting DTCM Base: " << PrintHexPadded(dtcmBase, 8));
+    LogDebug("Setting DTCM Size: " << PrintHex(dtcmVirtSize));
 }
 // ==================================================================================================
 void ARM946ES::invalidateInstructionCache() {
@@ -522,7 +556,7 @@ uint32_t ARM946ES_ControlReg_Layout::read() {
     writeBit(result, 16, dtcmEnable);
     writeBit(result, 17, dtcmLoadEnable);
     writeBit(result, 18, itcmEnable);
-    writeBit(result, 19, tcmLoadEnable);
+    writeBit(result, 19, itcmLoadEnable);
     // All other bits are zero.
     return result;
 }
@@ -568,26 +602,11 @@ void ARM946ES_ControlReg_Layout::write(uint32_t data) {
     if (preARMv5Mode) {
         LogError("Writing ARM946E-S Pre-ARMv5 compatibility mode is currently unsupported");
     }
-
     dtcmEnable = readBit(data, 16);
-    if (dtcmEnable) {
-        LogError("Writing to ARM946E-S DTCM Enable via control register is currently unsupported");
-    }
-
     dtcmLoadEnable = readBit(data, 17);
-    if (dtcmLoadEnable) {
-        LogError("Writing ARM946E-S DTCM Load Mode to write-only is currently unsupported");
-    }
-
     itcmEnable = readBit(data, 18);
-    if (itcmEnable) {
-        LogError("Writing to ARM946E-S ITCM Enable via control register is currently unsupported");
-    }
+    itcmLoadEnable = readBit(data, 19);
 
-    tcmLoadEnable = readBit(data, 19);
-    if (tcmLoadEnable) {
-        LogError("Writing ARM946E-S ITCM Load Mode to write-only is currently unsupported");
-    }
     // All other bits are fixed.
 };
 // ==================================================================================================
