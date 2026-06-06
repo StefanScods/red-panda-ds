@@ -21,6 +21,8 @@ private:
     ARM* arm9 = nullptr;
 
     uint8_t* mainRAM = nullptr;
+    uint8_t* sharedWRAM = nullptr;
+    uint8_t* arm7WRAM = nullptr;
 
 public:
     Interconnect();
