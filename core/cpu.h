@@ -216,6 +216,8 @@ protected:
     cycles data_nonSequencial32BitAccessTimings[0x100] = {0xFF};
     cycles data_sequencial16BitAccessTimings[0x100] = {0xFF};
     cycles data_nonSequencial16BitAccessTimings[0x100] = {0xFF};
+    cycles cacheMissPenaltyTimings[0x100] = {0xFF};
+    cycles cacheWriteBackPenaltyTimings[0x100] = {0xFF};
 
     // Interrupt control.
     bool IME;
@@ -879,8 +881,8 @@ public:
  * @brief Layout of ARM946E-S's control register.
  */
 struct ARM946ES_ControlReg_Layout {
-    bool mmuEnable = false;
-    bool unifiedCacheEnable = false;
+    bool puEnable = false;
+    bool dataCacheEnable = false;
     bool endianness = false;
     bool instructionCacheEnable = false;
     bool exceptionVectors = false;
@@ -926,6 +928,8 @@ struct ARM946ES_CacheLine {
  */
 struct ARM946ES_CacheSet {
     ARM946ES_CacheLine ways[ARM946ES_Cache_LinesPerSet];
+    uint16_t rrCounter;  // Counter used for round robin replacement.
+    uint16_t lfsr;       // Counter used for psudo random replacement.
 };
 // ==================================================================================================
 // ARM946ES Protection Unit
@@ -983,14 +987,12 @@ public:
     uint32_t co_puInstructionAccessPermissions;
     uint32_t co_puDataUnifiedExtendedAccessPermissions;
     uint32_t co_puInstructionExtendedAccessPermissions;
-    uint32_t co_puDataUnifiedRegions[8];
-    uint32_t co_puInstructionRegions[8];
-    uint32_t co_cacheDataLockdown;
-    uint32_t co_cacheInstructionLockdown;
-    uint32_t co_dataTCMBaseAndVirtualSize;
-    uint32_t co_instructionTCMBaseAndVirtualSize;
-    uint32_t co_processIdRegs[16];
-    uint32_t co_implDefinedAndDebugRegs[16];
+    // uint32_t co_cacheDataLockdown;
+    // uint32_t co_cacheInstructionLockdown;
+    // uint32_t co_dataTCMBaseAndVirtualSize;
+    // uint32_t co_instructionTCMBaseAndVirtualSize;
+    // uint32_t co_processIdRegs[16];
+    // uint32_t co_implDefinedAndDebugRegs[16];
 
     // Coprocessor access functions.
     busPayload readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2);
@@ -1008,6 +1010,63 @@ public:
      * @brief Invalidates the entire data cache.
      */
     void invalidateDataCache();
+    /**
+     * @brief Check if an address is cachable given the current PU configuration. This function
+     * assumes the control register's PU and relevent cache enable bits have already been checked.
+     *
+     * @param isInstruction True if this is an instructio access. False for data.
+     * @param address The address to check.
+     *
+     * @return bool
+     */
+    bool isCacheable(bool isInstruction, uint32_t address);
+    /**
+     * @brief Select a cache line to replace in a set.
+     *
+     * @param set Cache set to choose from.
+     */
+    ARM946ES_CacheLine& findCacheLineToReplace(ARM946ES_CacheSet& set);
+    /**
+     * @brief Fill a cache line from memory.
+     *
+     * @param cacheLine Line to fill.
+     * @param address Address to fetch from.
+     */
+    busPayload fillCacheLine(ARM946ES_CacheLine& cacheLine, uint32_t address);
+    /**
+     * @brief Read from a cache set (hit/miss handling included).
+     *
+     * @param cacheSet Cache set being accessed.
+     * @param address Full memory address.
+     * @param size Number of bits.
+     * @param tag Address tag.
+     * @param offset Offset within cache line.
+     */
+    busPayload readFromCacheSet(ARM946ES_CacheSet& cacheSet, uint32_t address, uint32_t size,
+                                uint32_t tag, uint32_t offset);
+    /**
+     * @brief Read from data cache.
+     *
+     * @param address Memory address.
+     * @param size Number of bits.
+     */
+    busPayload readFromDataCache(uint32_t address, uint32_t size);
+    /**
+     * @brief Write to data cache.
+     *
+     * @param address Memory address.
+     * @param data Data to write.
+     * @param size Number of bits.
+     * @param writeBack Whether write-back mode is used.
+     */
+    busPayload writeToDataCache(uint32_t address, uint32_t data, uint32_t size, bool writeBack);
+    /**
+     * @brief Read from instruction cache.
+     *
+     * @param address Instruction address.
+     * @param size Number of bits.
+     */
+    busPayload readFromInstructionCache(uint32_t address, uint32_t size);
 
     /**
      * @brief Writes to a Protection Unit's region control.
@@ -1017,6 +1076,20 @@ public:
      * @param data The data to write to the region control.
      */
     void writeToPURegionControl(bool instruction, uint8_t regionNum, uint32_t data);
+    /**
+     * @brief Find highest priority matching data PU region.
+     *
+     * @param address Memory address.
+     * @return region index or -1 if none.
+     */
+    int findHighestPriorityDataPURegion(uint32_t address);
+    /**
+     * @brief Find highest priority matching instruction PU region.
+     *
+     * @param address Memory address.
+     * @return region index or -1 if none.
+     */
+    int findHighestPriorityInstructionPURegion(uint32_t address);
 
     // Function overrides.
     void reset() override;
