@@ -96,7 +96,7 @@ void ARM::reset() {
     previousCodeAddr = 0;
     previousDataAddr = 0;
 
-    setProcessorMode(ProcessorModes::User);
+    setProcessorMode(ProcessorModes::System);
 }
 // ==================================================================================================
 cycles ARM::execute() {
@@ -106,8 +106,8 @@ cycles ARM::execute() {
 // ==================================================================================================
 cycles ARM::ARM_execute() {
     // Make space in the pipeline.
-    uint32_t nextInstruction = instuctionPipeLine[0];
-    instuctionPipeLine[0] = NO_INSTRUCT;
+    uint32_t nextInstruction = instuctionPipeLine[0].inst;
+    instuctionPipeLine[0] = {.inst = NO_INSTRUCT, .addr = 0};
     uint8_t condition = readBits(nextInstruction, 28, 31);
     LogDebug("Executing ARM: " << PrintHex(nextInstruction) << " - "
                                << dissembleARMInstruction(nextInstruction).toString() << "...");
@@ -143,8 +143,8 @@ cycles ARM::ARM_execute() {
 // ==================================================================================================
 cycles ARM::THUMB_execute() {
     // Make space in the pipeline.
-    uint32_t nextInstruction = instuctionPipeLine[0];
-    instuctionPipeLine[0] = NO_INSTRUCT;
+    uint32_t nextInstruction = instuctionPipeLine[0].inst;
+    instuctionPipeLine[0] = {.inst = NO_INSTRUCT, .addr = 0};
     LogDebug("Executing THUMB: " << PrintHex(nextInstruction) << " - "
                                  << dissembleTHUMBInstruction(nextInstruction).toString() << "...");
     // TODO!!! Remove this if statement once the execute() is less buggy.
@@ -264,12 +264,13 @@ cycles ARM::fetch() {
         LogDebug("Fetching instruction at: " << PrintHex(pc()) << "...");
         busPayload readResult = readBus(pc(), 32, true);
         cycleCount = readResult.numCycles;
+        uint32_t fetchAddr = pc();
         if (getThumbMode()) {
             // Fill the instruction queue with half words.
-            instructionQueue.push(readResult.data & 0xFFFF);
-            instructionQueue.push(readResult.data >> 16);
+            instructionQueue.push({.inst = readResult.data & 0xFFFF, .addr = fetchAddr});
+            instructionQueue.push({.inst = readResult.data >> 16, .addr = fetchAddr});
         } else {
-            instructionQueue.push(readResult.data);
+            instructionQueue.push({.inst = readResult.data, .addr = fetchAddr});
         }
     }
     // Get the next instruction onto the pipeline.
@@ -292,7 +293,7 @@ cycles ARM::fetchAndExecute(int numExecutions) {
         justBranched = false;
         advanceInstructionPipeline();
         cycles exeCycles = 0;
-        if (instuctionPipeLine[0] != NO_INSTRUCT) {
+        if (instuctionPipeLine[0].inst != NO_INSTRUCT) {
             exeCycles = execute();
             numExecutions--;
         }
@@ -426,9 +427,9 @@ void ARM::branch(uint32_t dest, bool exchange) {
 // ==================================================================================================
 void ARM::clearInstructionPipeline() {
     // Clear the instuction pipeline.
-    instuctionPipeLine[0] = NO_INSTRUCT;
-    instuctionPipeLine[1] = NO_INSTRUCT;
-    instuctionPipeLine[2] = NO_INSTRUCT;
+    instuctionPipeLine[0] = {.inst = NO_INSTRUCT, .addr = 0};
+    instuctionPipeLine[1] = {.inst = NO_INSTRUCT, .addr = 0};
+    instuctionPipeLine[2] = {.inst = NO_INSTRUCT, .addr = 0};
     while (!instructionQueue.empty()) {
         instructionQueue.pop();
     }
@@ -441,21 +442,25 @@ void ARM::advanceInstructionPipeline() {
     // Move pipeline.
     instuctionPipeLine[0] = instuctionPipeLine[1];
     instuctionPipeLine[1] = instuctionPipeLine[2];
-    instuctionPipeLine[2] = NO_INSTRUCT;
-    // Detect and recombine 32 bit thumb instructions.
-    if (getThumbMode() && (readBits(instuctionPipeLine[0], 29, 31) != 0b111) &&
-        (readBits(instuctionPipeLine[0], 13, 15) == 0b111) &&
-        (readBits(instuctionPipeLine[0], 11, 12) != 0b00)) {
-        // Create a 32 bit thumb instruction.
-        instuctionPipeLine[1] = (instuctionPipeLine[0] << 16) | (instuctionPipeLine[1]);
-        instuctionPipeLine[0] = NO_INSTRUCT;
+    instuctionPipeLine[2] = {.inst = NO_INSTRUCT, .addr = 0};
+    // Detect and recombine 32-bit Thumb instructions.
+    if (getThumbMode() && instuctionPipeLine[0].inst != NO_INSTRUCT &&
+        instuctionPipeLine[1].inst != NO_INSTRUCT &&
+        (readBits(instuctionPipeLine[0].inst, 29, 31) != 0b111) &&
+        (readBits(instuctionPipeLine[0].inst, 13, 15) == 0b111) &&
+        (readBits(instuctionPipeLine[0].inst, 11, 12) != 0b00)) {
+        // Combine the first and second halfwords into a 32-bit instruction.
+        instuctionPipeLine[1].inst =
+            (instuctionPipeLine[0].inst << 16) | instuctionPipeLine[1].inst;
+
+        instuctionPipeLine[0] = {.inst = NO_INSTRUCT, .addr = 0};
     }
 }
 // ==================================================================================================
 uint32_t ARM::getAddrOfNextInstructionToExecute() {
     uint32_t instructionSize = getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE;
-    if (instuctionPipeLine[0] != NO_INSTRUCT) return pc() - 2 * instructionSize;
-    if (instuctionPipeLine[1] != NO_INSTRUCT) return pc() - 1 * instructionSize;
+    if (instuctionPipeLine[0].inst != NO_INSTRUCT) return instuctionPipeLine[0].addr;
+    if (instuctionPipeLine[1].inst != NO_INSTRUCT) return instuctionPipeLine[1].addr;
     return pc();
 }
 // ==================================================================================================

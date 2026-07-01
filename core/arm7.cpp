@@ -15,6 +15,11 @@ namespace Core {
 // ==================================================================================================
 ARM7TDMI::ARM7TDMI() {
     arm9 = false;
+    // Inital SP values.
+    reg[SP_REGISTER_NUM] = 0x03002F7C;
+    regIRQ[0] = 0x03003F80;
+    regSVC[0] = 0x03003FC0;
+
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
     // BIOS.
     code_nonSequencial32BitAccessTimings[ARM7MemoryRegionNum::BIOS] = 1;
@@ -86,6 +91,15 @@ ARM7TDMI::ARM7TDMI() {
 }
 // ==================================================================================================
 ARM7TDMI::~ARM7TDMI() {
+}
+// ==================================================================================================
+void ARM7TDMI::reset() {
+    ARM::reset();
+
+    // Inital SP values.
+    reg[SP_REGISTER_NUM] = 0x0380FD80;
+    regIRQ[0] = 0x0380FF80;
+    regSVC[0] = 0x0380FFC0;
 }
 // ==================================================================================================
 busPayload ARM7TDMI::readBus(uint32_t address, uint32_t size, bool codeRead) {
@@ -178,23 +192,26 @@ busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 cycles ARM7TDMI::cycle() {
     cycles cyclesRan = 0;
     while (currentCycle < targetCycle) {
-        // Clear just branch indicator.
+        // Clear just branched indicator.
         justBranched = false;
-        // Maintain instruction pipeline.
-        if (instuctionPipeLine[0] == NO_INSTRUCT && instuctionPipeLine[2] != NO_INSTRUCT) {
+
+        // Advance instuction pipeline.
+        if (instuctionPipeLine[0].inst == NO_INSTRUCT) {
             advanceInstructionPipeline();
         }
-        // Perform fetches and executes in parallel.
-        if (executeCooldown == 0 && instuctionPipeLine[0] != NO_INSTRUCT) {
-            if (!justHitBreakpoint) {
-                // Check to see if PC is currently equal to a breakpoint.
-                uint32_t pcCorrected =
-                    pc() - 2 * (getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE);
-                if (breakpoints.contains(pcCorrected)) {
-                    justHitBreakpoint = true;
-                    break;
-                }
-            }
+
+        // Check if we hit a break point.
+        if (instuctionPipeLine[0].inst != NO_INSTRUCT && !justHitBreakpoint &&
+            breakpoints.contains(instuctionPipeLine[0].addr)) {
+            justHitBreakpoint = true;
+            break;
+        }
+
+        // Execute Stage.
+        if (executeCooldown == 0 && instuctionPipeLine[0].inst != NO_INSTRUCT &&
+            (instuctionPipeLine[1].inst != NO_INSTRUCT ||
+             instuctionPipeLine[2].inst != NO_INSTRUCT)) {
+            // Handle execution limit
             if (hasExecutionLimit) {
                 if (executionLimit == 0) {
                     hasExecutionLimit = false;
@@ -208,18 +225,24 @@ cycles ARM7TDMI::cycle() {
             // Clear the just hit a breakpoint indicator.
             justHitBreakpoint = false;
         }
-        if (fetchCooldown == 0 && instuctionPipeLine[2] == NO_INSTRUCT) {
+
+        // Fetch Stage.
+        if (fetchCooldown == 0 && instuctionPipeLine[2].inst == NO_INSTRUCT &&
+            (instuctionPipeLine[1].inst == NO_INSTRUCT ||
+             instuctionPipeLine[0].inst == NO_INSTRUCT)) {
             // Instruction pipeline has space, fetch a new instuction.
             fetchCooldown = fetch();
         }
 
         // Determine how much to progress the CPU's cycle counter.
-        if (fetchCooldown > 0)
+        if (fetchCooldown > 0 && executeCooldown > 0) {
             cyclesElapsed = std::min(fetchCooldown, executeCooldown);
-        else
+        } else if (fetchCooldown > 0) {
+            cyclesElapsed = fetchCooldown;
+        } else if (executeCooldown > 0) {
             cyclesElapsed = executeCooldown;
-        // Catch cycles where no work is done -> filling pipeline.
-        if (cyclesElapsed == 0) {
+        } else {
+            // Catch cycles where no work is done -> filling pipeline.
             cyclesElapsed = 1;
         }
         // Increment the cpu's current cycles based on the number of cycles elapsed.

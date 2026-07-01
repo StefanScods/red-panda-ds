@@ -147,6 +147,11 @@ inline const char* toString(ProcessorModes mode) {
 }
 }  // namespace ProcessorModes
 
+struct PipelineStage {
+    uint32_t inst = NO_INSTRUCT;
+    uint32_t addr = 0;
+};
+
 extern std::vector<std::string> g_regNames;
 
 // ==================================================================================================
@@ -204,8 +209,8 @@ protected:
     uint32_t previousCodeAddr = 0;
     uint32_t previousDataAddr = 0;
 
-    std::queue<uint32_t> instructionQueue;
-    uint32_t instuctionPipeLine[INSTUCTION_PIPELINE_LENGTH];
+    std::queue<PipelineStage> instructionQueue;
+    PipelineStage instuctionPipeLine[INSTUCTION_PIPELINE_LENGTH];
 
     // Cycle timing map.
     cycles code_sequencial32BitAccessTimings[0x100] = {0xFF};
@@ -869,6 +874,7 @@ public:
     ~ARM7TDMI();
 
     // Function overrides.
+    void reset() override;
     cycles cycle() override;
     std::string getCPUName() override { return "ARM7TDMI"; }
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;

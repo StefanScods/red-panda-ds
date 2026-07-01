@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "core/cpu.h"
 #include "core/interconnect.h"
 #include "core/memoryDefines.h"
 
@@ -42,10 +43,14 @@ protected:
 };
 class TestInterconnect_MainRAM_ARM9 : public TestInterconnect_MainRAM {
 protected:
+    ARM946ES arm9;
     TestInterconnect_MainRAM_ARM9() {}
     ~TestInterconnect_MainRAM_ARM9() {}
 
-    void SetUp() override { TestInterconnect_MainRAM::SetUp(); }
+    void SetUp() override {
+        TestInterconnect_MainRAM::SetUp();
+        bus.bindARM9(&arm9);
+    }
 
     void TearDown() override { TestInterconnect_MainRAM::TearDown(); }
 };
@@ -83,7 +88,7 @@ TEST_F(TestInterconnect_MainRAM_ARM9, ReadAndWrite32Bit) {
         // Check the address is valid.
         ASSERT_TRUE(bus.isAddressValidARM9(i));
         // Write the value and read it back.
-        bus.write32ARM7(i, i);
+        bus.write32ARM9(i, i);
         uint32_t val = bus.read32ARM9(i);
         // Ensure the value survived.
         ASSERT_EQ(val, i);
@@ -97,7 +102,7 @@ TEST_F(TestInterconnect_MainRAM_ARM9, ReadAndWrite16Bit) {
         ASSERT_TRUE(bus.isAddressValidARM9(i));
         // Write the value and read it back.
         uint16_t valWrite = i & 0x0000FFFF;
-        bus.write16ARM7(i, valWrite);
+        bus.write16ARM9(i, valWrite);
         uint16_t valRead = bus.read16ARM9(i);
         // Ensure the value survived.
         ASSERT_EQ(valRead, valWrite);

@@ -80,6 +80,7 @@ cycles ARM::ARM_LDR(uint32_t desReg, uint32_t baseReg, uint32_t offset, bool pre
                     bool wback) {
     LogDebug("Executing LDR");
     uint32_t address = *activeRegs[baseReg];
+    LogDebug("Base address " << PrintHex(address));
     uint32_t offset_address = add ? address + offset : address - offset;
     uint32_t targetAddress = pre ? offset_address : address;
     busPayload payload = readBus(targetAddress, 32);
