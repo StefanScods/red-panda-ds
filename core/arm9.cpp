@@ -571,7 +571,7 @@ cycles ARM946ES::cycle() {
 }
 // ==================================================================================================
 void ARM946ES::setITCMBaseAndSize(uint32_t data) {
-    uint8_t virtSizeShift = readBits(data, 1, 4);
+    uint8_t virtSizeShift = readBits(data, 1, 5);
     virtSizeShift = std::min(virtSizeShift, (uint8_t)23);
     virtSizeShift = std::max(virtSizeShift, (uint8_t)3);
     itcmVirtSize = 512 << virtSizeShift;
@@ -586,7 +586,7 @@ void ARM946ES::setITCMBaseAndSize(uint32_t data) {
 }
 // ==================================================================================================
 void ARM946ES::setDTCMBaseAndSize(uint32_t data) {
-    uint8_t virtSizeShift = readBits(data, 1, 4);
+    uint8_t virtSizeShift = readBits(data, 1, 5);
     virtSizeShift = std::min(virtSizeShift, (uint8_t)23);
     virtSizeShift = std::max(virtSizeShift, (uint8_t)3);
     dtcmVirtSize = 512 << virtSizeShift;
