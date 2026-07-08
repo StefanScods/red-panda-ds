@@ -38,6 +38,11 @@ void Interconnect::init() {
         LogError("Could not malloc ARM7 Work RAM!");
         exit(1);
     }
+    sharedWRAM = new uint8_t[SHARED_WRAM_SIZE];
+    if (sharedWRAM == nullptr) {
+        LogError("Could not malloc Shared Work RAM!");
+        exit(1);
+    }
 }
 // ==================================================================================================
 void Interconnect::bindARM7(ARM* cpu) {
@@ -62,12 +67,19 @@ uint32_t Interconnect::read32ARM7(uint32_t addr) {
             return val;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                uint32_t val = *reinterpret_cast<uint32_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK));
+                LogDebug("Shared WRAM - 32 bit read at " << hexString(addr) << ": "
+                                                         << hexString(val));
+                return val;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 uint32_t val = *reinterpret_cast<uint32_t*>(arm7WRAM + (addr & ARM7_WRAM_MASK));
                 LogDebug("ARM7 WRAM - 32 bit read at " << hexString(addr) << ": "
                                                        << hexString(val));
                 return val;
             }
+            assert(0);
         }
         case (ARM7MemoryRegionNum::IO): {
             return read32IOARM7(addr);
@@ -93,12 +105,19 @@ uint16_t Interconnect::read16ARM7(uint32_t addr) {
             return val;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                uint16_t val = *reinterpret_cast<uint16_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK));
+                LogDebug("Shared WRAM - 16 bit read at " << hexString(addr) << ": "
+                                                         << hexString(val));
+                return val;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 uint16_t val = *reinterpret_cast<uint16_t*>(arm7WRAM + (addr & ARM7_WRAM_MASK));
                 LogDebug("ARM7 WRAM - 16 bit read at " << hexString(addr) << ": "
                                                        << hexString(val));
                 return val;
             }
+            assert(0);
         }
         case (ARM7MemoryRegionNum::IO): {
             return read16IOARM7(addr);
@@ -121,11 +140,18 @@ uint8_t Interconnect::read8ARM7(uint32_t addr) {
             return val;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                uint8_t val = *(sharedWRAM + (addr & SHARED_WRAM_MASK));
+                LogDebug("Shared WRAM - 8 bit read at " << hexString(addr) << ": "
+                                                        << hexString(val));
+                return val;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 uint8_t val = *(arm7WRAM + (addr & ARM7_WRAM_MASK));
                 LogDebug("ARM7 WRAM - 8 bit read at " << hexString(addr) << ": " << hexString(val));
                 return val;
             }
+            assert(0);
         }
         case (ARM7MemoryRegionNum::IO): {
             return read8IOARM7(addr);
@@ -150,12 +176,19 @@ void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
             break;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                *reinterpret_cast<uint32_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK)) = data;
+                LogDebug("Shared WRAM - 32 bit write at " << hexString(addr) << ": "
+                                                          << hexString(data));
+                break;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 *reinterpret_cast<uint32_t*>(arm7WRAM + (addr & ARM7_WRAM_MASK)) = data;
                 LogDebug("ARM7 WRAM - 32 bit write at " << hexString(addr) << ": "
                                                         << hexString(data));
                 break;
             }
+            assert(0);
         }
         case (ARM7MemoryRegionNum::IO): {
             write32IOARM7(addr, data);
@@ -180,12 +213,19 @@ void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
             break;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                *reinterpret_cast<uint16_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK)) = data;
+                LogDebug("Shared WRAM - 16 bit write at " << hexString(addr) << ": "
+                                                          << hexString(data));
+                break;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 *reinterpret_cast<uint16_t*>(arm7WRAM + (addr & ARM7_WRAM_MASK)) = data;
                 LogDebug("ARM7 WRAM - 16 bit write at " << hexString(addr) << ": "
                                                         << hexString(data));
                 break;
             }
+            assert(0);
         }
         case (ARM7MemoryRegionNum::IO): {
             write16IOARM7(addr, data);
@@ -208,12 +248,19 @@ void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
             break;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                *(sharedWRAM + (addr & SHARED_WRAM_MASK)) = data;
+                LogDebug("Shared WRAM - 8 bit write at " << hexString(addr) << ": "
+                                                         << hexString(data));
+                break;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 *(arm7WRAM + (addr & ARM7_WRAM_MASK)) = data;
                 LogDebug("ARM7 WRAM - 8 bit write at " << hexString(addr) << ": "
                                                        << hexString(data));
                 break;
             }
+            assert(0);
         }
         case (ARM7MemoryRegionNum::IO): {
             write8IOARM7(addr, data);
@@ -484,6 +531,9 @@ bool Interconnect::isAddressValidARM7(uint32_t addr) {
             return true;
         }
         case (ARM7MemoryRegionNum::WRAM): {
+            if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
+                return true;
+            }
             if (addr >= ARM7_WRAM_START && addr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
                 return true;
             }
