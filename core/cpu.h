@@ -1013,9 +1013,35 @@ public:
      */
     void invalidateInstructionCache();
     /**
+     * @brief Invalidates a single instruction cache line.
+     *
+     * @param address The address from the cache to invalidate.
+     * @param setIndexAddressing True if using set index addressing. False to use standard address
+     * lookup.
+     */
+    void invalidateInstructionCacheLine(uint32_t address, bool setIndexAddressing = false);
+    /**
      * @brief Invalidates the entire data cache.
      */
     void invalidateDataCache();
+    /**
+     * @brief Invalidates a single data cache line.
+     *
+     * @param address The address from the cache to invalidate.
+     * @param setIndexAddressing True if using set index addressing. False to use standard address
+     * lookup.
+     */
+    void invalidateDataCacheLine(uint32_t address, bool setIndexAddressing = false);
+    /**
+     * @brief Cleans a single data cache line.
+     *
+     * @param address The address from the cache to clean.
+     * @param workPayload work payload to modify which captures delay.
+     * @param setIndexAddressing True if using set index addressing. False to use standard address
+     * lookup.
+     */
+    void cleanDataCacheLine(uint32_t address, busPayload& workPayload,
+                            bool setIndexAddressing = false);
     /**
      * @brief Check if an address is cachable given the current PU configuration. This function
      * assumes the control register's PU and relevent cache enable bits have already been checked.

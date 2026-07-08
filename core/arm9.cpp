@@ -272,13 +272,47 @@ busPayload ARM946ES::writeToCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op
             invalidateInstructionCache();
             break;
         }
+        case 0x00070501: {
+            invalidateInstructionCacheLine(data);
+            break;
+        }
+        case 0x00070502: {
+            invalidateInstructionCacheLine(data, true);
+            break;
+        }
         case 0x00070600: {
             invalidateDataCache();
+            break;
+        }
+        case 0x00070601: {
+            invalidateDataCacheLine(data);
+            break;
+        }
+        case 0x00070602: {
+            invalidateDataCacheLine(data, true);
+            break;
+        }
+        case 0x00070a01: {
+            cleanDataCacheLine(data, result);
+            break;
+        }
+        case 0x00070a02: {
+            cleanDataCacheLine(data, result, true);
             break;
         }
         case 0x00070a04: {
             // Drain write buffer.
             // TODO!!!: No write buffer is currently implemented.
+            break;
+        }
+        case 0x00070e01: {
+            cleanDataCacheLine(data, result);
+            invalidateDataCacheLine(data);
+            break;
+        }
+        case 0x00070e02: {
+            cleanDataCacheLine(data, result, true);
+            invalidateDataCacheLine(data, true);
             break;
         }
 
@@ -610,6 +644,28 @@ void ARM946ES::invalidateInstructionCache() {
     }
 }
 // ===================================================================================================
+void ARM946ES::invalidateInstructionCacheLine(uint32_t address, bool setIndexAddressing) {
+    // Handle direct set index addressing.
+    if (setIndexAddressing) {
+        uint32_t set = (address >> 5) & 0x3F;
+        uint32_t way = (address >> 30) & 3;
+        instructionCache[set].ways[way].valid = false;
+        return;
+    }
+    // Else use the address to calculate a tag.
+    uint32_t set = readBits(address, 5, 10);
+    uint32_t tag = readBits(address, 11, 31);
+    // Look for the desired set / tag and mark as invalid.
+    ARM946ES_CacheSet& cacheSet = instructionCache[set];
+    for (unsigned int i = 0; i < ARM946ES_Cache_LinesPerSet; i++) {
+        ARM946ES_CacheLine& line = cacheSet.ways[i];
+        if (line.tag != tag) continue;
+        if (!line.valid) continue;
+        line.valid = false;
+        return;
+    }
+}
+// ===================================================================================================
 void ARM946ES::invalidateDataCache() {
     for (uint32_t i = 0; i < ARM946ES_DataCache_NumSets; i++) {
         dataCache[i].lfsr = 0xACE1;  // Seed the lfsr.
@@ -621,6 +677,79 @@ void ARM946ES::invalidateDataCache() {
         dataCache[i].ways[3].valid = false;
         // All other data can stay as is as long as valid is false;
     }
+}
+// ==================================================================================================
+void ARM946ES::invalidateDataCacheLine(uint32_t address, bool setIndexAddressing) {
+    // Handle direct set index addressing.
+    if (setIndexAddressing) {
+        uint32_t set = (address >> 5) & 0x1F;
+        uint32_t way = (address >> 30) & 3;
+        dataCache[set].ways[way].valid = false;
+        return;
+    }
+    // Else use the address to calculate a tag.
+    uint32_t set = readBits(address, 5, 9);
+    uint32_t tag = readBits(address, 10, 31);
+    // Look for the desired set / tag and mark as invalid.
+    ARM946ES_CacheSet& cacheSet = dataCache[set];
+    for (unsigned int i = 0; i < ARM946ES_Cache_LinesPerSet; i++) {
+        ARM946ES_CacheLine& line = cacheSet.ways[i];
+        if (line.tag != tag) continue;
+        if (!line.valid) continue;
+        line.valid = false;
+        return;
+    }
+}
+// ==================================================================================================
+void ARM946ES::cleanDataCacheLine(uint32_t address, busPayload& workPayload,
+                                  bool setIndexAddressing) {
+    const int NUM_BYTES_PER_WORD = sizeof(uint32_t);
+
+    ARM946ES_CacheLine* line = nullptr;
+    uint32_t targetAddress = address;
+    // Handle direct set index addressing.
+    if (setIndexAddressing) {
+        uint32_t set = (address >> 5) & 0x1F;
+        uint32_t way = (address >> 30) & 3;
+        line = &dataCache[set].ways[way];
+        // Reconstruct the target address.
+        targetAddress = (line->tag << 10) | (set << 5);
+    } else {
+        // Look for the desired set / tag.
+        uint32_t set = readBits(address, 5, 9);
+        uint32_t tag = readBits(address, 10, 31);
+
+        bool foundLine = false;
+
+        ARM946ES_CacheSet& cacheSet = dataCache[set];
+        for (unsigned int i = 0; i < ARM946ES_Cache_LinesPerSet; i++) {
+            ARM946ES_CacheLine& nextLine = cacheSet.ways[i];
+            if (nextLine.tag != tag) continue;
+            if (!nextLine.valid) continue;
+
+            line = &nextLine;
+            foundLine = true;
+
+            break;
+        }
+
+        if (!foundLine) return;
+    }
+    if (line == nullptr || !line->dirty) return;
+
+    uint32_t baseAddress = address & 0xFFFFFFE0;
+    uint8_t memRegion = (baseAddress) >> 24;
+
+    // Write back all data in the line to memory.
+    for (uint32_t i = 0; i < ARM946ES_CacheLine_Bytes / NUM_BYTES_PER_WORD; i++) {
+        uint32_t offset = i * NUM_BYTES_PER_WORD;
+        uint32_t targetAddress = baseAddress + offset;
+        uint32_t oldData = reinterpret_cast<uint32_t*>(line->data)[i];
+        bus->write32ARM9(targetAddress, oldData);
+    }
+    line->dirty = false;
+
+    workPayload.numCycles += cacheWriteBackPenaltyTimings[memRegion];
 }
 // ==================================================================================================
 bool ARM946ES::isCacheable(bool isInstruction, uint32_t address) {
