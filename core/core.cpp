@@ -5,6 +5,8 @@
 
 // Control print statements.
 #define LOG_LEVEL 4
+#include <profiler.h>
+
 #include "logger.h"
 
 namespace RedPandaDS {
@@ -22,6 +24,8 @@ DSEmuCore::DSEmuCore() {
     bus->bindARM7(arm7);
     bus->bindARM9(arm9);
     debugger.bindCore(this);
+    arm7->connectToSisterCPU(arm9);
+    arm9->connectToSisterCPU(arm7);
 }
 // ==================================================================================================
 DSEmuCore::~DSEmuCore() {
@@ -138,55 +142,61 @@ cycles DSEmuCore::processNextEvent() {
         LogErrorPrefixed("No pending events in the event queue.", "Core");
         return 0;
     }
+    cycles totalCycleElapsed = 0;
     // Get the next event.
     CoreEvent* nextEvent = eventQueue.top();
-    // Determine the component of interest and cycle that component.
-    // Bools to keep track of whats driven.
-    bool finishedARM9 = false;
-    bool finishedARM7 = false;
-    cycles cyclesElapsed = 0;
-    switch (nextEvent->target) {
-        case EventTargetComponent::AnyCPU:
-            // Drive the CPU being debugged.
-            if (debugger.getDebugCPU() == arm7) {
+    while (currentCycle < nextEvent->timestamp) {
+        // Determine the component of interest and cycle that component.
+        // Bools to keep track of whats driven.
+        bool finishedARM9 = false;
+        bool finishedARM7 = false;
+        cycles cyclesElapsed = 0;
+        cycles targetCycles = std::min(nextEvent->timestamp, currentCycle + NUM_CYCLES_PER_ADVANCE);
+        switch (nextEvent->target) {
+            case EventTargetComponent::AnyCPU:
+                // Drive the CPU being debugged.
+                if (debugger.getDebugCPU() == arm7) {
+                    finishedARM7 = true;
+                    arm7->setTargetCycle(applyCycleRatio(targetCycles, ARM7_CYCLE_RATIO));
+                    cyclesElapsed = arm7->cycle() * ARM7_CYCLE_RATIO;
+                } else {
+                    finishedARM9 = true;
+                    arm9->setTargetCycle(applyCycleRatio(targetCycles, ARM9_CYCLE_RATIO));
+                    cyclesElapsed = arm9->cycle() * ARM9_CYCLE_RATIO;
+                }
+                break;
+            case EventTargetComponent::ARM7:
                 finishedARM7 = true;
-                arm7->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM7_CYCLE_RATIO));
+                arm7->setTargetCycle(applyCycleRatio(targetCycles, ARM7_CYCLE_RATIO));
                 cyclesElapsed = arm7->cycle() * ARM7_CYCLE_RATIO;
-            } else {
+                break;
+            case EventTargetComponent::ARM9:
                 finishedARM9 = true;
-                arm9->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM9_CYCLE_RATIO));
+                arm9->setTargetCycle(applyCycleRatio(targetCycles, ARM9_CYCLE_RATIO));
                 cyclesElapsed = arm9->cycle() * ARM9_CYCLE_RATIO;
-            }
-            break;
-        case EventTargetComponent::ARM7:
-            finishedARM7 = true;
-            arm7->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM7_CYCLE_RATIO));
-            cyclesElapsed = arm7->cycle() * ARM7_CYCLE_RATIO;
-            break;
-        case EventTargetComponent::ARM9:
-            finishedARM9 = true;
-            arm9->setTargetCycle(applyCycleRatio(nextEvent->timestamp, ARM9_CYCLE_RATIO));
-            cyclesElapsed = arm9->cycle() * ARM9_CYCLE_RATIO;
-            break;
+                break;
 
-        default:
-            LogErrorPrefixed("Unsupported event target " << nextEvent->target, "Core");
-            return 0;
-    }
-    currentCycle = currentCycle + cyclesElapsed;
-    // Drive all the remaining components.
-    if (!finishedARM9) {
-        arm9->setTargetCycle(currentCycle / ARM9_CYCLE_RATIO);
-        arm9->cycle();
-    }
-    if (!finishedARM7) {
-        arm7->setTargetCycle(currentCycle / ARM7_CYCLE_RATIO);
-        arm7->cycle();
-    }
+            default:
+                LogErrorPrefixed("Unsupported event target " << nextEvent->target, "Core");
+                return 0;
+        }
 
-    // Hit a breakpoint -> pause the core.
-    if (arm9->hitBreakpoint() || arm7->hitBreakpoint()) {
-        setState(ApplicationState::paused);
+        // Drive all the remaining components.
+        if (!finishedARM9) {
+            arm9->setTargetCycle(currentCycle / ARM9_CYCLE_RATIO);
+            arm9->cycle();
+        }
+        if (!finishedARM7) {
+            arm7->setTargetCycle(currentCycle / ARM7_CYCLE_RATIO);
+            arm7->cycle();
+        }
+        currentCycle = currentCycle + cyclesElapsed;
+        totalCycleElapsed += cyclesElapsed;
+        // Hit a breakpoint -> pause the core.
+        if (arm9->hitBreakpoint() || arm7->hitBreakpoint()) {
+            setState(ApplicationState::paused);
+            break;
+        }
     }
 
     // Check if the event is finished.
@@ -199,7 +209,7 @@ cycles DSEmuCore::processNextEvent() {
         DELETE_DYNAMIC_POINTER(nextEvent);
         eventQueue.pop();
     }
-    return cyclesElapsed;
+    return totalCycleElapsed;
 }
 // ==================================================================================================
 void DSEmuCore::endNDSFrame() {

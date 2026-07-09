@@ -165,6 +165,7 @@ class ARM {
 protected:
     bool arm9 = false;
     Interconnect* bus = nullptr;
+    ARM* sisterCPU = nullptr;
 
     uint32_t reg[NUM_OF_STANDARD_REGISTERS];
     uint32_t cpsr;
@@ -223,6 +224,15 @@ protected:
     cycles data_nonSequencial16BitAccessTimings[0x100] = {0xFF};
     cycles cacheMissPenaltyTimings[0x100] = {0xFF};
     cycles cacheWriteBackPenaltyTimings[0x100] = {0xFF};
+
+    // Inter Process Communication.
+    static const int IPCFIFO_SIZE = 16;
+    uint32_t IPCSYNC;
+    uint32_t* remote_IPCSYNC;
+    uint32_t IPCFIFOCNT;
+    uint32_t* remote_IPCFIFOCNT;
+    std::queue<uint32_t> IPCFIFOSEND;
+    std::queue<uint32_t>* IPCFIFORECV;
 
     // Interrupt control.
     bool IME;
@@ -469,6 +479,44 @@ public:
     uint32_t readAPSR() { return cpsr & 0xF0000000; }
 
     /**
+     * @brief Read from the IPCSYNC.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readIPCSYNC();
+    /**
+     * @brief Write to the IPCSYNC.
+     *
+     * @param data The data to write.
+     */
+    void writeIPCSYNC(uint32_t data);
+
+    /**
+     * @brief Read from the IPCFIFOCNT.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readIPCFIFOCNT();
+    /**
+     * @brief Write to the IPCFIFOCNT.
+     *
+     * @param data The data to write.
+     */
+    void writeIPCFIFOCNT(uint32_t data);
+    /**
+     * @brief Write to the IPCFIFOSEND.
+     *
+     * @param data The data to write.
+     */
+    void writeIPCFIFOSEND(uint32_t data);
+    /**
+     * @brief Read from the IPCFIFORECV.
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readIPCFIFORECV();
+
+    /**
      * @brief Write to the IME.
      *
      * @param data The data to write.
@@ -536,6 +584,14 @@ public:
      * @param d_bus The interconnect to "connect" to.
      */
     void connectToInterconnect(Interconnect* d_bus) { bus = d_bus; }
+
+    /**
+     * @brief Connect's to a sister CPU. This function must be called
+     * before any execution takes place.
+     *
+     * @param d_bus The CPU to "connect" to.
+     */
+    void connectToSisterCPU(ARM* d_sisterCPU);
 
     /**
      * @brief Sets the target number of cycles -> determines how long to execute for.

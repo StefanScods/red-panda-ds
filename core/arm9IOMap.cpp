@@ -10,9 +10,13 @@ namespace Core {
 
 namespace ARM9IOMemoryAddress {
 enum ARM9IOMemoryAddress : uint32_t {
+    IPCSYNC = 0x4000180,
+    IPCFIFOCNT = 0x4000184,
+    IPCFIFOSEND = 0x4000188,
     IME = 0x04000208,
     IE = 0x04000210,
     IF = 0x04000214,
+    IPCFIFORECV = 0x4100000,
 };
 }
 
@@ -22,9 +26,13 @@ bool Interconnect::isIOAddressValidARM9(uint32_t addr) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::IPCSYNC:
+        case ARM9IOMemoryAddress::IPCFIFOCNT:
+        case ARM9IOMemoryAddress::IPCFIFOSEND:
         case ARM9IOMemoryAddress::IME:
         case ARM9IOMemoryAddress::IE:
         case ARM9IOMemoryAddress::IF:
+        case ARM9IOMemoryAddress::IPCFIFORECV:
             return true;
         default:
             return false;
@@ -37,6 +45,12 @@ uint32_t Interconnect::read32IOARM9(uint32_t addr) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::IPCSYNC: {
+            return arm9->readIPCSYNC();
+        }
+        case ARM9IOMemoryAddress::IPCFIFOCNT: {
+            return arm9->readIPCFIFOCNT();
+        }
         case ARM9IOMemoryAddress::IME: {
             return arm9->readIME();
         }
@@ -46,8 +60,11 @@ uint32_t Interconnect::read32IOARM9(uint32_t addr) {
         case ARM9IOMemoryAddress::IF: {
             return arm9->readIF();
         }
+        case ARM9IOMemoryAddress::IPCFIFORECV: {
+            return arm9->readIPCFIFORECV();
+        }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM9 IO 32-bit read at " << hexString(addr));
             return INVALID_MEM_32BIT;
     }
     return INVALID_MEM_32BIT;
@@ -58,6 +75,12 @@ uint16_t Interconnect::read16IOARM9(uint32_t addr) {
     addr &= ~0x1;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::IPCSYNC: {
+            return arm9->readIPCSYNC();
+        }
+        case ARM9IOMemoryAddress::IPCFIFOCNT: {
+            return arm9->readIPCFIFOCNT();
+        }
         case ARM9IOMemoryAddress::IME: {
             return readBits(arm9->readIME(), 0, 15);
         }
@@ -77,7 +100,7 @@ uint16_t Interconnect::read16IOARM9(uint32_t addr) {
             return readBits(arm9->readIF(), 16, 31);
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM9 IO 16-bit read at " << hexString(addr));
             return INVALID_MEM_16BIT;
     }
     return INVALID_MEM_16BIT;
@@ -123,7 +146,7 @@ uint8_t Interconnect::read8IOARM9(uint32_t addr) {
             return readBits(arm9->readIF(), 24, 31);
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM9 IO 8-bit read at " << hexString(addr));
             return INVALID_MEM_8BIT;
     }
     return INVALID_MEM_8BIT;
@@ -134,6 +157,15 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::IPCSYNC: {
+            return arm9->writeIPCSYNC(data);
+        }
+        case ARM9IOMemoryAddress::IPCFIFOCNT: {
+            return arm9->writeIPCFIFOCNT(data);
+        }
+        case ARM9IOMemoryAddress::IPCFIFOSEND: {
+            return arm9->writeIPCFIFOSEND(data);
+        }
         case ARM9IOMemoryAddress::IME: {
             return arm9->writeIME(data);
         }
@@ -144,7 +176,7 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
             return arm9->writeIF(data);
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM9 IO 32-bit write at " << hexString(addr));
             break;
     }
 }
@@ -154,6 +186,12 @@ void Interconnect::write16IOARM9(uint32_t addr, uint16_t data) {
     addr &= ~0x1;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::IPCSYNC: {
+            return arm9->writeIPCSYNC(data);
+        }
+        case ARM9IOMemoryAddress::IPCFIFOCNT: {
+            return arm9->writeIPCFIFOCNT(data);
+        }
         case ARM9IOMemoryAddress::IME: {
             uint32_t val = arm9->readIME();
             writeBits(val, (uint32_t)data, 0, 15);
@@ -191,7 +229,7 @@ void Interconnect::write16IOARM9(uint32_t addr, uint16_t data) {
             break;
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM9 IO 16-bit write at " << hexString(addr));
             break;
     }
 }
@@ -272,7 +310,7 @@ void Interconnect::write8IOARM9(uint32_t addr, uint8_t data) {
             break;
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM9 IO 8-bit write at " << hexString(addr));
             break;
     }
 }

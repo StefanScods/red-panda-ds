@@ -10,9 +10,13 @@ namespace Core {
 
 namespace ARM7IOMemoryAddress {
 enum ARM7IOMemoryAddress : uint32_t {
+    IPCSYNC = 0x4000180,
+    IPCFIFOCNT = 0x4000184,
+    IPCFIFOSEND = 0x4000188,
     IME = 0x04000208,
     IE = 0x04000210,
     IF = 0x04000214,
+    IPCFIFORECV = 0x4100000,
 };
 }
 
@@ -22,9 +26,13 @@ bool Interconnect::isIOAddressValidARM7(uint32_t addr) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM7IOMemoryAddress::IPCSYNC:
+        case ARM7IOMemoryAddress::IPCFIFOCNT:
+        case ARM7IOMemoryAddress::IPCFIFOSEND:
         case ARM7IOMemoryAddress::IME:
         case ARM7IOMemoryAddress::IE:
         case ARM7IOMemoryAddress::IF:
+        case ARM7IOMemoryAddress::IPCFIFORECV:
             return true;
         default:
             return false;
@@ -37,6 +45,12 @@ uint32_t Interconnect::read32IOARM7(uint32_t addr) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM7IOMemoryAddress::IPCSYNC: {
+            return arm7->readIPCSYNC();
+        }
+        case ARM7IOMemoryAddress::IPCFIFOCNT: {
+            return arm7->readIPCFIFOCNT();
+        }
         case ARM7IOMemoryAddress::IME: {
             return arm7->readIME();
         }
@@ -46,8 +60,11 @@ uint32_t Interconnect::read32IOARM7(uint32_t addr) {
         case ARM7IOMemoryAddress::IF: {
             return arm7->readIF();
         }
+        case ARM7IOMemoryAddress::IPCFIFORECV: {
+            return arm7->readIPCFIFORECV();
+        }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM7 IO 32-bit read at " << hexString(addr));
             return INVALID_MEM_32BIT;
     }
     return INVALID_MEM_32BIT;
@@ -58,6 +75,12 @@ uint16_t Interconnect::read16IOARM7(uint32_t addr) {
     addr &= ~0x1;
     // IO memory map.
     switch (addr) {
+        case ARM7IOMemoryAddress::IPCSYNC: {
+            return arm7->readIPCSYNC();
+        }
+        case ARM7IOMemoryAddress::IPCFIFOCNT: {
+            return arm7->readIPCFIFOCNT();
+        }
         case ARM7IOMemoryAddress::IME: {
             return readBits(arm7->readIME(), 0, 15);
         }
@@ -77,7 +100,7 @@ uint16_t Interconnect::read16IOARM7(uint32_t addr) {
             return readBits(arm7->readIF(), 16, 31);
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM7 IO 16-bit read at " << hexString(addr));
             return INVALID_MEM_16BIT;
     }
     return INVALID_MEM_16BIT;
@@ -123,7 +146,7 @@ uint8_t Interconnect::read8IOARM7(uint32_t addr) {
             return readBits(arm7->readIF(), 24, 31);
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM7 IO 8-bit read at " << hexString(addr));
             return INVALID_MEM_8BIT;
     }
     return INVALID_MEM_8BIT;
@@ -134,6 +157,15 @@ void Interconnect::write32IOARM7(uint32_t addr, uint32_t data) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM7IOMemoryAddress::IPCSYNC: {
+            return arm7->writeIPCSYNC(data);
+        }
+        case ARM7IOMemoryAddress::IPCFIFOCNT: {
+            return arm7->writeIPCFIFOCNT(data);
+        }
+        case ARM7IOMemoryAddress::IPCFIFOSEND: {
+            return arm7->writeIPCFIFOSEND(data);
+        }
         case ARM7IOMemoryAddress::IME: {
             return arm7->writeIME(data);
         }
@@ -144,7 +176,7 @@ void Interconnect::write32IOARM7(uint32_t addr, uint32_t data) {
             return arm7->writeIF(data);
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM7 IO 32-bit write at " << hexString(addr));
             break;
     }
 }
@@ -154,6 +186,12 @@ void Interconnect::write16IOARM7(uint32_t addr, uint16_t data) {
     addr &= ~0x1;
     // IO memory map.
     switch (addr) {
+        case ARM7IOMemoryAddress::IPCSYNC: {
+            return arm7->writeIPCSYNC(data);
+        }
+        case ARM7IOMemoryAddress::IPCFIFOCNT: {
+            return arm7->writeIPCFIFOCNT(data);
+        }
         case ARM7IOMemoryAddress::IME: {
             uint32_t val = arm7->readIME();
             writeBits(val, (uint32_t)data, 0, 15);
@@ -191,7 +229,7 @@ void Interconnect::write16IOARM7(uint32_t addr, uint16_t data) {
             break;
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM7 IO 16-bit write at " << hexString(addr));
             break;
     }
 }
@@ -272,7 +310,7 @@ void Interconnect::write8IOARM7(uint32_t addr, uint8_t data) {
             break;
         }
         default:
-            LogError("Unsupported IO access at " << hexString(addr));
+            LogError("Unsupported ARM7 IO 8-bit write at " << hexString(addr));
             break;
     }
 }

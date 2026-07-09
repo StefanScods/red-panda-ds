@@ -33,7 +33,7 @@ struct CoreEvent {
     EventTargetComponent::EventTargetComponent target;
     std::function<void()> onEventFinishCallback = nullptr;
 };
-
+constexpr int NUM_CYCLES_PER_ADVANCE = 1024 * 1024;
 constexpr int NDS_ARM9_FRAME_CYCLES = 66 * 1024 * 1024 / 60;
 /**
  * @brief Defines a standard frame event for the emulator.

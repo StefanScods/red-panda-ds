@@ -85,6 +85,12 @@ void ARM::reset() {
     justBranched = false;
     justHitBreakpoint = false;
 
+    // Inter Process Communication.
+    IPCSYNC = 0;
+    IPCFIFOCNT = 0;
+    while (!IPCFIFOSEND.empty()) IPCFIFOSEND.pop();
+    // Remotes should be reset via the sister CPU.
+
     // Interrupt control.
     IME = 0;
     IE = 0;
@@ -315,6 +321,13 @@ busPayload ARM::writeBus(uint32_t address, uint32_t data, uint32_t size) {
     return {0, 0, 0};
 }
 // ==================================================================================================
+void ARM::connectToSisterCPU(ARM* d_sisterCPU) {
+    sisterCPU = d_sisterCPU;
+    remote_IPCSYNC = &sisterCPU->IPCSYNC;
+    remote_IPCFIFOCNT = &sisterCPU->IPCFIFOCNT;
+    IPCFIFORECV = &sisterCPU->IPCFIFOSEND;
+}
+// ==================================================================================================
 cycles ARM::ARM_UNDEFINED_INST(uint32_t instruct) {
     LogError("Unsupported ARM instuction: " << PrintHex(instruct) << "!");
     return 1;
@@ -514,6 +527,87 @@ void ARM::setAPSR(uint32_t data) {
     cpsr = cpsr & ~(0xF0000000);
     // Set flags.
     cpsr = cpsr | (data & (0xF0000000));
+}
+// ==================================================================================================
+uint32_t ARM::readIPCSYNC() {
+    LogDebug("ARM9 - " << isARM9() << " Reading IPCSYNC " << PrintHex(IPCSYNC)
+                       << " PC: " << PrintHex(pc()));
+    return IPCSYNC;
+}
+// ==================================================================================================
+void ARM::writeIPCSYNC(uint32_t data) {
+    LogDebug("ARM9 - " << isARM9() << " Writing " << PrintHex(data) << " to IPCSYNC "
+                       << " PC: " << PrintHex(pc()));
+    uint32_t dataToRemote = readBits(data, 8, 11);
+    // Handle the 4 bit message.
+    writeBits(IPCSYNC, dataToRemote, 8, 11);
+    writeBits(*remote_IPCSYNC, dataToRemote, 0, 3);
+    // Send IRQ if set.
+    if (readBit(data, 13)) {
+        LogError("IPCSYNC IRQ currently unsupported!");
+    }
+    // Enable IRQ.
+    writeBit(IPCSYNC, readBit(data, 14), 14);
+}
+// ==================================================================================================
+uint32_t ARM::readIPCFIFOCNT() {
+    // Update the register given teh current state of IPC FIFOs.
+    writeBit(IPCFIFOCNT, IPCFIFOSEND.empty(), 0);
+    writeBit(IPCFIFOCNT, IPCFIFOSEND.size() >= IPCFIFO_SIZE, 1);
+    writeBit(IPCFIFOCNT, IPCFIFORECV->empty(), 8);
+    writeBit(IPCFIFOCNT, IPCFIFORECV->size() >= IPCFIFO_SIZE, 9);
+
+    return IPCFIFOCNT;
+}
+// ==================================================================================================
+void ARM::writeIPCFIFOCNT(uint32_t data) {
+    LogDebug("Writing " << PrintHex(data) << " to IPCFIFOCNT");
+    // Enable send Fifo Empty IRQ.
+    writeBit(IPCFIFOCNT, readBit(data, 2), 2);
+    // Flush send FIFO.
+    if (readBit(data, 3)) {
+        while (!IPCFIFOSEND.empty()) IPCFIFOSEND.pop();
+    }
+    // Enable receive Fifo Not Empty IRQ.
+    writeBit(IPCFIFOCNT, readBit(data, 10), 10);
+    // Handle ack fifo error.
+    if (readBit(IPCFIFOCNT, 14) && readBit(data, 14)) {
+        writeBit(IPCFIFOCNT, 0, 14);
+    }
+    // Enable Send/Receive Fifo.
+    writeBit(IPCFIFOCNT, readBit(data, 15), 15);
+}
+// ==================================================================================================
+void ARM::writeIPCFIFOSEND(uint32_t data) {
+    // Ignore sends when disabled.
+    if (!readBit(IPCFIFOCNT, 15)) {
+        return;
+    }
+    // Handle max capcity.
+    if (IPCFIFOSEND.size() >= IPCFIFO_SIZE) {
+        // Set error bit.
+        writeBit(IPCFIFOCNT, 1, 14);
+        return;
+    }
+    // Send the data.
+    IPCFIFOSEND.push(data);
+}
+// ==================================================================================================
+uint32_t ARM::readIPCFIFORECV() {
+    // Ignore receives when disabled.
+    if (!readBit(IPCFIFOCNT, 15)) {
+        return INVALID_MEM_32BIT;
+    }
+    // Handle empty capcity.
+    if (IPCFIFORECV->empty()) {
+        // Set error bit.
+        writeBit(IPCFIFOCNT, 1, 14);
+        return INVALID_MEM_32BIT;
+    }
+    // Receive and pop the data from the FIFO.
+    uint32_t recvData = IPCFIFORECV->front();
+    IPCFIFORECV->pop();
+    return recvData;
 }
 // ==================================================================================================
 void ARM::fixupIfTargetingPC(uint32_t destReg) {
