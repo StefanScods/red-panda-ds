@@ -16,8 +16,9 @@ namespace Core {
 std::vector<std::string> g_regNames = {"R0", "R1", "R2",  "R3",  "R4",  "R5", "R6", "R7",
                                        "R8", "R9", "R10", "R11", "R12", "SP", "LR", "PC"};
 // ==================================================================================================
-ARM::ARM() {
+ARM::ARM(BIOS* d_bios) : bios(d_bios) {
     reset();
+    bios->bindCPU(this);
 }
 // ==================================================================================================
 ARM::~ARM() {
@@ -329,12 +330,14 @@ void ARM::connectToSisterCPU(ARM* d_sisterCPU) {
 }
 // ==================================================================================================
 cycles ARM::ARM_UNDEFINED_INST(uint32_t instruct) {
-    LogError("Unsupported ARM instuction: " << PrintHex(instruct) << "!");
+    LogError("Unsupported ARM instuction: " << PrintHex(instruct) << PrintHex(instruct) << " at "
+                                            << PrintHex(pc() - ARM_MODE_INST_SIZE * 2) << "!");
     return 1;
 }
 // ==================================================================================================
 cycles ARM::THUMB_UNDEFINED_INST(uint32_t instruct) {
-    LogError("Unsupported THUMB instuction: " << PrintHex(instruct) << "!");
+    LogError("Unsupported THUMB instuction: " << PrintHex(instruct) << " at "
+                                              << PrintHex(pc() - THUMB_MODE_INST_SIZE * 2) << "!");
     return 1;
 }
 // ==================================================================================================

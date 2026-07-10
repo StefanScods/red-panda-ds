@@ -17,7 +17,7 @@ namespace RedPandaDS {
 namespace Core {
 
 // ==================================================================================================
-ARM946ES::ARM946ES() {
+ARM946ES::ARM946ES(BIOS* d_bios) : ARM(d_bios) {
     arm9 = true;
     // Memory Access timings. Based on https://problemkaputt.de/gbatek.htm#dsmemorytimings
     // TCM

@@ -158,7 +158,9 @@ private:
     // Components.
     Interconnect* bus = nullptr;
     ARM7TDMI* arm7 = nullptr;
+    NDS_ARM7_BIOS* arm7BIOS = nullptr;
     ARM946ES* arm9 = nullptr;
+    NDS_ARM9_BIOS* arm9BIOS = nullptr;
     NDS_LCD* ndsLCD = nullptr;
     NDS_Cartridge* ndsCartridge = nullptr;
 

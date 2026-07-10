@@ -17,13 +17,15 @@ namespace Core {
 // BKPT
 // ==================================================================================================
 cycles ARM::THUMB_BKPT(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    return THUMB_UNDEFINED_INST(instruct);
 }
 // ==================================================================================================
 // SVC
 // ==================================================================================================
 cycles ARM::THUMB_SVC(uint32_t instruct) {
-    return ARM_UNDEFINED_INST(instruct);
+    uint32_t imm8 = readBits(instruct, 0, 7);
+    cycles executionTime = bios->handleSWI(imm8);
+    return 1 + executionTime;
 }
 // ==================================================================================================
 

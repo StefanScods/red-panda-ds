@@ -12,8 +12,8 @@
 class TestCPU_ARM_DataInstructions : public testing::Test {
 protected:
     Interconnect bus;
-    ARM7TDMI arm7;
-    ARM946ES arm9;
+    ARM7TDMI arm7{new NDS_ARM7_BIOS()};
+    ARM946ES arm9{new NDS_ARM9_BIOS()};
     TestCPU_ARM_DataInstructions() {}
     ~TestCPU_ARM_DataInstructions() {}
 

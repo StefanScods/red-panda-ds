@@ -43,7 +43,7 @@ protected:
 };
 class TestInterconnect_MainRAM_ARM9 : public TestInterconnect_MainRAM {
 protected:
-    ARM946ES arm9;
+    ARM946ES arm9{new NDS_ARM9_BIOS()};
     TestInterconnect_MainRAM_ARM9() {}
     ~TestInterconnect_MainRAM_ARM9() {}
 

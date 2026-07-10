@@ -13,7 +13,7 @@ namespace RedPandaDS {
 namespace Core {
 
 // ==================================================================================================
-ARM7TDMI::ARM7TDMI() {
+ARM7TDMI::ARM7TDMI(BIOS* d_bios) : ARM(d_bios) {
     arm9 = false;
     // Inital SP values.
     reg[SP_REGISTER_NUM] = 0x03002F7C;

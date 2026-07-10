@@ -5,6 +5,7 @@
 #include <queue>
 #include <unordered_set>
 
+#include "bios.h"
 #include "types.h"
 #include "utils.h"
 
@@ -165,6 +166,7 @@ class ARM {
 protected:
     bool arm9 = false;
     Interconnect* bus = nullptr;
+    BIOS* bios = nullptr;
     ARM* sisterCPU = nullptr;
 
     uint32_t reg[NUM_OF_STANDARD_REGISTERS];
@@ -255,10 +257,12 @@ protected:
     }
 
 public:
-    ARM();
+    ARM(BIOS* d_bios);
     ~ARM();
 
     friend class Interconnect;
+    friend class BIOS;
+    friend class NDS_BIOS;
 
     /**
      * @brief Get the name of the CPU.
@@ -926,7 +930,7 @@ public:
 class ARM7TDMI : public ARM {
 private:
 public:
-    ARM7TDMI();
+    ARM7TDMI(BIOS* d_bios);
     ~ARM7TDMI();
 
     // Function overrides.
@@ -1017,7 +1021,7 @@ struct ARM946ES_PU_Region {
 class ARM946ES : public ARM {
 private:
 public:
-    ARM946ES();
+    ARM946ES(BIOS* d_bios);
     ~ARM946ES();
 
     // Instruciton tightly coupled memory.

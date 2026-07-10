@@ -15,8 +15,10 @@ namespace Core {
 // ==================================================================================================
 DSEmuCore::DSEmuCore() {
     // Create the components.
-    arm7 = new ARM7TDMI();
-    arm9 = new ARM946ES();
+    arm7BIOS = new NDS_ARM7_BIOS();
+    arm7 = new ARM7TDMI(arm7BIOS);
+    arm9BIOS = new NDS_ARM9_BIOS();
+    arm9 = new ARM946ES(arm9BIOS);
     bus = new Interconnect();
     ndsLCD = new NDS_LCD();
     ndsCartridge = new NDS_Cartridge();
@@ -30,7 +32,9 @@ DSEmuCore::DSEmuCore() {
 // ==================================================================================================
 DSEmuCore::~DSEmuCore() {
     DELETE_DYNAMIC_POINTER(arm7);
+    DELETE_DYNAMIC_POINTER(arm7BIOS);
     DELETE_DYNAMIC_POINTER(arm9);
+    DELETE_DYNAMIC_POINTER(arm9BIOS);
     DELETE_DYNAMIC_POINTER(bus);
     DELETE_DYNAMIC_POINTER(ndsLCD);
     DELETE_DYNAMIC_POINTER(ndsCartridge);
