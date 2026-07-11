@@ -194,28 +194,20 @@ cycles ARM7TDMI::cycle() {
     justBranched = false;
     justHitBreakpoint = false;
 
-    // Handle halted or stopped states.
-    if (state != ProcessorStates::Running) {
-        cyclesRan = underflowSafeSubtract(targetCycle, currentCycle);
-        // Increment the cpu's current cycles based on the number of cycles elapsed.
-        currentCycle += cyclesRan;
-        addCyclesElapsed();
-
-        // Handle execution limit.
-        if (hasExecutionLimit && executionLimit == 0) {
-            hasExecutionLimit = false;
-            justHitBreakpoint = true;
-        }
-
-        return cyclesRan;
-    };
-
     // CPU is running execute like normal.
     while (currentCycle < targetCycle) {
         // Handle execution limit.
         if (hasExecutionLimit && executionLimit == 0) {
             hasExecutionLimit = false;
             justHitBreakpoint = true;
+            break;
+        }
+
+        // Handle halted or stopped states.
+        if (state != ProcessorStates::Running) {
+            cyclesRan = underflowSafeSubtract(targetCycle, currentCycle);
+            cyclesElapsed = cyclesRan;
+            addCyclesElapsed();
             break;
         }
 

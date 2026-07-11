@@ -33,25 +33,36 @@ DisassemblyViewerEntry::DisassemblyViewerEntry(
     addressLabel = new QLabel(this);
     addressLabel->setProperty("disassemblyViewerEntryLabel", "true");
     addressLabel->setGraphicsEffect(addressLabelEffect);
+    addressLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(addressLabel, lineId, 1);
     instructionBitsLabel = new QLabel(this);
     instructionBitsLabel->setProperty("disassemblyViewerEntryLabel", "true");
     instructionBitsLabel->setGraphicsEffect(instructionBitsEffect);
+    instructionBitsLabel->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                                  Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(instructionBitsLabel, lineId, 3);
     opcodeLabel = new QLabel(this);
     opcodeLabel->setProperty("disassemblyViewerEntryLabel", "true");
+    opcodeLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(opcodeLabel, lineId, 4);
     destinationLabel = new QLabel(this);
     destinationLabel->setProperty("disassemblyViewerEntryLabel", "true");
+    destinationLabel->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                              Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(destinationLabel, lineId, 5);
     operand1Label = new QLabel(this);
     operand1Label->setProperty("disassemblyViewerEntryLabel", "true");
+    operand1Label->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                           Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(operand1Label, lineId, 6);
     operand2Label = new QLabel(this);
     operand2Label->setProperty("disassemblyViewerEntryLabel", "true");
+    operand2Label->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                           Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(operand2Label, lineId, 7);
     commentLabel = new QLabel(this);
     commentLabel->setProperty("disassemblyViewerEntryLabel", "true");
+    commentLabel->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     parentLayout->addWidget(commentLabel, lineId, 8);
 
     connect(breakpointButton, &QPushButton::released, this,
@@ -82,6 +93,7 @@ void DisassemblyViewerEntry::update() {
         // Label hasn't changed
         return;
     }
+
     prevTargetAddress = targetAddress;
     prevTargetInstruction = targetInstruction;
     prevIsValidInstruction = isValidInstruction;
@@ -256,7 +268,6 @@ DisassemblyViewerContainer::~DisassemblyViewerContainer() {
 // ==================================================================================================
 void DisassemblyViewerContainer::update() {
     if (parentWidget()->isHidden()) return;
-    contentWidget->hide();
     currentPCIndicator->hide();
 
     Core::DSEmuCore* core = app->getEmuCore();
@@ -359,7 +370,6 @@ void DisassemblyViewerContainer::update() {
         entries[i]->setBreakpointState(bkptState);
         addr += addrSize;
     }
-    contentWidget->show();
 }
 // ==================================================================================================
 void DisassemblyViewerContainer::setWidth(int width) {

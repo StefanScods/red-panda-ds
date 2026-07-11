@@ -29,6 +29,8 @@ MemoryViewerContainer::MemoryViewerContainer(RedPandaDSApp* app, QWidget* parent
     for (unsigned int i = 0; i <= 0xF; i++) {
         QLabel* byteLabel = new QLabel(contentWidget);
         byteLabel->setProperty("boldLabel", true);
+        byteLabel->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                           Qt::TextSelectableByKeyboard);
         std::stringstream ss;
         ss << PrintHex(i);
         byteLabel->setText(ss.str().c_str());
@@ -39,6 +41,8 @@ MemoryViewerContainer::MemoryViewerContainer(RedPandaDSApp* app, QWidget* parent
     for (unsigned int i = 0; i < MAX_NUM_ENTRY_LINES; i++) {
         addressLabels[i] = new QLabel(contentWidget);
         addressLabels[i]->setProperty("boldLabel", true);
+        addressLabels[i]->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                                  Qt::TextSelectableByKeyboard);
         addressLabels[i]->setText("0x00000000");
         contentLayout->addWidget(addressLabels[i], 2 + i, 0);
     }
@@ -48,6 +52,8 @@ MemoryViewerContainer::MemoryViewerContainer(RedPandaDSApp* app, QWidget* parent
     for (unsigned int i = 0; i < numElements; i++) {
         valueLabels[i] = new QLabel(contentWidget);
         valueLabels[i]->setText("0x00");
+        valueLabels[i]->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                                Qt::TextSelectableByKeyboard);
         valueLabels[i]->adjustSize();
         valueLabels[i]->setFixedSize(valueLabels[i]->size());
         valueLabels[i]->setText("");

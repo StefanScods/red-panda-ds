@@ -482,6 +482,7 @@ uint32_t ARM::getAddrOfNextInstructionToExecute() {
     uint32_t instructionSize = getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE;
     if (instuctionPipeLine[0].inst != NO_INSTRUCT) return instuctionPipeLine[0].addr;
     if (instuctionPipeLine[1].inst != NO_INSTRUCT) return instuctionPipeLine[1].addr;
+    if (instuctionPipeLine[2].inst != NO_INSTRUCT) return instuctionPipeLine[2].addr;
     return pc();
 }
 // ==================================================================================================
