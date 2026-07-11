@@ -60,6 +60,7 @@ public:
 
     // Emulated SWI handlers.
     cycles WaitByLoop();
+    cycles IntrWait();
 };
 /**
  * @brief NDS's ARM9 BIOS emulation model.

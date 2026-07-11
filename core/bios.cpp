@@ -34,7 +34,9 @@ void NDS_BIOS::cleanup() {
 }
 // ==================================================================================================
 cycles NDS_BIOS::unknownSWI(uint32_t vector) {
-    LogError("Unsupported SWI argument " << vector << "!");
+    uint32_t instructionSize = cpu->getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE;
+    LogError("Unsupported SWI argument " << vector << " at "
+                                         << PrintHex(cpu->pc() - instructionSize) << "!");
     return 1;
 }
 // ==================================================================================================
@@ -42,6 +44,11 @@ cycles NDS_BIOS::WaitByLoop() {
     cycles count = *(cpu->activeRegs[0]);
     // Takes ~4 cycles per value of reg0.
     return 4 * count;
+}
+// ==================================================================================================
+cycles NDS_BIOS::IntrWait() {
+    cpu->setProcessorState(ProcessorStates::Halted);
+    return 1;
 }
 // ==================================================================================================
 // NDS ARM9 BIOS
@@ -58,6 +65,8 @@ cycles NDS_ARM9_BIOS::handleSWI(uint32_t vector) {
     switch (vector) {
         case 0x3:
             return WaitByLoop();
+        case 0x4:
+            return IntrWait();
         default:
             // Fallthrough and return "UNKNOWN".
             break;
@@ -79,6 +88,8 @@ cycles NDS_ARM7_BIOS::handleSWI(uint32_t vector) {
     switch (vector) {
         case 0x3:
             return WaitByLoop();
+        case 0x4:
+            return IntrWait();
         default:
             // Fallthrough and return "UNKNOWN".
             break;

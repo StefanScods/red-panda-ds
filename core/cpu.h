@@ -148,6 +148,10 @@ inline const char* toString(ProcessorModes mode) {
 }
 }  // namespace ProcessorModes
 
+namespace ProcessorStates {
+enum ProcessorStates : uint8_t { Running = 0, Halted, Stopped };
+}
+
 struct PipelineStage {
     uint32_t inst = NO_INSTRUCT;
     uint32_t addr = 0;
@@ -168,6 +172,8 @@ protected:
     Interconnect* bus = nullptr;
     BIOS* bios = nullptr;
     ARM* sisterCPU = nullptr;
+
+    ProcessorStates::ProcessorStates state;
 
     uint32_t reg[NUM_OF_STANDARD_REGISTERS];
     uint32_t cpsr;
@@ -404,6 +410,19 @@ public:
     void setFlag(uint32_t flagBit, bool data) { writeBit(cpsr, data, flagBit); }
 
     /**
+     * @brief Get the current processor state.
+     *
+     * @return `ProcessorStates::ProcessorStates`
+     */
+    ProcessorStates::ProcessorStates getProcessorState() { return state; }
+    /**
+     * @brief Set the current processor state.
+     *
+     * @param state State to switch too.
+     */
+    void setProcessorState(ProcessorStates::ProcessorStates d_state);
+
+    /**
      * @brief Get the current processor mode.
      *
      * @return `ProcessorModes::ProcessorModes`
@@ -612,6 +631,13 @@ public:
     void setExecutionLimit(uint32_t target) {
         hasExecutionLimit = true;
         executionLimit = target;
+    }
+    /**
+     * @brief Clears the target number of executions before hitting a "breakpoint".
+     */
+    void clearExecutionLimit() {
+        hasExecutionLimit = false;
+        executionLimit = 0;
     }
 
     /**

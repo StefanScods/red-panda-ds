@@ -542,9 +542,38 @@ busPayload ARM946ES::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 // ==================================================================================================
 cycles ARM946ES::cycle() {
     cycles cyclesRan = 0;
+    justBranched = false;
+    justHitBreakpoint = false;
+
+    // Handle halted or stopped states.
+    if (state != ProcessorStates::Running) {
+        cyclesRan = underflowSafeSubtract(targetCycle, currentCycle);
+        // Increment the cpu's current cycles based on the number of cycles elapsed.
+        currentCycle += cyclesRan;
+        addCyclesElapsed();
+
+        // Handle execution limit.
+        if (hasExecutionLimit && executionLimit == 0) {
+            hasExecutionLimit = false;
+            justHitBreakpoint = true;
+        }
+
+        return cyclesRan;
+    };
+
+    // CPU is running execute like normal.
     while (currentCycle < targetCycle) {
+        // Handle execution limit.
+        if (hasExecutionLimit && executionLimit == 0) {
+            hasExecutionLimit = false;
+            justHitBreakpoint = true;
+            break;
+        }
+
         // Clear just branched indicator.
         justBranched = false;
+        // Clear the just hit a breakpoint indicator.
+        justHitBreakpoint = false;
 
         // Advance instuction pipeline.
         if (instuctionPipeLine[0].inst == NO_INSTRUCT) {
@@ -562,19 +591,12 @@ cycles ARM946ES::cycle() {
         if (executeCooldown == 0 && instuctionPipeLine[0].inst != NO_INSTRUCT &&
             (instuctionPipeLine[1].inst != NO_INSTRUCT ||
              instuctionPipeLine[2].inst != NO_INSTRUCT)) {
-            // Handle execution limit
-            if (hasExecutionLimit) {
-                if (executionLimit == 0) {
-                    hasExecutionLimit = false;
-                    justHitBreakpoint = true;
-                    break;
-                }
-                executionLimit--;
-            }
             // Instruction is on the execute stage, execute a new instuction.
             executeCooldown = execute();
-            // Clear the just hit a breakpoint indicator.
-            justHitBreakpoint = false;
+            // Decrement execution limit.
+            if (hasExecutionLimit && executionLimit >= 0) {
+                executionLimit--;
+            }
         }
 
         // Fetch Stage.

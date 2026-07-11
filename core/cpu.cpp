@@ -103,6 +103,7 @@ void ARM::reset() {
     previousCodeAddr = 0;
     previousDataAddr = 0;
 
+    setProcessorState(ProcessorStates::Running);
     setProcessorMode(ProcessorModes::System);
 }
 // ==================================================================================================
@@ -339,6 +340,10 @@ cycles ARM::THUMB_UNDEFINED_INST(uint32_t instruct) {
     LogError("Unsupported THUMB instuction: " << PrintHex(instruct) << " at "
                                               << PrintHex(pc() - THUMB_MODE_INST_SIZE * 2) << "!");
     return 1;
+}
+// ==================================================================================================
+void ARM::setProcessorState(ProcessorStates::ProcessorStates d_state) {
+    state = d_state;
 }
 // ==================================================================================================
 void ARM::setProcessorMode(ProcessorModes::ProcessorModes mode) {

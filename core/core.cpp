@@ -239,8 +239,10 @@ void DSEmuCore::setState(ApplicationState::ApplicationState newState) {
 // ==================================================================================================
 void DSEmuCore::togglePausedState() {
     if (state != ApplicationState::running) {
+        debugger.getDebugCPU()->clearExecutionLimit();
         setState(ApplicationState::running);
     } else {
+        debugger.getDebugCPU()->setExecutionLimit(0);
         setState(ApplicationState::paused);
     }
 }
