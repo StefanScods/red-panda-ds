@@ -28,9 +28,8 @@ NDS_BIOS::~NDS_BIOS() {
 }
 // ==================================================================================================
 void NDS_BIOS::cleanup() {
-    cpu->clearInstructionPipeline();
     uint32_t instructionSize = cpu->getThumbMode() ? THUMB_MODE_INST_SIZE : ARM_MODE_INST_SIZE;
-    cpu->pc() -= instructionSize;
+    cpu->branch(cpu->pc() - instructionSize, false);
 }
 // ==================================================================================================
 cycles NDS_BIOS::unknownSWI(uint32_t vector) {
@@ -60,18 +59,19 @@ NDS_ARM9_BIOS::~NDS_ARM9_BIOS() {
 }
 // ==================================================================================================
 cycles NDS_ARM9_BIOS::handleSWI(uint32_t vector) {
-    cleanup();
-
+    cycles returnVal = 0;
     switch (vector) {
         case 0x3:
-            return WaitByLoop();
-        case 0x4:
-            return IntrWait();
-        default:
-            // Fallthrough and return "UNKNOWN".
+            returnVal = WaitByLoop();
             break;
+        case 0x4:
+            returnVal = IntrWait();
+            break;
+        default:
+            return unknownSWI(vector);
     }
-    return unknownSWI(vector);
+    cleanup();
+    return returnVal;
 }
 // ==================================================================================================
 // NDS ARM7 BIOS
@@ -83,18 +83,19 @@ NDS_ARM7_BIOS::~NDS_ARM7_BIOS() {
 }
 // ==================================================================================================
 cycles NDS_ARM7_BIOS::handleSWI(uint32_t vector) {
-    cleanup();
-
+    cycles returnVal = 0;
     switch (vector) {
         case 0x3:
-            return WaitByLoop();
-        case 0x4:
-            return IntrWait();
-        default:
-            // Fallthrough and return "UNKNOWN".
+            returnVal = WaitByLoop();
             break;
+        case 0x4:
+            returnVal = IntrWait();
+            break;
+        default:
+            return unknownSWI(vector);
     }
-    return unknownSWI(vector);
+    cleanup();
+    return returnVal;
 }
 // ==================================================================================================
 }  // namespace Core

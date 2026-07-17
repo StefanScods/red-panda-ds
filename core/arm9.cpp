@@ -543,12 +543,11 @@ busPayload ARM946ES::writeBus(uint32_t address, uint32_t data, uint32_t size) {
 cycles ARM946ES::cycle() {
     cycles cyclesRan = 0;
     justBranched = false;
-    justHitBreakpoint = false;
 
     // CPU is running execute like normal.
     while (currentCycle < targetCycle) {
         // Handle execution limit.
-        if (hasExecutionLimit && executionLimit == 0) {
+        if (hasExecutionLimit && executionLimit == 0 && !justHitBreakpoint) {
             hasExecutionLimit = false;
             justHitBreakpoint = true;
             break;
@@ -564,8 +563,6 @@ cycles ARM946ES::cycle() {
 
         // Clear just branched indicator.
         justBranched = false;
-        // Clear the just hit a breakpoint indicator.
-        justHitBreakpoint = false;
 
         // Advance instuction pipeline.
         if (instuctionPipeLine[0].inst == NO_INSTRUCT) {
@@ -578,6 +575,9 @@ cycles ARM946ES::cycle() {
             justHitBreakpoint = true;
             break;
         }
+
+        // Clear the just hit a breakpoint indicator.
+        justHitBreakpoint = false;
 
         // Execute Stage.
         if (executeCooldown == 0 && instuctionPipeLine[0].inst != NO_INSTRUCT &&

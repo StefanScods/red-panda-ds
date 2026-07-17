@@ -275,8 +275,14 @@ cycles ARM::fetch() {
         uint32_t fetchAddr = pc();
         if (getThumbMode()) {
             // Fill the instruction queue with half words.
-            instructionQueue.push({.inst = readResult.data & 0xFFFF, .addr = fetchAddr});
-            instructionQueue.push({.inst = readResult.data >> 16, .addr = fetchAddr});
+            if (!(pc() & 2)) {
+                // Only take the top half when PC is aligned
+                instructionQueue.push({.inst = readResult.data & 0xFFFF, .addr = fetchAddr});
+                instructionQueue.push(
+                    {.inst = readResult.data >> 16, .addr = fetchAddr + THUMB_MODE_INST_SIZE});
+            } else {
+                instructionQueue.push({.inst = readResult.data >> 16, .addr = fetchAddr});
+            }
         } else {
             instructionQueue.push({.inst = readResult.data, .addr = fetchAddr});
         }

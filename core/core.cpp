@@ -185,7 +185,12 @@ cycles DSEmuCore::processNextEvent() {
                 return 0;
         }
 
+        if(cyclesElapsed == 0){
+
+        }
+
         // Drive all the remaining components.
+        currentCycle = currentCycle + cyclesElapsed;
         if (!finishedARM9) {
             arm9->setTargetCycle(currentCycle / ARM9_CYCLE_RATIO);
             arm9->cycle();
@@ -194,7 +199,6 @@ cycles DSEmuCore::processNextEvent() {
             arm7->setTargetCycle(currentCycle / ARM7_CYCLE_RATIO);
             arm7->cycle();
         }
-        currentCycle = currentCycle + cyclesElapsed;
         totalCycleElapsed += cyclesElapsed;
         // Hit a breakpoint -> pause the core.
         if (arm9->hitBreakpoint() || arm7->hitBreakpoint()) {
