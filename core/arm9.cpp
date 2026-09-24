@@ -140,6 +140,9 @@ ARM946ES::ARM946ES(BIOS* d_bios) : ARM(d_bios) {
     // TCM set up.
     itcm = new uint8_t[ITCM_SIZE];
     dtcm = new uint8_t[DTCM_SIZE];
+
+    // DS Memory Control
+    EXMEMCNT = 0b0110000000000000;
 }
 // ==================================================================================================
 ARM946ES::~ARM946ES() {
@@ -376,13 +379,6 @@ void ARM946ES::reset() {
     co_puInstructionAccessPermissions = 0;
     co_puDataUnifiedExtendedAccessPermissions = 0;
     co_puInstructionExtendedAccessPermissions = 0;
-
-    // co_cacheDataLockdown = 0;
-    // co_cacheInstructionLockdown = 0;
-    // co_dataTCMBaseAndVirtualSize = 0;
-    // co_instructionTCMBaseAndVirtualSize = 0;
-    // std::fill(std::begin(co_processIdRegs), std::end(co_processIdRegs), 0);
-    // std::fill(std::begin(co_implDefinedAndDebugRegs), std::end(co_implDefinedAndDebugRegs), 0);
 }
 // ==================================================================================================
 busPayload ARM946ES::readBus(uint32_t address, uint32_t size, bool codeRead) {
@@ -947,6 +943,22 @@ int ARM946ES::findHighestPriorityInstructionPURegion(uint32_t address) {
         return i;
     }
     return -1;
+}
+// ==================================================================================================
+void ARM946ES::writeEXMEMCNT(uint16_t data) {
+    EXMEMCNT = data & 0b1100100011111111;
+}
+// ==================================================================================================
+uint16_t ARM946ES::readEXMEMCNT() {
+    return EXMEMCNT;
+}
+// ==================================================================================================
+void ARM946ES::writeWRAMCNT(uint8_t data) {
+    WRAMCNT = data & 0b00000011;
+}
+// ==================================================================================================
+uint8_t ARM946ES::readWRAMCNT() {
+    return WRAMCNT;
 }
 // ==================================================================================================
 uint32_t ARM946ES_ControlReg_Layout::read() {

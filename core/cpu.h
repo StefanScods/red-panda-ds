@@ -6,6 +6,7 @@
 #include <unordered_set>
 
 #include "bios.h"
+#include "dma.h"
 #include "types.h"
 #include "utils.h"
 
@@ -246,6 +247,9 @@ protected:
     bool IME;
     uint32_t IE;
     uint32_t IF;
+
+    // DMA.
+    DMAController dmaController;
 
     // Breakpoints.
     std::unordered_set<uint32_t> breakpoints;
@@ -1079,12 +1083,10 @@ public:
     uint32_t co_puInstructionAccessPermissions;
     uint32_t co_puDataUnifiedExtendedAccessPermissions;
     uint32_t co_puInstructionExtendedAccessPermissions;
-    // uint32_t co_cacheDataLockdown;
-    // uint32_t co_cacheInstructionLockdown;
-    // uint32_t co_dataTCMBaseAndVirtualSize;
-    // uint32_t co_instructionTCMBaseAndVirtualSize;
-    // uint32_t co_processIdRegs[16];
-    // uint32_t co_implDefinedAndDebugRegs[16];
+
+    // DS Memory Control
+    uint8_t WRAMCNT;
+    uint16_t EXMEMCNT;
 
     // Coprocessor access functions.
     busPayload readFromCP15(uint8_t Cn, uint8_t Cm, uint8_t op1, uint8_t op2);
@@ -1208,6 +1210,12 @@ public:
      * @return region index or -1 if none.
      */
     int findHighestPriorityInstructionPURegion(uint32_t address);
+
+    // IO accessors.
+    void writeEXMEMCNT(uint16_t data);
+    uint16_t readEXMEMCNT();
+    void writeWRAMCNT(uint8_t data);
+    uint8_t readWRAMCNT();
 
     // Function overrides.
     void reset() override;

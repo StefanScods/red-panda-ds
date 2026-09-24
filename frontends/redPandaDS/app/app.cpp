@@ -211,6 +211,7 @@ void RedPandaDSApp::openDisassemblyViewer() {
         disassemblyViewer = new DisassemblyViewer(this, core);
     }
     disassemblyViewer->isHidden() ? disassemblyViewer->show() : disassemblyViewer->raise();
+    disassemblyViewer->goToPC();
 }
 void RedPandaDSApp::openMemoryViewer() {
     if (memoryViewer == nullptr) {
