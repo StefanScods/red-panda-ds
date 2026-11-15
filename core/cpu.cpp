@@ -702,9 +702,39 @@ int64_t ARM::signedSaturatedQ(int64_t operand, uint8_t bitSize) {
 }
 // ==================================================================================================
 void ARM::DEBUG_pauseExecution() {
-    LogError(getCPUName() << " - Execution paused at PC: " << PrintHex(pc()));
+    LogError(getCPUName() << " - Hit Debug Breakpoint!");
+    DEBUG_dumpCPUState();
     hasExecutionLimit = true;
     executionLimit = 1;
+}
+// ==================================================================================================
+void ARM::DEBUG_dumpCPUState() {
+    LogMsg("=======================================");
+    LogMsg(getCPUName() << " - CPU State:");
+    LogMsg("  R0: " << PrintHex(*activeRegs[0]));
+    LogMsg("  R1: " << PrintHex(*activeRegs[1]));
+    LogMsg("  R2: " << PrintHex(*activeRegs[2]));
+    LogMsg("  R3: " << PrintHex(*activeRegs[3]));
+    LogMsg("  R4: " << PrintHex(*activeRegs[4]));
+    LogMsg("  R5: " << PrintHex(*activeRegs[5]));
+    LogMsg("  R6: " << PrintHex(*activeRegs[6]));
+    LogMsg("  R7: " << PrintHex(*activeRegs[7]));
+    LogMsg("  R8: " << PrintHex(*activeRegs[8]));
+    LogMsg("  R9: " << PrintHex(*activeRegs[9]));
+    LogMsg("  R10: " << PrintHex(*activeRegs[10]));
+    LogMsg("  R11: " << PrintHex(*activeRegs[11]));
+    LogMsg("  R12: " << PrintHex(*activeRegs[12]));
+    LogMsg("  SP: " << PrintHex(*activeRegs[13]));
+    LogMsg("  LR: " << PrintHex(*activeRegs[14]));
+    uint32_t pc = *activeRegs[15];
+    LogMsg("  PC (actual): " << PrintHex(pc));
+    uint32_t correctedPC =
+        getThumbMode() ? pc - THUMB_MODE_INST_SIZE * 2 : pc - ARM_MODE_INST_SIZE * 2;
+    LogMsg("  PC (corrected): " << PrintHex(correctedPC));
+    LogMsg("  CPSR: " << PrintHex(cpsr));
+    LogMsg("  State: " << ProcessorModes::toString(getProcessorMode()));
+    LogMsg("  Thumb Mode: " << (getThumbMode() ? "Thumb" : "ARM"));
+    LogMsg("=======================================");
 }
 // ==================================================================================================
 bool ARM::checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics condition) {

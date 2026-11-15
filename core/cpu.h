@@ -740,6 +740,10 @@ public:
      * after the current instruction is executed.
      */
     void DEBUG_pauseExecution();
+    /**
+     * @brief Debug function to dump the current CPU state.
+     */
+    void DEBUG_dumpCPUState();
 
     // =============================================================================================
     // ARM Instruction set.
