@@ -701,6 +701,12 @@ int64_t ARM::signedSaturatedQ(int64_t operand, uint8_t bitSize) {
     return operand;
 }
 // ==================================================================================================
+void ARM::DEBUG_pauseExecution() {
+    LogError(getCPUName() << " - Execution paused at PC: " << PrintHex(pc()));
+    hasExecutionLimit = true;
+    executionLimit = 1;
+}
+// ==================================================================================================
 bool ARM::checkIfConditionPassed(ConditionMnemonics::ConditionMnemonics condition) {
     bool Z = readBit(cpsr, Z_FLAG);
     bool C = readBit(cpsr, C_FLAG);

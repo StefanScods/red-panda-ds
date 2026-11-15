@@ -735,6 +735,12 @@ public:
      */
     int64_t signedSaturatedQ(int64_t operand, uint8_t bitSize);
 
+    /**
+     * @brief Debug function to programmatically pause emulation execution. The pause takes effect
+     * after the current instruction is executed.
+     */
+    void DEBUG_pauseExecution();
+
     // =============================================================================================
     // ARM Instruction set.
     // =============================================================================================

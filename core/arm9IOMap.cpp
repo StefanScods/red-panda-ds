@@ -144,6 +144,7 @@ uint32_t Interconnect::read32IOARM9(uint32_t addr) {
             return arm9ptr->readIPCFIFORECV();
         }
         default:
+            arm9ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM9 IO 32-bit read at " << hexString(addr));
             return INVALID_MEM_32BIT;
     }
@@ -256,6 +257,7 @@ uint16_t Interconnect::read16IOARM9(uint32_t addr) {
             return arm9ptr->readEXMEMCNT();
         }
         default:
+            arm9ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM9 IO 16-bit read at " << hexString(addr));
             return INVALID_MEM_16BIT;
     }
@@ -450,6 +452,7 @@ uint8_t Interconnect::read8IOARM9(uint32_t addr) {
             return arm9ptr->readWRAMCNT();
         }
         default:
+            arm9ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM9 IO 8-bit read at " << hexString(addr));
             return INVALID_MEM_8BIT;
     }
@@ -505,6 +508,7 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
             return arm9ptr->writeIF(data);
         }
         default:
+            arm9ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM9 IO 32-bit write at " << hexString(addr));
             break;
     }
@@ -586,6 +590,7 @@ void Interconnect::write16IOARM9(uint32_t addr, uint16_t data) {
             return arm9ptr->writeEXMEMCNT(data);
         }
         default:
+            arm9ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM9 IO 16-bit write at " << hexString(addr));
             break;
     }
@@ -672,6 +677,7 @@ void Interconnect::write8IOARM9(uint32_t addr, uint8_t data) {
             break;
         }
         default:
+            arm9ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM9 IO 8-bit write at " << hexString(addr));
             break;
     }

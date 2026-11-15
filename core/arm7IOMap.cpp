@@ -141,6 +141,7 @@ uint32_t Interconnect::read32IOARM7(uint32_t addr) {
             return arm7ptr->readIPCFIFORECV();
         }
         default:
+            arm7ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM7 IO 32-bit read at " << hexString(addr));
             return INVALID_MEM_32BIT;
     }
@@ -250,6 +251,7 @@ uint16_t Interconnect::read16IOARM7(uint32_t addr) {
             return readBits(arm7ptr->readIF(), 16, 31);
         }
         default:
+            arm7ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM7 IO 16-bit read at " << hexString(addr));
             return INVALID_MEM_16BIT;
     }
@@ -441,6 +443,7 @@ uint8_t Interconnect::read8IOARM7(uint32_t addr) {
             return readBits(arm7ptr->readIF(), 24, 31);
         }
         default:
+            arm7ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM7 IO 8-bit read at " << hexString(addr));
             return INVALID_MEM_8BIT;
     }
@@ -496,6 +499,7 @@ void Interconnect::write32IOARM7(uint32_t addr, uint32_t data) {
             return arm7ptr->writeIF(data);
         }
         default:
+            arm7ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM7 IO 32-bit write at " << hexString(addr));
             break;
     }
@@ -574,6 +578,7 @@ void Interconnect::write16IOARM7(uint32_t addr, uint16_t data) {
             break;
         }
         default:
+            arm7ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM7 IO 16-bit write at " << hexString(addr));
             break;
     }
@@ -799,6 +804,7 @@ void Interconnect::write8IOARM7(uint32_t addr, uint8_t data) {
             break;
         }
         default:
+            arm7ptr->DEBUG_pauseExecution();
             LogError("Unsupported ARM7 IO 8-bit write at " << hexString(addr));
             break;
     }
