@@ -1,8 +1,26 @@
 #ifndef DMA_H
 #define DMA_H
 
+#include "types.h"
+
 namespace RedPandaDS {
 namespace Core {
+
+#define NUM_DMA_CHANNELS 4
+
+struct DMAChannelConfig {
+    uint32_t sourceAddress;
+    uint32_t destinationAddress;
+    uint32_t wordCount;
+    uint8_t destControl;
+    uint8_t sourceControl;
+    bool repeat;
+    bool dataSize;
+    bool bit11;
+    uint8_t startCondition;
+    uint8_t irqEnable;
+    uint8_t enable;
+};
 
 /**
  * @brief Provides an interface to the ARM DMA controller.
@@ -13,6 +31,8 @@ struct DMAController {
      * @brief Set all vars back to their initial value.
      */
     void reset();
+
+    DMAChannelConfig channels[NUM_DMA_CHANNELS];
 };
 
 }  // namespace Core

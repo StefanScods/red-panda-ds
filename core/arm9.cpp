@@ -961,6 +961,18 @@ uint8_t ARM946ES::readWRAMCNT() {
     return WRAMCNT;
 }
 // ==================================================================================================
+void ARM946ES::writeDMAControl(uint32_t channel, uint32_t value, bool low) {
+    ARM::writeDMAControl(channel, value, low);
+    if (low) return;
+    writeBits(dmaController.channels[channel].wordCount, readBits(value, 0, 4), 16, 20);
+}
+// ==================================================================================================
+uint16_t ARM946ES::readDMAControl(uint32_t channel, bool low) {
+    uint16_t result = ARM::readDMAControl(channel, low);
+    writeBits(result, (uint16_t)readBits(dmaController.channels[channel].wordCount, 16, 20), 0, 4);
+    return result;
+}
+// ==================================================================================================
 uint32_t ARM946ES_ControlReg_Layout::read() {
     uint32_t result = 0;
     writeBit(result, 0, puEnable);

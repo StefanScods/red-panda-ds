@@ -10,6 +10,22 @@ namespace Core {
 
 namespace ARM9IOMemoryAddress {
 enum ARM9IOMemoryAddress : uint32_t {
+    DMA0SAD = 0x40000B0,
+    DMA0DAD = 0x40000B4,
+    DMA0CNT_L = 0x40000B8,
+    DMA0CNT_H = 0x40000BA,
+    DMA1SAD = 0x40000BC,
+    DMA1DAD = 0x40000C0,
+    DMA1CNT_L = 0x40000C4,
+    DMA1CNT_H = 0x40000C6,
+    DMA2SAD = 0x40000C8,
+    DMA2DAD = 0x40000CC,
+    DMA2CNT_L = 0x40000D0,
+    DMA2CNT_H = 0x40000D2,
+    DMA3SAD = 0x40000D4,
+    DMA3DAD = 0x40000D8,
+    DMA3CNT_L = 0x40000DC,
+    DMA3CNT_H = 0x40000DE,
     IPCSYNC = 0x4000180,
     IPCFIFOCNT = 0x4000184,
     IPCFIFOSEND = 0x4000188,
@@ -28,6 +44,22 @@ bool Interconnect::isIOAddressValidARM9(uint32_t addr) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::DMA0SAD:
+        case ARM9IOMemoryAddress::DMA0DAD:
+        case ARM9IOMemoryAddress::DMA0CNT_L:
+        case ARM9IOMemoryAddress::DMA0CNT_H:
+        case ARM9IOMemoryAddress::DMA1SAD:
+        case ARM9IOMemoryAddress::DMA1DAD:
+        case ARM9IOMemoryAddress::DMA1CNT_L:
+        case ARM9IOMemoryAddress::DMA1CNT_H:
+        case ARM9IOMemoryAddress::DMA2SAD:
+        case ARM9IOMemoryAddress::DMA2DAD:
+        case ARM9IOMemoryAddress::DMA2CNT_L:
+        case ARM9IOMemoryAddress::DMA2CNT_H:
+        case ARM9IOMemoryAddress::DMA3SAD:
+        case ARM9IOMemoryAddress::DMA3DAD:
+        case ARM9IOMemoryAddress::DMA3CNT_L:
+        case ARM9IOMemoryAddress::DMA3CNT_H:
         case ARM9IOMemoryAddress::IPCSYNC:
         case ARM9IOMemoryAddress::IPCFIFOCNT:
         case ARM9IOMemoryAddress::IPCFIFOSEND:
@@ -49,6 +81,50 @@ uint32_t Interconnect::read32IOARM9(uint32_t addr) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::DMA0SAD: {
+            return arm9ptr->readDMASourceAddress(0);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD: {
+            return arm9ptr->readDMADestAddress(0);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_L: {
+            uint32_t result = arm9ptr->readDMAControl(0, false);
+            result = (result << 16) | arm9ptr->readDMAControl(0, true);
+            return result;
+        }
+        case ARM9IOMemoryAddress::DMA1SAD: {
+            return arm9ptr->readDMASourceAddress(1);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD: {
+            return arm9ptr->readDMADestAddress(1);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_L: {
+            uint32_t result = arm9ptr->readDMAControl(1, false);
+            result = (result << 16) | arm9ptr->readDMAControl(1, true);
+            return result;
+        }
+        case ARM9IOMemoryAddress::DMA2SAD: {
+            return arm9ptr->readDMASourceAddress(2);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD: {
+            return arm9ptr->readDMADestAddress(2);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_L: {
+            uint32_t result = arm9ptr->readDMAControl(2, false);
+            result = (result << 16) | arm9ptr->readDMAControl(2, true);
+            return result;
+        }
+        case ARM9IOMemoryAddress::DMA3SAD: {
+            return arm9ptr->readDMASourceAddress(3);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD: {
+            return arm9ptr->readDMADestAddress(3);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_L: {
+            uint32_t result = arm9ptr->readDMAControl(3, false);
+            result = (result << 16) | arm9ptr->readDMAControl(3, true);
+            return result;
+        }
         case ARM9IOMemoryAddress::IPCSYNC: {
             return arm9ptr->readIPCSYNC();
         }
@@ -69,7 +145,6 @@ uint32_t Interconnect::read32IOARM9(uint32_t addr) {
         }
         default:
             LogError("Unsupported ARM9 IO 32-bit read at " << hexString(addr));
-            exit(1);
             return INVALID_MEM_32BIT;
     }
     return INVALID_MEM_32BIT;
@@ -81,6 +156,78 @@ uint16_t Interconnect::read16IOARM9(uint32_t addr) {
     addr &= ~0x1;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::DMA0SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(0), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA0SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(0), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD: {
+            return readBits(arm9ptr->readDMADestAddress(0), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(0), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_L: {
+            return arm9ptr->readDMAControl(0, true);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_H: {
+            return arm9ptr->readDMAControl(0, false);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(1), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(1), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD: {
+            return readBits(arm9ptr->readDMADestAddress(1), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(1), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_L: {
+            return arm9ptr->readDMAControl(1, true);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_H: {
+            return arm9ptr->readDMAControl(1, false);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(2), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(2), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD: {
+            return readBits(arm9ptr->readDMADestAddress(2), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(2), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_L: {
+            return arm9ptr->readDMAControl(2, true);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_H: {
+            return arm9ptr->readDMAControl(2, false);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(3), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(3), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD: {
+            return readBits(arm9ptr->readDMADestAddress(3), 0, 15);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(3), 16, 31);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_L: {
+            return arm9ptr->readDMAControl(3, true);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_H: {
+            return arm9ptr->readDMAControl(3, false);
+        }
         case ARM9IOMemoryAddress::IPCSYNC: {
             return arm9ptr->readIPCSYNC();
         }
@@ -119,6 +266,150 @@ uint8_t Interconnect::read8IOARM9(uint32_t addr) {
     ARM946ES* arm9ptr = (ARM946ES*)arm9;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::DMA0SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(0), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA0SAD + 1: {
+            return readBits(arm9ptr->readDMASourceAddress(0), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA0SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(0), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA0SAD + 3: {
+            return readBits(arm9ptr->readDMASourceAddress(0), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD: {
+            return readBits(arm9ptr->readDMADestAddress(0), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD + 1: {
+            return readBits(arm9ptr->readDMADestAddress(0), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(0), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD + 3: {
+            return readBits(arm9ptr->readDMADestAddress(0), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_L: {
+            return readBits(arm9ptr->readDMAControl(0, true), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_L + 1: {
+            return readBits(arm9ptr->readDMAControl(0, true), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_H: {
+            return readBits(arm9ptr->readDMAControl(0, false), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_H + 1: {
+            return readBits(arm9ptr->readDMAControl(0, false), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(1), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD + 1: {
+            return readBits(arm9ptr->readDMASourceAddress(1), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(1), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD + 3: {
+            return readBits(arm9ptr->readDMASourceAddress(1), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD: {
+            return readBits(arm9ptr->readDMADestAddress(1), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD + 1: {
+            return readBits(arm9ptr->readDMADestAddress(1), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(1), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD + 3: {
+            return readBits(arm9ptr->readDMADestAddress(1), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_L: {
+            return readBits(arm9ptr->readDMAControl(1, true), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_L + 1: {
+            return readBits(arm9ptr->readDMAControl(1, true), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_H: {
+            return readBits(arm9ptr->readDMAControl(1, false), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_H + 1: {
+            return readBits(arm9ptr->readDMAControl(1, false), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(2), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD + 1: {
+            return readBits(arm9ptr->readDMASourceAddress(2), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(2), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD + 3: {
+            return readBits(arm9ptr->readDMASourceAddress(2), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD: {
+            return readBits(arm9ptr->readDMADestAddress(2), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD + 1: {
+            return readBits(arm9ptr->readDMADestAddress(2), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(2), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD + 3: {
+            return readBits(arm9ptr->readDMADestAddress(2), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_L: {
+            return readBits(arm9ptr->readDMAControl(2, true), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_L + 1: {
+            return readBits(arm9ptr->readDMAControl(2, true), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_H: {
+            return readBits(arm9ptr->readDMAControl(2, false), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_H + 1: {
+            return readBits(arm9ptr->readDMAControl(2, false), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD: {
+            return readBits(arm9ptr->readDMASourceAddress(3), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD + 1: {
+            return readBits(arm9ptr->readDMASourceAddress(3), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD + 2: {
+            return readBits(arm9ptr->readDMASourceAddress(3), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD + 3: {
+            return readBits(arm9ptr->readDMASourceAddress(3), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD: {
+            return readBits(arm9ptr->readDMADestAddress(3), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD + 1: {
+            return readBits(arm9ptr->readDMADestAddress(3), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD + 2: {
+            return readBits(arm9ptr->readDMADestAddress(3), 16, 23);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD + 3: {
+            return readBits(arm9ptr->readDMADestAddress(3), 24, 31);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_L: {
+            return readBits(arm9ptr->readDMAControl(3, true), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_L + 1: {
+            return readBits(arm9ptr->readDMAControl(3, true), 8, 15);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_H: {
+            return readBits(arm9ptr->readDMAControl(3, false), 0, 7);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_H + 1: {
+            return readBits(arm9ptr->readDMAControl(3, false), 8, 15);
+        }
         case ARM9IOMemoryAddress::IME: {
             return readBits(arm9ptr->readIME(), 0, 7);
         }
@@ -171,6 +462,30 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
     addr &= ~0x3;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::DMA0SAD: {
+            return arm9ptr->writeDMASourceAddress(0, data);
+        }
+        case ARM9IOMemoryAddress::DMA0DAD: {
+            return arm9ptr->writeDMADestAddress(0, data);
+        }
+        case ARM9IOMemoryAddress::DMA1SAD: {
+            return arm9ptr->writeDMASourceAddress(1, data);
+        }
+        case ARM9IOMemoryAddress::DMA1DAD: {
+            return arm9ptr->writeDMADestAddress(1, data);
+        }
+        case ARM9IOMemoryAddress::DMA2SAD: {
+            return arm9ptr->writeDMASourceAddress(2, data);
+        }
+        case ARM9IOMemoryAddress::DMA2DAD: {
+            return arm9ptr->writeDMADestAddress(2, data);
+        }
+        case ARM9IOMemoryAddress::DMA3SAD: {
+            return arm9ptr->writeDMASourceAddress(3, data);
+        }
+        case ARM9IOMemoryAddress::DMA3DAD: {
+            return arm9ptr->writeDMADestAddress(3, data);
+        }
         case ARM9IOMemoryAddress::IPCSYNC: {
             return arm9ptr->writeIPCSYNC(data);
         }
@@ -191,7 +506,6 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
         }
         default:
             LogError("Unsupported ARM9 IO 32-bit write at " << hexString(addr));
-            exit(1);
             break;
     }
 }
@@ -202,6 +516,30 @@ void Interconnect::write16IOARM9(uint32_t addr, uint16_t data) {
     addr &= ~0x1;
     // IO memory map.
     switch (addr) {
+        case ARM9IOMemoryAddress::DMA0CNT_L: {
+            return arm9ptr->writeDMAControl(0, data, true);
+        }
+        case ARM9IOMemoryAddress::DMA0CNT_H: {
+            return arm9ptr->writeDMAControl(0, data, false);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_L: {
+            return arm9ptr->writeDMAControl(1, data, true);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_H: {
+            return arm9ptr->writeDMAControl(1, data, false);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_L: {
+            return arm9ptr->writeDMAControl(2, data, true);
+        }
+        case ARM9IOMemoryAddress::DMA2CNT_H: {
+            return arm9ptr->writeDMAControl(2, data, false);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_L: {
+            return arm9ptr->writeDMAControl(3, data, true);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_H: {
+            return arm9ptr->writeDMAControl(3, data, false);
+        }
         case ARM9IOMemoryAddress::IPCSYNC: {
             return arm9ptr->writeIPCSYNC(data);
         }

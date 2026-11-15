@@ -185,8 +185,7 @@ cycles DSEmuCore::processNextEvent() {
                 return 0;
         }
 
-        if(cyclesElapsed == 0){
-
+        if (cyclesElapsed == 0) {
         }
 
         // Drive all the remaining components.

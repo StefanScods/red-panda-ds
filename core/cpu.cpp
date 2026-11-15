@@ -97,6 +97,9 @@ void ARM::reset() {
     IE = 0;
     IF = 0;
 
+    // DMA.
+    dmaController.reset();
+
     // CPU instruction Pipeline.
     clearInstructionPipeline();
 
@@ -317,6 +320,58 @@ cycles ARM::fetchAndExecute(int numExecutions) {
         cycleCount += std::max(exeCycles, fetchCycles);
     }
     return cycleCount;
+}
+// ==================================================================================================
+void ARM::writeDMASourceAddress(uint32_t channel, uint32_t address) {
+    assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+    dmaController.channels[channel].sourceAddress = address;
+}
+// ==================================================================================================
+uint32_t ARM::readDMASourceAddress(uint32_t channel) {
+    assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+    return dmaController.channels[channel].sourceAddress;
+}
+// ==================================================================================================
+void ARM::writeDMADestAddress(uint32_t channel, uint32_t address) {
+    assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+    dmaController.channels[channel].destinationAddress = address;
+}
+// ==================================================================================================
+uint32_t ARM::readDMADestAddress(uint32_t channel) {
+    assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+    return dmaController.channels[channel].destinationAddress;
+}
+// ==================================================================================================
+void ARM::writeDMAControl(uint32_t channel, uint32_t value, bool low) {
+    assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+    if (low) {
+        writeBits(dmaController.channels[channel].wordCount, value, 0, 15);
+        return;
+    }
+    // 0-4 unused.
+    dmaController.channels[channel].destControl = readBits(value, 5, 6);
+    dmaController.channels[channel].sourceControl = readBits(value, 7, 8);
+    dmaController.channels[channel].repeat = readBit(value, 9);
+    dmaController.channels[channel].dataSize = readBit(value, 10);
+    dmaController.channels[channel].bit11 = readBit(value, 11);
+    dmaController.channels[channel].startCondition = readBits(value, 12, 13);
+    dmaController.channels[channel].irqEnable = readBit(value, 14);
+    dmaController.channels[channel].enable = readBit(value, 15);
+}
+// ==================================================================================================
+uint16_t ARM::readDMAControl(uint32_t channel, bool low) {
+    assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+    if (low) return readBits((uint16_t)dmaController.channels[channel].wordCount, 0, 16);
+    uint16_t result = 0;
+    writeBits(result, (uint16_t)dmaController.channels[channel].destControl, 5, 6);
+    writeBits(result, (uint16_t)dmaController.channels[channel].sourceControl, 7, 8);
+    writeBit(result, dmaController.channels[channel].repeat, 9);
+    writeBit(result, dmaController.channels[channel].dataSize, 10);
+    writeBit(result, dmaController.channels[channel].bit11, 11);
+    writeBits(result, (uint16_t)dmaController.channels[channel].startCondition, 12, 13);
+    writeBit(result, dmaController.channels[channel].irqEnable, 14);
+    writeBit(result, dmaController.channels[channel].enable, 15);
+    return result;
 }
 // ==================================================================================================
 busPayload ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {

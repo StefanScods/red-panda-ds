@@ -582,6 +582,55 @@ public:
      */
     uint32_t readIF() { return IF; }
 
+    // DMA.
+    /**
+     * @brief Write to a DMA channel's source address.
+     *
+     * @param channel DMA channel number (0-3).
+     * @param address Source address bit pattern to write.
+     */
+    void writeDMASourceAddress(uint32_t channel, uint32_t address);
+    /**
+     * @brief Read a DMA channel's source address.
+     *
+     * @param channel DMA channel number (0-3).
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readDMASourceAddress(uint32_t channel);
+    /**
+     * @brief Write to a DMA channel's destination address.
+     *
+     * @param channel DMA channel number (0-3).
+     * @param address Destination address bit pattern to write.
+     */
+    void writeDMADestAddress(uint32_t channel, uint32_t address);
+    /**
+     * @brief Read a DMA channel's destination address.
+     *
+     * @param channel DMA channel number (0-3).
+     *
+     * @return `uint32_t`
+     */
+    uint32_t readDMADestAddress(uint32_t channel);
+    /**
+     * @brief Write to a DMA channel's control register.
+     *
+     * @param channel DMA channel number (0-3).
+     * @param value Value to write.
+     * @param low True to write the low halfword, false for the high halfword.
+     */
+    virtual void writeDMAControl(uint32_t channel, uint32_t value, bool low);
+    /**
+     * @brief Read from a DMA channel's control register.
+     *
+     * @param channel DMA channel number (0-3).
+     * @param low True to write the low halfword, false for the high halfword.
+     *
+     * @return `uint16_t`
+     */
+    virtual uint16_t readDMAControl(uint32_t channel, bool low);
+
     /**
      * @brief Read the bus.
      *
@@ -967,6 +1016,8 @@ public:
     void reset() override;
     cycles cycle() override;
     std::string getCPUName() override { return "ARM7TDMI"; }
+    // void writeDMAControl(uint32_t channel, uint32_t value, bool low) override;
+    // uint16_t readDMAControl(uint32_t channel) override;
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
 };
@@ -1220,6 +1271,8 @@ public:
     // Function overrides.
     void reset() override;
     cycles cycle() override;
+    void writeDMAControl(uint32_t channel, uint32_t value, bool low) override;
+    uint16_t readDMAControl(uint32_t channel, bool low) override;
     std::string getCPUName() override { return "ARM946ES"; }
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
