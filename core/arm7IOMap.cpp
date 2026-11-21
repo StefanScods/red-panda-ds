@@ -462,11 +462,19 @@ void Interconnect::write32IOARM7(uint32_t addr, uint32_t data) {
         case ARM7IOMemoryAddress::DMA0DAD: {
             return arm7ptr->writeDMADestAddress(0, data);
         }
+        case ARM7IOMemoryAddress::DMA0CNT_L: {
+            arm7ptr->writeDMAControl(0, data, true);
+            return arm7ptr->writeDMAControl(0, data >> 16, false);
+        }
         case ARM7IOMemoryAddress::DMA1SAD: {
             return arm7ptr->writeDMASourceAddress(1, data);
         }
         case ARM7IOMemoryAddress::DMA1DAD: {
             return arm7ptr->writeDMADestAddress(1, data);
+        }
+        case ARM7IOMemoryAddress::DMA1CNT_L: {
+            arm7ptr->writeDMAControl(1, data, true);
+            return arm7ptr->writeDMAControl(1, data >> 16, false);
         }
         case ARM7IOMemoryAddress::DMA2SAD: {
             return arm7ptr->writeDMASourceAddress(2, data);
@@ -474,11 +482,19 @@ void Interconnect::write32IOARM7(uint32_t addr, uint32_t data) {
         case ARM7IOMemoryAddress::DMA2DAD: {
             return arm7ptr->writeDMADestAddress(2, data);
         }
+        case ARM7IOMemoryAddress::DMA2CNT_L: {
+            arm7ptr->writeDMAControl(2, data, true);
+            return arm7ptr->writeDMAControl(2, data >> 16, false);
+        }
         case ARM7IOMemoryAddress::DMA3SAD: {
             return arm7ptr->writeDMASourceAddress(3, data);
         }
         case ARM7IOMemoryAddress::DMA3DAD: {
             return arm7ptr->writeDMADestAddress(3, data);
+        }
+        case ARM7IOMemoryAddress::DMA3CNT_L: {
+            arm7ptr->writeDMAControl(3, data, true);
+            return arm7ptr->writeDMAControl(3, data >> 16, false);
         }
         case ARM7IOMemoryAddress::IPCSYNC: {
             return arm7ptr->writeIPCSYNC(data);

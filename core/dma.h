@@ -8,6 +8,10 @@ namespace Core {
 
 #define NUM_DMA_CHANNELS 4
 
+namespace DMAState {
+enum DMAState : uint32_t { DISABLED = 0, PENDING, TRIGGERED };
+}
+
 struct DMAChannelConfig {
     uint32_t sourceAddress;
     uint32_t destinationAddress;
@@ -20,6 +24,12 @@ struct DMAChannelConfig {
     uint8_t startCondition;
     uint8_t irqEnable;
     uint8_t enable;
+
+    DMAState::DMAState state;
+    uint32_t currentSource;
+    uint32_t currentDest;
+    uint32_t remainingCount;
+    cycles cooldown;
 };
 
 /**

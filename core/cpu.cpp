@@ -344,19 +344,40 @@ uint32_t ARM::readDMADestAddress(uint32_t channel) {
 // ==================================================================================================
 void ARM::writeDMAControl(uint32_t channel, uint32_t value, bool low) {
     assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
+
+    DMAChannelConfig& targetedChannel = dmaController.channels[channel];
+
+    bool currEnable = targetedChannel.enable;
+    if (currEnable && targetedChannel.state == DMAState::TRIGGERED) {
+        LogWarning("writeDMAControl() has been called on a triggered channel: " << channel << "!");
+    }
+
     if (low) {
-        writeBits(dmaController.channels[channel].wordCount, value, 0, 15);
+        writeBits(targetedChannel.wordCount, value, 0, 15);
         return;
     }
     // 0-4 unused.
-    dmaController.channels[channel].destControl = readBits(value, 5, 6);
-    dmaController.channels[channel].sourceControl = readBits(value, 7, 8);
-    dmaController.channels[channel].repeat = readBit(value, 9);
-    dmaController.channels[channel].dataSize = readBit(value, 10);
-    dmaController.channels[channel].bit11 = readBit(value, 11);
-    dmaController.channels[channel].startCondition = readBits(value, 12, 13);
-    dmaController.channels[channel].irqEnable = readBit(value, 14);
-    dmaController.channels[channel].enable = readBit(value, 15);
+    targetedChannel.destControl = readBits(value, 5, 6);
+    targetedChannel.sourceControl = readBits(value, 7, 8);
+    targetedChannel.repeat = readBit(value, 9);
+    targetedChannel.dataSize = readBit(value, 10);
+    targetedChannel.bit11 = readBit(value, 11);
+    targetedChannel.startCondition = readBits(value, 12, 13);
+    targetedChannel.irqEnable = readBit(value, 14);
+    // Handle enable.
+    bool nextEnable = readBit(value, 15);
+    targetedChannel.enable = nextEnable;
+    // 1 -> 0.
+    if (currEnable && !nextEnable) {
+        targetedChannel.state = DMAState::DISABLED;
+    }
+    // 0 -> 1.
+    else if (!currEnable && nextEnable) {
+        targetedChannel.state = DMAState::PENDING;
+        targetedChannel.currentSource = targetedChannel.sourceAddress;
+        targetedChannel.currentDest = targetedChannel.destinationAddress;
+        targetedChannel.cooldown = 0;
+    }
 }
 // ==================================================================================================
 uint16_t ARM::readDMAControl(uint32_t channel, bool low) {
@@ -372,6 +393,33 @@ uint16_t ARM::readDMAControl(uint32_t channel, bool low) {
     writeBit(result, dmaController.channels[channel].irqEnable, 14);
     writeBit(result, dmaController.channels[channel].enable, 15);
     return result;
+}
+// ==================================================================================================
+void ARM::handleDMATriggers() {
+    for (uint32_t i = 0; i < NUM_DMA_CHANNELS; ++i) {
+        if (dmaController.channels[i].state != DMAState::PENDING) continue;
+        switch (dmaController.channels[i].startCondition) {
+            case 0:  // Start Immediately.
+                dmaController.channels[i].state = DMAState::TRIGGERED;
+                break;
+            default:
+                LogError("Unsupported DMA start condition: "
+                         << PrintHex(dmaController.channels[i].startCondition));
+                break;
+        }
+    }
+}
+// ==================================================================================================
+void ARM::progressDMA(cycles numCycles) {
+    int dmaChannelToRun = -1;
+    for (uint32_t i = 0; i < NUM_DMA_CHANNELS; ++i) {
+        if (!dmaController.channels[i].state != DMAState::TRIGGERED) continue;
+        dmaChannelToRun = i;
+        break;
+    }
+    if (dmaChannelToRun < 0) return;  // No DMA work to do.
+
+    DMAChannelConfig& targetedChannel = dmaController.channels[dmaChannelToRun];
 }
 // ==================================================================================================
 busPayload ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {
@@ -705,7 +753,7 @@ void ARM::DEBUG_pauseExecution() {
     LogError(getCPUName() << " - Hit Debug Breakpoint!");
     DEBUG_dumpCPUState();
     hasExecutionLimit = true;
-    executionLimit = 1;
+    executionLimit = 0;
 }
 // ==================================================================================================
 void ARM::DEBUG_dumpCPUState() {

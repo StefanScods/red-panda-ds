@@ -471,11 +471,19 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
         case ARM9IOMemoryAddress::DMA0DAD: {
             return arm9ptr->writeDMADestAddress(0, data);
         }
+        case ARM9IOMemoryAddress::DMA0CNT_L: {
+            arm9ptr->writeDMAControl(0, data, true);
+            return arm9ptr->writeDMAControl(0, data >> 16, false);
+        }
         case ARM9IOMemoryAddress::DMA1SAD: {
             return arm9ptr->writeDMASourceAddress(1, data);
         }
         case ARM9IOMemoryAddress::DMA1DAD: {
             return arm9ptr->writeDMADestAddress(1, data);
+        }
+        case ARM9IOMemoryAddress::DMA1CNT_L: {
+            arm9ptr->writeDMAControl(1, data, true);
+            return arm9ptr->writeDMAControl(1, data >> 16, false);
         }
         case ARM9IOMemoryAddress::DMA2SAD: {
             return arm9ptr->writeDMASourceAddress(2, data);
@@ -483,11 +491,19 @@ void Interconnect::write32IOARM9(uint32_t addr, uint32_t data) {
         case ARM9IOMemoryAddress::DMA2DAD: {
             return arm9ptr->writeDMADestAddress(2, data);
         }
+        case ARM9IOMemoryAddress::DMA2CNT_L: {
+            arm9ptr->writeDMAControl(2, data, true);
+            return arm9ptr->writeDMAControl(2, data >> 16, false);
+        }
         case ARM9IOMemoryAddress::DMA3SAD: {
             return arm9ptr->writeDMASourceAddress(3, data);
         }
         case ARM9IOMemoryAddress::DMA3DAD: {
             return arm9ptr->writeDMADestAddress(3, data);
+        }
+        case ARM9IOMemoryAddress::DMA3CNT_L: {
+            arm9ptr->writeDMAControl(3, data, true);
+            return arm9ptr->writeDMAControl(3, data >> 16, false);
         }
         case ARM9IOMemoryAddress::IPCSYNC: {
             return arm9ptr->writeIPCSYNC(data);

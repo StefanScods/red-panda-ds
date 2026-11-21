@@ -196,17 +196,23 @@ cycles ARM7TDMI::cycle() {
     // CPU is running execute like normal.
     while (currentCycle < targetCycle) {
         // Handle execution limit.
-        if (hasExecutionLimit && executionLimit == 0 && !justHitBreakpoint) {
+        if (hasExecutionLimit && executionLimit <= 0 && !justHitBreakpoint) {
             hasExecutionLimit = false;
             justHitBreakpoint = true;
             break;
         }
+
+        // Update DMA Triggers.
+        handleDMATriggers();
 
         // Handle halted or stopped states.
         if (state != ProcessorStates::Running) {
             cyclesRan = underflowSafeSubtract(targetCycle, currentCycle);
             cyclesElapsed = cyclesRan;
             addCyclesElapsed();
+
+            // Progress any CPU attached peripheral.
+            progressDMA(cyclesElapsed);
             break;
         }
 
@@ -232,6 +238,9 @@ cycles ARM7TDMI::cycle() {
         if (executeCooldown == 0 && instuctionPipeLine[0].inst != NO_INSTRUCT &&
             (instuctionPipeLine[1].inst != NO_INSTRUCT ||
              instuctionPipeLine[2].inst != NO_INSTRUCT)) {
+            // TODO Check if the next instruction uses a memory address that is held up by something
+            // else. If so executeCooldown++ and skip execution for now.
+
             // Instruction is on the execute stage, execute a new instuction.
             executeCooldown = execute();
             // Decrement execution limit.
@@ -244,6 +253,9 @@ cycles ARM7TDMI::cycle() {
         if (fetchCooldown == 0 && instuctionPipeLine[2].inst == NO_INSTRUCT &&
             (instuctionPipeLine[1].inst == NO_INSTRUCT ||
              instuctionPipeLine[0].inst == NO_INSTRUCT)) {
+            // TODO Check if the next instruction uses a memory address that is held up by something
+            // else. If so fetchCooldown++ and skip fetching for now.
+
             // Instruction pipeline has space, fetch a new instuction.
             fetchCooldown = fetch();
         }
@@ -262,6 +274,9 @@ cycles ARM7TDMI::cycle() {
         // Increment the cpu's current cycles based on the number of cycles elapsed.
         cyclesRan += cyclesElapsed;
         addCyclesElapsed();
+
+        // Progress any CPU attached peripheral.
+        progressDMA(cyclesElapsed);
     }
 
     return cyclesRan;

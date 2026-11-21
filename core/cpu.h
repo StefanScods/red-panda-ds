@@ -211,7 +211,7 @@ protected:
     cycles currentCycle = 0;
     cycles targetCycle = 0;
     bool hasExecutionLimit = 0;
-    uint32_t executionLimit = 0;
+    int32_t executionLimit = 0;
     bool justBranched = false;
     bool justHitBreakpoint = false;
 
@@ -630,6 +630,18 @@ public:
      * @return `uint16_t`
      */
     virtual uint16_t readDMAControl(uint32_t channel, bool low);
+
+    /**
+     * @brief Handles any pending DMA triggers.
+     */
+    virtual void handleDMATriggers();
+
+    /**
+     * @brief Progresses DMA transfers by the specified number of cycles.
+     *
+     * @param numCycles Number of cycles to advance DMA.
+     */
+    virtual void progressDMA(cycles numCycles);
 
     /**
      * @brief Read the bus.
