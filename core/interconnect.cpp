@@ -580,15 +580,24 @@ bool Interconnect::isAddressValidARM9(uint32_t addr) {
 // ==================================================================================================
 void Interconnect::loadProgramFromROM(uint32_t destAddr, uint32_t size, uint32_t srcAddr,
                                       NDS_Cartridge* cart) {
-    uint8_t memRegion = destAddr >> 24;
-    if (memRegion != ARM7MemoryRegionNum::MAIN_RAM) {
-        LogError("Trying to copy program into memory region other than main RAM! Target address: "
+    uint8_t* dest = nullptr;
+
+    if (destAddr >= MAIN_RAM_START && destAddr < MAIN_RAM_START + MAIN_RAM_SIZE) {
+        dest = mainRAM + (destAddr & MAIN_RAM_MASK);
+    } else if (destAddr >= SHARED_WRAM_START && destAddr < ARM7_WRAM_START) {
+        dest = sharedWRAM + (destAddr & SHARED_WRAM_MASK);
+    } else if (destAddr >= ARM7_WRAM_START && destAddr < ARM7_WRAM_START + ARM7_WRAM_SIZE) {
+        // Should be an error on ARM9.
+        dest = arm7WRAM + (destAddr & ARM7_WRAM_MASK);
+    } else {
+        LogError("Trying to copy program into unsupported memory region! Target address: "
                  << PrintHex(destAddr));
         return;
     }
+
     LogDebug("Reading " << size << "byte(s) from ROM address " << PrintHex(srcAddr)
                         << " into RAM address " << PrintHex(destAddr));
-    cart->readFromROM(srcAddr, size, (mainRAM + (destAddr & MAIN_RAM_MASK)));
+    cart->readFromROM(srcAddr, size, dest);
 }
 // ==================================================================================================
 
