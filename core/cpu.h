@@ -637,6 +637,49 @@ public:
     virtual void handleDMATriggers();
 
     /**
+     * @brief Returns the currently active DMA channel. Returns -1 if no channel is active.
+     *
+     * @return `int`
+     */
+    int getActiveDMAChannel() const;
+
+    /**
+     * @brief Gets the cycle cost of the next DMA transfer step.
+     *
+     * @param source The source address for the DMA step.
+     * @param dest The destination address for the DMA step.
+     * @param first True if this is the first step of the DMA transfer.
+     * @param fullWord True if transferring a full word (32-bit), false for halfword (16-bit).
+     * @return `uint32_t`
+     */
+    uint32_t getCostOfNextDMAStep(uint32_t source, uint32_t dest, bool first, bool fullWord) const;
+
+    /**
+     * @brief Performs a single DMA transfer step on the bus.
+     *
+     * @param source The source address to read from.
+     * @param dest The destination address to write to.
+     * @param fullWord True to transfer a full word (32-bit), false for halfword (16-bit).
+     */
+    virtual void doDMAStep(uint32_t source, uint32_t dest, bool fullWord);
+
+    /**
+     * @brief Calculates the next source address for a DMA channel.
+     *
+     * @param targetedChannel Reference to the DMA channel configuration.
+     * @return `uint32_t`
+     */
+    uint32_t getDMAsNextSourceAddr(DMAChannelConfig& targetedChannel) const;
+
+    /**
+     * @brief Calculates the next destination address for a DMA channel.
+     *
+     * @param targetedChannel Reference to the DMA channel configuration.
+     * @return `uint32_t`
+     */
+    uint32_t getDMAsNextDestinationAddr(DMAChannelConfig& targetedChannel) const;
+
+    /**
      * @brief Progresses DMA transfers by the specified number of cycles.
      *
      * @param numCycles Number of cycles to advance DMA.
@@ -1038,10 +1081,9 @@ public:
     void reset() override;
     cycles cycle() override;
     std::string getCPUName() override { return "ARM7TDMI"; }
-    // void writeDMAControl(uint32_t channel, uint32_t value, bool low) override;
-    // uint16_t readDMAControl(uint32_t channel) override;
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
+    void doDMAStep(uint32_t source, uint32_t dest, bool fullWord) override;
 };
 // ==================================================================================================
 // ARM946ES Control Register
@@ -1298,6 +1340,7 @@ public:
     std::string getCPUName() override { return "ARM946ES"; }
     busPayload readBus(uint32_t address, uint32_t size = 32, bool codeRead = false) override;
     busPayload writeBus(uint32_t address, uint32_t data, uint32_t size = 32) override;
+    void doDMAStep(uint32_t source, uint32_t dest, bool fullWord) override;
 };
 
 }  // namespace Core

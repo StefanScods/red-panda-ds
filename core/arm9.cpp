@@ -536,6 +536,11 @@ busPayload ARM946ES::writeBus(uint32_t address, uint32_t data, uint32_t size) {
             size};
 }
 // ==================================================================================================
+void ARM946ES::doDMAStep(uint32_t source, uint32_t dest, bool fullWord) {
+    uint32_t data = fullWord ? bus->read32ARM9(source) : bus->read16ARM9(source);
+    fullWord ? bus->write32ARM9(dest, data) : bus->write16ARM9(dest, data);
+}
+// ==================================================================================================
 cycles ARM946ES::cycle() {
     cycles cyclesRan = 0;
     justBranched = false;
@@ -556,10 +561,10 @@ cycles ARM946ES::cycle() {
         if (state != ProcessorStates::Running) {
             cyclesRan = underflowSafeSubtract(targetCycle, currentCycle);
             cyclesElapsed = cyclesRan;
-            addCyclesElapsed();
-
             // Progress any CPU attached peripheral.
             progressDMA(cyclesElapsed);
+
+            addCyclesElapsed();
             break;
         }
 
@@ -618,12 +623,12 @@ cycles ARM946ES::cycle() {
             // Catch cycles where no work is done -> filling pipeline.
             cyclesElapsed = 1;
         }
+        // Progress any CPU attached peripheral.
+        progressDMA(cyclesElapsed);
+
         // Increment the cpu's current cycles based on the number of cycles elapsed.
         cyclesRan += cyclesElapsed;
         addCyclesElapsed();
-
-        // Progress any CPU attached peripheral.
-        progressDMA(cyclesElapsed);
     }
 
     return cyclesRan;

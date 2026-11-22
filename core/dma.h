@@ -28,7 +28,7 @@ struct DMAChannelConfig {
     DMAState::DMAState state;
     uint32_t currentSource;
     uint32_t currentDest;
-    uint32_t remainingCount;
+    uint32_t progress;
     cycles cooldown;
 };
 

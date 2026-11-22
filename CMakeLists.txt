@@ -52,6 +52,7 @@ add_subdirectory(core)
 # ==================================================================================================
 # set(SKIP_TEST_ROMS True)
 if(NOT SKIP_TEST_ROMS)
+    set(TEST_ROM_OUTPUT "${CMAKE_BINARY_DIR}/ROMs")
     add_subdirectory(testROMs)
 endif()
 

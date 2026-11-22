@@ -353,7 +353,7 @@ void ARM::writeDMAControl(uint32_t channel, uint32_t value, bool low) {
     }
 
     if (low) {
-        writeBits(targetedChannel.wordCount, value, 0, 15);
+        writeBits(targetedChannel.wordCount, readBits(value, 0, 15), 0, 15);
         return;
     }
     // 0-4 unused.
@@ -367,6 +367,7 @@ void ARM::writeDMAControl(uint32_t channel, uint32_t value, bool low) {
     // Handle enable.
     bool nextEnable = readBit(value, 15);
     targetedChannel.enable = nextEnable;
+
     // 1 -> 0.
     if (currEnable && !nextEnable) {
         targetedChannel.state = DMAState::DISABLED;
@@ -377,12 +378,13 @@ void ARM::writeDMAControl(uint32_t channel, uint32_t value, bool low) {
         targetedChannel.currentSource = targetedChannel.sourceAddress;
         targetedChannel.currentDest = targetedChannel.destinationAddress;
         targetedChannel.cooldown = 0;
+        targetedChannel.progress = 0;
     }
 }
 // ==================================================================================================
 uint16_t ARM::readDMAControl(uint32_t channel, bool low) {
     assert(channel >= 0 && channel < NUM_DMA_CHANNELS);
-    if (low) return readBits((uint16_t)dmaController.channels[channel].wordCount, 0, 16);
+    if (low) return readBits((uint16_t)dmaController.channels[channel].wordCount, 0, 15);
     uint16_t result = 0;
     writeBits(result, (uint16_t)dmaController.channels[channel].destControl, 5, 6);
     writeBits(result, (uint16_t)dmaController.channels[channel].sourceControl, 7, 8);
@@ -410,16 +412,139 @@ void ARM::handleDMATriggers() {
     }
 }
 // ==================================================================================================
-void ARM::progressDMA(cycles numCycles) {
-    int dmaChannelToRun = -1;
+int ARM::getActiveDMAChannel() const {
     for (uint32_t i = 0; i < NUM_DMA_CHANNELS; ++i) {
-        if (!dmaController.channels[i].state != DMAState::TRIGGERED) continue;
-        dmaChannelToRun = i;
-        break;
+        if (dmaController.channels[i].state != DMAState::TRIGGERED) continue;
+        return i;
     }
+    return -1;
+}
+// ==================================================================================================
+uint32_t ARM::getCostOfNextDMAStep(uint32_t source, uint32_t dest, bool first,
+                                   bool fullWord) const {
+    uint8_t srcRegion = source >> 24;
+    uint8_t destRegion = dest >> 24;
+
+    bool mainToMain =
+        srcRegion == ARM7MemoryRegionNum::MAIN_RAM && destRegion == ARM7MemoryRegionNum::MAIN_RAM;
+    bool sequential = !first && !mainToMain;
+
+    uint32_t readCycles = 0;
+    uint32_t writeCycles = 0;
+    if (fullWord) {
+        readCycles = sequential ? data_sequencial32BitAccessTimings[srcRegion]
+                                : data_nonSequencial32BitAccessTimings[srcRegion];
+
+        writeCycles = sequential ? data_sequencial32BitAccessTimings[destRegion]
+                                 : data_nonSequencial32BitAccessTimings[destRegion];
+    } else {
+        readCycles = sequential ? data_sequencial16BitAccessTimings[srcRegion]
+                                : data_nonSequencial16BitAccessTimings[srcRegion];
+
+        writeCycles = sequential ? data_sequencial16BitAccessTimings[destRegion]
+                                 : data_nonSequencial16BitAccessTimings[destRegion];
+    }
+
+    return readCycles + writeCycles;
+}
+// ==================================================================================================
+void ARM::doDMAStep(uint32_t source, uint32_t dest, bool fullWord) {
+    LogError("Unimplemented doDMAStep()");
+}
+// ==================================================================================================
+uint32_t ARM::getDMAsNextSourceAddr(DMAChannelConfig& targetedChannel) const {
+    // Transfer size.
+    uint8_t numBytes = targetedChannel.dataSize ? 4 : 2;
+    uint32_t sourceAddr = targetedChannel.currentSource;
+    switch (targetedChannel.sourceControl) {
+        case 0:
+        case 3:  // Increment.
+            sourceAddr += targetedChannel.progress * numBytes;
+            break;
+
+        case 1:  // Decrement.
+            sourceAddr -= targetedChannel.progress * numBytes;
+            break;
+
+        case 2:  // Fixed.
+        default:
+            break;
+    }
+    return sourceAddr;
+}
+// ==================================================================================================
+uint32_t ARM::getDMAsNextDestinationAddr(DMAChannelConfig& targetedChannel) const {
+    uint8_t numBytes = targetedChannel.dataSize ? 4 : 2;
+    uint32_t destAddr = targetedChannel.currentDest;
+    switch (targetedChannel.destControl) {
+        case 0:
+        case 3:  // Increment.
+            destAddr += targetedChannel.progress * numBytes;
+            break;
+
+        case 1:  // Decrement.
+            destAddr -= targetedChannel.progress * numBytes;
+            break;
+
+        case 2:  // Fixed.
+        default:
+            break;
+    }
+    return destAddr;
+}
+// ==================================================================================================
+void ARM::progressDMA(cycles numCycles) {
+    int dmaChannelToRun = getActiveDMAChannel();
     if (dmaChannelToRun < 0) return;  // No DMA work to do.
 
     DMAChannelConfig& targetedChannel = dmaController.channels[dmaChannelToRun];
+    while (numCycles > 0) {
+        cycles workBudget = underflowSafeSubtract(numCycles, targetedChannel.cooldown);
+        targetedChannel.cooldown = underflowSafeSubtract(targetedChannel.cooldown, numCycles);
+        if (targetedChannel.cooldown > 0) return;  // DMA is still "working" on the previous chunk.
+        numCycles = workBudget;
+
+        // Get source and destination address,
+        uint32_t sourceAddr = getDMAsNextSourceAddr(targetedChannel);
+        uint32_t destAddr = getDMAsNextDestinationAddr(targetedChannel);
+        LogDebug("DMA Transfer Tick:" << "\n\tChannel: " << dmaChannelToRun
+                                      << "\n\tSource Address: " << PrintHex(sourceAddr)
+                                      << "\n\tDestination Address: " << PrintHex(destAddr)
+                                      << "\n\tProgress: " << targetedChannel.progress << " / "
+                                      << targetedChannel.wordCount);
+
+        // Progress the DMA by a single write.
+        cycles cost = getCostOfNextDMAStep(sourceAddr, destAddr, targetedChannel.progress == 0,
+                                           targetedChannel.dataSize);
+        doDMAStep(sourceAddr, destAddr, targetedChannel.dataSize);
+        targetedChannel.progress++;
+
+        // Assign cycle delay to the DMA channel.
+        // To account for the last chunk finishing the channel and exiting early, the second last
+        // chunk is charged with the last chunk's delay.
+        if (targetedChannel.progress == targetedChannel.wordCount - 1) {
+            sourceAddr = getDMAsNextSourceAddr(targetedChannel);
+            destAddr = getDMAsNextDestinationAddr(targetedChannel);
+            cost += getCostOfNextDMAStep(sourceAddr, destAddr, targetedChannel.progress == 0,
+                                         targetedChannel.dataSize);
+        }
+        targetedChannel.cooldown = cost;
+
+        // Check for finish condition.
+        if (targetedChannel.progress < targetedChannel.wordCount) continue;
+        // Exit the work loop.
+        if (targetedChannel.repeat) {
+            LogError("DMA repeat currently not supported!");
+        } else {
+            // Disable the channel.
+            targetedChannel.state = DMAState::DISABLED;
+            targetedChannel.enable = 0;
+        }
+        break;  // Since we charged n-1 with the cost of n, we dont need to update num cycles.
+    }
+
+    // DMA Transfer fully finished. Move to the next transfer with the remaining budget.
+    if (numCycles > 0) progressDMA(numCycles);
 }
 // ==================================================================================================
 busPayload ARM::readBus(uint32_t address, uint32_t size, bool codeRead) {

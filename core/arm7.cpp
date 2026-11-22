@@ -189,6 +189,11 @@ busPayload ARM7TDMI::writeBus(uint32_t address, uint32_t data, uint32_t size) {
             size};
 }
 // ==================================================================================================
+void ARM7TDMI::doDMAStep(uint32_t source, uint32_t dest, bool fullWord) {
+    uint32_t data = fullWord ? bus->read32ARM7(source) : bus->read16ARM7(source);
+    fullWord ? bus->write32ARM7(dest, data) : bus->write16ARM7(dest, data);
+}
+// ==================================================================================================
 cycles ARM7TDMI::cycle() {
     cycles cyclesRan = 0;
     justBranched = false;
@@ -209,10 +214,10 @@ cycles ARM7TDMI::cycle() {
         if (state != ProcessorStates::Running) {
             cyclesRan = underflowSafeSubtract(targetCycle, currentCycle);
             cyclesElapsed = cyclesRan;
-            addCyclesElapsed();
-
             // Progress any CPU attached peripheral.
             progressDMA(cyclesElapsed);
+
+            addCyclesElapsed();
             break;
         }
 
@@ -271,12 +276,12 @@ cycles ARM7TDMI::cycle() {
             // Catch cycles where no work is done -> filling pipeline.
             cyclesElapsed = 1;
         }
+        // Progress any CPU attached peripheral.
+        progressDMA(cyclesElapsed);
+
         // Increment the cpu's current cycles based on the number of cycles elapsed.
         cyclesRan += cyclesElapsed;
         addCyclesElapsed();
-
-        // Progress any CPU attached peripheral.
-        progressDMA(cyclesElapsed);
     }
 
     return cyclesRan;
