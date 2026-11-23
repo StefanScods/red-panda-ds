@@ -34,6 +34,11 @@ public:
     void init();
 
     /**
+     * @brief Resets any block of memory connected to the interconnect.
+     */
+    void reset();
+
+    /**
      * @brief Add the ARM7 cpu to the interconnect.
      *
      * @param cpu The ARM7 cpu to add
@@ -50,10 +55,11 @@ public:
      * @brief Read 32 bits from the specified address.
      *
      * @param addr Address to read from
+     * @param forceSafe True to skip over some additional error checking
      *
      * @return uint32_t
      */
-    uint32_t read32ARM7(uint32_t addr);
+    uint32_t read32ARM7(uint32_t addr, bool forceSafe = false);
     /**
      * @brief Read 32 bits from the specified IO address.
      *
@@ -66,10 +72,11 @@ public:
      * @brief Read 16 bits from the specified address.
      *
      * @param addr Address to read from
+     * @param forceSafe True to skip over some additional error checking
      *
      * @return uint16_t
      */
-    uint16_t read16ARM7(uint32_t addr);
+    uint16_t read16ARM7(uint32_t addr, bool forceSafe = false);
     /**
      * @brief Read 16 bits from the specified IO address.
      *
@@ -82,10 +89,11 @@ public:
      * @brief Read 8 bits from the specified address.
      *
      * @param addr Address to read from
+     * @param forceSafe True to skip over some additional error checking
      *
      * @return uint8_t
      */
-    uint8_t read8ARM7(uint32_t addr);
+    uint8_t read8ARM7(uint32_t addr, bool forceSafe = false);
     /**
      * @brief Read 8 bits from the specified IO address.
      *
@@ -99,8 +107,9 @@ public:
      *
      * @param addr Address to write to
      * @param data Data to write
+     * @param forceSafe True to skip over some additional error checking
      */
-    void write32ARM7(uint32_t addr, uint32_t data);
+    void write32ARM7(uint32_t addr, uint32_t data, bool forceSafe = false);
     /**
      * @brief Write 32 bits to the specified IO address.
      *
@@ -113,8 +122,9 @@ public:
      *
      * @param addr Address to write to
      * @param data Data to write
+     * @param forceSafe True to skip over some additional error checking
      */
-    void write16ARM7(uint32_t addr, uint16_t data);
+    void write16ARM7(uint32_t addr, uint16_t data, bool forceSafe = false);
     /**
      * @brief Write 16 bits to the specified IO address.
      *
@@ -127,8 +137,9 @@ public:
      *
      * @param addr Address to write to
      * @param data Data to write
+     * @param forceSafe True to skip over some additional error checking
      */
-    void write8ARM7(uint32_t addr, uint8_t data);
+    void write8ARM7(uint32_t addr, uint8_t data, bool forceSafe = false);
     /**
      * @brief Write 8 bits to the specified IO address.
      *
@@ -140,10 +151,11 @@ public:
      * @brief Read 32 bits from the specified address.
      *
      * @param addr Address to read from
+     * @param forceSafe True to skip over some additional error checking
      *
      * @return uint32_t
      */
-    uint32_t read32ARM9(uint32_t addr);
+    uint32_t read32ARM9(uint32_t addr, bool forceSafe = false);
     /**
      * @brief Read 32 bits from the specified IO address.
      *
@@ -156,10 +168,11 @@ public:
      * @brief Read 16 bits from the specified address.
      *
      * @param addr Address to read from
+     * @param forceSafe True to skip over some additional error checking
      *
      * @return uint16_t
      */
-    uint16_t read16ARM9(uint32_t addr);
+    uint16_t read16ARM9(uint32_t addr, bool forceSafe = false);
     /**
      * @brief Read 16 bits from the specified IO address.
      *
@@ -172,10 +185,11 @@ public:
      * @brief Read 8 bits from the specified address.
      *
      * @param addr Address to read from
+     * @param forceSafe True to skip over some additional error checking
      *
      * @return uint8_t
      */
-    uint8_t read8ARM9(uint32_t addr);
+    uint8_t read8ARM9(uint32_t addr, bool forceSafe = false);
     /**
      * @brief Read 8 bits from the specified IO address.
      *
@@ -189,8 +203,9 @@ public:
      *
      * @param addr Address to write to
      * @param data Data to write
+     * @param forceSafe True to skip over some additional error checking
      */
-    void write32ARM9(uint32_t addr, uint32_t data);
+    void write32ARM9(uint32_t addr, uint32_t data, bool forceSafe = false);
     /**
      * @brief Write 32 bits to the specified IO address.
      *
@@ -203,8 +218,9 @@ public:
      *
      * @param addr Address to write to
      * @param data Data to write
+     * @param forceSafe True to skip over some additional error checking
      */
-    void write16ARM9(uint32_t addr, uint16_t data);
+    void write16ARM9(uint32_t addr, uint16_t data, bool forceSafe = false);
     /**
      * @brief Write 16 bits to the specified IO address.
      *
@@ -217,8 +233,9 @@ public:
      *
      * @param addr Address to write to
      * @param data Data to write
+     * @param forceSafe True to skip over some additional error checking
      */
-    void write8ARM9(uint32_t addr, uint8_t data);
+    void write8ARM9(uint32_t addr, uint8_t data, bool forceSafe = false);
     /**
      * @brief Write 8 bits to the specified IO address.
      *

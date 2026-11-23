@@ -12,10 +12,10 @@ using namespace RedPandaDS::Core;
 class TestInterconnect : public testing::Test {
 protected:
     Interconnect bus;
-    TestInterconnect() {}
+    TestInterconnect() { bus.init(); }
     ~TestInterconnect() {}
 
-    void SetUp() override { bus.init(); }
+    void SetUp() override { bus.reset(); }
 
     void TearDown() override {}
 };
@@ -161,7 +161,11 @@ TEST_F(TestInterconnect_WRAM_ARM7WRAM, ReadAndWrite16Bit) {
 // ==================================================================================================
 class TestInterconnect_WRAM_ARM7SharedWRAM : public TestInterconnect_WRAM {
 protected:
-    TestInterconnect_WRAM_ARM7SharedWRAM() {}
+    ARM946ES arm9{new NDS_ARM9_BIOS()};
+    TestInterconnect_WRAM_ARM7SharedWRAM() {
+        bus.bindARM9(&arm9);
+        arm9.writeWRAMCNT(0b11);
+    }
     ~TestInterconnect_WRAM_ARM7SharedWRAM() {}
 
     void SetUp() override { TestInterconnect_WRAM::SetUp(); }
@@ -191,6 +195,47 @@ TEST_F(TestInterconnect_WRAM_ARM7SharedWRAM, ReadAndWrite16Bit) {
         uint16_t valWrite = i & 0x0000FFFF;
         bus.write16ARM7(i, valWrite);
         uint16_t valRead = bus.read16ARM7(i);
+        // Ensure the value survived.
+        ASSERT_EQ(valRead, valWrite);
+    }
+}
+// ==================================================================================================
+class TestInterconnect_WRAM_ARM9SharedWRAM : public TestInterconnect_WRAM {
+protected:
+    ARM946ES arm9{new NDS_ARM9_BIOS()};
+    TestInterconnect_WRAM_ARM9SharedWRAM() {
+        bus.bindARM9(&arm9);
+        arm9.writeWRAMCNT(0b00);
+    }
+    ~TestInterconnect_WRAM_ARM9SharedWRAM() {}
+
+    void SetUp() override { TestInterconnect_WRAM::SetUp(); }
+
+    void TearDown() override { TestInterconnect_WRAM::TearDown(); }
+};
+// ==================================================================================================
+TEST_F(TestInterconnect_WRAM_ARM9SharedWRAM, ReadAndWrite32Bit) {
+    // Loop over the entire memory space.
+    for (uint32_t i = SHARED_WRAM_START; i < SHARED_WRAM_START + SHARED_WRAM_SIZE; i += 4) {
+        // Check the address is valid.
+        ASSERT_TRUE(bus.isAddressValidARM7(i));
+        // Write the value and read it back.
+        bus.write32ARM9(i, i);
+        uint32_t val = bus.read32ARM9(i);
+        // Ensure the value survived.
+        ASSERT_EQ(val, i);
+    }
+}
+// ==================================================================================================
+TEST_F(TestInterconnect_WRAM_ARM9SharedWRAM, ReadAndWrite16Bit) {
+    // Loop over the entire memory space.
+    for (uint32_t i = SHARED_WRAM_START; i < SHARED_WRAM_START + SHARED_WRAM_SIZE; i += 2) {
+        // Check the address is valid.
+        ASSERT_TRUE(bus.isAddressValidARM7(i));
+        // Write the value and read it back.
+        uint16_t valWrite = i & 0x0000FFFF;
+        bus.write16ARM9(i, valWrite);
+        uint16_t valRead = bus.read16ARM9(i);
         // Ensure the value survived.
         ASSERT_EQ(valRead, valWrite);
     }

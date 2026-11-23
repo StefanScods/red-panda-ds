@@ -53,6 +53,7 @@ void DSEmuCore::reset() {
     ndsCartridge->reset();
     arm7->reset();
     arm9->reset();
+    bus->reset();
     debugger.changeDebugCPU(true);
 
     eventQueue = {};

@@ -1,5 +1,7 @@
 #include "interconnect.h"
 
+#include <cstring>
+
 #include "cpu.h"
 
 // Control print statements.
@@ -45,6 +47,17 @@ void Interconnect::init() {
     }
 }
 // ==================================================================================================
+void Interconnect::reset() {
+    assert(mainRAM != nullptr && "Call Interconnect::init() first!");
+    memset(mainRAM, 0, MAIN_RAM_SIZE);
+
+    assert(arm7WRAM != nullptr && "Call Interconnect::init() first!");
+    memset(arm7WRAM, 0, ARM7_WRAM_SIZE);
+
+    assert(sharedWRAM != nullptr && "Call Interconnect::init() first!");
+    memset(sharedWRAM, 0, SHARED_WRAM_SIZE);
+}
+// ==================================================================================================
 void Interconnect::bindARM7(ARM* cpu) {
     arm7 = cpu;
     arm7->connectToInterconnect(this);
@@ -55,7 +68,7 @@ void Interconnect::bindARM9(ARM* cpu) {
     arm9->connectToInterconnect(this);
 }
 // ==================================================================================================
-uint32_t Interconnect::read32ARM7(uint32_t addr) {
+uint32_t Interconnect::read32ARM7(uint32_t addr, bool forceSafe) {
     // Word align mem accesses.
     addr &= ~0x3;
     // Memory map.
@@ -68,7 +81,15 @@ uint32_t Interconnect::read32ARM7(uint32_t addr) {
         }
         case (ARM7MemoryRegionNum::WRAM): {
             if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
-                uint32_t val = *reinterpret_cast<uint32_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK));
+                uint8_t wramcnt = arm9 == nullptr ? 0b00 : ((ARM946ES*)arm9)->readWRAMCNT();
+                uint32_t offset = (addr & SHARED_WRAM_MASK);
+                bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+                if (!forceSafe && !readBit(wramcnt, bank1 ? 1 : 0)) {
+                    LogError("ARM7 trying to read to bank" << bank1
+                                                           << " of shared WRAM without ownership!");
+                    return INVALID_MEM_32BIT;
+                }
+                uint32_t val = *reinterpret_cast<uint32_t*>(sharedWRAM + offset);
                 LogDebug("Shared WRAM - 32 bit read at " << hexString(addr) << ": "
                                                          << hexString(val));
                 return val;
@@ -93,7 +114,7 @@ uint32_t Interconnect::read32ARM7(uint32_t addr) {
     return INVALID_MEM_32BIT;
 }
 // ==================================================================================================
-uint16_t Interconnect::read16ARM7(uint32_t addr) {
+uint16_t Interconnect::read16ARM7(uint32_t addr, bool forceSafe) {
     // Half word align mem accesses.
     addr &= ~0x1;
     // Memory map.
@@ -106,7 +127,15 @@ uint16_t Interconnect::read16ARM7(uint32_t addr) {
         }
         case (ARM7MemoryRegionNum::WRAM): {
             if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
-                uint16_t val = *reinterpret_cast<uint16_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK));
+                uint8_t wramcnt = arm9 == nullptr ? 0b00 : ((ARM946ES*)arm9)->readWRAMCNT();
+                uint32_t offset = (addr & SHARED_WRAM_MASK);
+                bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+                if (!forceSafe && !readBit(wramcnt, bank1 ? 1 : 0)) {
+                    LogError("ARM7 trying to read to bank" << bank1
+                                                           << " of shared WRAM without ownership!");
+                    return INVALID_MEM_16BIT;
+                }
+                uint16_t val = *reinterpret_cast<uint16_t*>(sharedWRAM + offset);
                 LogDebug("Shared WRAM - 16 bit read at " << hexString(addr) << ": "
                                                          << hexString(val));
                 return val;
@@ -130,7 +159,7 @@ uint16_t Interconnect::read16ARM7(uint32_t addr) {
     return INVALID_MEM_16BIT;
 }
 // ==================================================================================================
-uint8_t Interconnect::read8ARM7(uint32_t addr) {
+uint8_t Interconnect::read8ARM7(uint32_t addr, bool forceSafe) {
     // Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
@@ -141,7 +170,16 @@ uint8_t Interconnect::read8ARM7(uint32_t addr) {
         }
         case (ARM7MemoryRegionNum::WRAM): {
             if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
-                uint8_t val = *(sharedWRAM + (addr & SHARED_WRAM_MASK));
+                uint8_t wramcnt = arm9 == nullptr ? 0b00 : ((ARM946ES*)arm9)->readWRAMCNT();
+                uint32_t offset = (addr & SHARED_WRAM_MASK);
+                bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+                if (!forceSafe && !readBit(wramcnt, bank1 ? 1 : 0)) {
+                    LogError("ARM7 trying to read to bank" << bank1
+                                                           << " of shared WRAM without ownership!");
+                    return INVALID_MEM_8BIT;
+                }
+
+                uint8_t val = *(sharedWRAM + offset);
                 LogDebug("Shared WRAM - 8 bit read at " << hexString(addr) << ": "
                                                         << hexString(val));
                 return val;
@@ -164,7 +202,7 @@ uint8_t Interconnect::read8ARM7(uint32_t addr) {
     return INVALID_MEM_8BIT;
 }
 // ==================================================================================================
-void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
+void Interconnect::write32ARM7(uint32_t addr, uint32_t data, bool forceSafe) {
     // Byte align mem accesses.
     addr &= ~0x3;
     // Memory map.
@@ -177,7 +215,15 @@ void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
         }
         case (ARM7MemoryRegionNum::WRAM): {
             if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
-                *reinterpret_cast<uint32_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK)) = data;
+                uint8_t wramcnt = arm9 == nullptr ? 0b00 : ((ARM946ES*)arm9)->readWRAMCNT();
+                uint32_t offset = (addr & SHARED_WRAM_MASK);
+                bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+                if (!forceSafe && !readBit(wramcnt, bank1 ? 1 : 0)) {
+                    LogError("ARM7 trying to write to bank"
+                             << bank1 << " of shared WRAM without ownership!");
+                    return;
+                }
+                *reinterpret_cast<uint32_t*>(sharedWRAM + offset) = data;
                 LogDebug("Shared WRAM - 32 bit write at " << hexString(addr) << ": "
                                                           << hexString(data));
                 break;
@@ -201,7 +247,7 @@ void Interconnect::write32ARM7(uint32_t addr, uint32_t data) {
     }
 }
 // ==================================================================================================
-void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
+void Interconnect::write16ARM7(uint32_t addr, uint16_t data, bool forceSafe) {
     // Byte align mem accesses.
     addr &= ~0x1;
     // Memory map.
@@ -214,7 +260,15 @@ void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
         }
         case (ARM7MemoryRegionNum::WRAM): {
             if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
-                *reinterpret_cast<uint16_t*>(sharedWRAM + (addr & SHARED_WRAM_MASK)) = data;
+                uint8_t wramcnt = arm9 == nullptr ? 0b00 : ((ARM946ES*)arm9)->readWRAMCNT();
+                uint32_t offset = (addr & SHARED_WRAM_MASK);
+                bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+                if (!forceSafe && !readBit(wramcnt, bank1 ? 1 : 0)) {
+                    LogError("ARM7 trying to write to bank"
+                             << bank1 << " of shared WRAM without ownership!");
+                    return;
+                }
+                *reinterpret_cast<uint16_t*>(sharedWRAM + offset) = data;
                 LogDebug("Shared WRAM - 16 bit write at " << hexString(addr) << ": "
                                                           << hexString(data));
                 break;
@@ -238,7 +292,7 @@ void Interconnect::write16ARM7(uint32_t addr, uint16_t data) {
     }
 }
 // ==================================================================================================
-void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
+void Interconnect::write8ARM7(uint32_t addr, uint8_t data, bool forceSafe) {
     // Memory map.
     uint8_t memRegion = addr >> 24;
     switch (memRegion) {
@@ -249,7 +303,15 @@ void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
         }
         case (ARM7MemoryRegionNum::WRAM): {
             if (addr >= SHARED_WRAM_START && addr < ARM7_WRAM_START) {
-                *(sharedWRAM + (addr & SHARED_WRAM_MASK)) = data;
+                uint8_t wramcnt = arm9 == nullptr ? 0b00 : ((ARM946ES*)arm9)->readWRAMCNT();
+                uint32_t offset = (addr & SHARED_WRAM_MASK);
+                bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+                if (!forceSafe && !readBit(wramcnt, bank1 ? 1 : 0)) {
+                    LogError("ARM7 trying to write to bank"
+                             << bank1 << " of shared WRAM without ownership!");
+                    return;
+                }
+                *(sharedWRAM + offset) = data;
                 LogDebug("Shared WRAM - 8 bit write at " << hexString(addr) << ": "
                                                          << hexString(data));
                 break;
@@ -273,7 +335,7 @@ void Interconnect::write8ARM7(uint32_t addr, uint8_t data) {
     }
 }
 // ==================================================================================================
-uint32_t Interconnect::read32ARM9(uint32_t addr) {
+uint32_t Interconnect::read32ARM9(uint32_t addr, bool forceSafe) {
     ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Word align mem accesses.
     addr &= ~0x3;
@@ -305,6 +367,19 @@ uint32_t Interconnect::read32ARM9(uint32_t addr) {
             LogDebug("Main RAM - 32 bit read at " << hexString(addr) << ": " << hexString(val));
             return val;
         }
+        case (ARM9MemoryRegionNum::WRAM): {
+            uint8_t wramcnt = arm9 == nullptr ? 0b11 : ((ARM946ES*)arm9)->readWRAMCNT();
+            uint32_t offset = (addr & SHARED_WRAM_MASK);
+            bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+            if (!forceSafe && readBit(wramcnt, bank1 ? 1 : 0)) {
+                LogError("ARM9 trying to read to bank" << bank1
+                                                       << " of shared WRAM without ownership!");
+                return INVALID_MEM_32BIT;
+            }
+            uint32_t val = *reinterpret_cast<uint32_t*>(sharedWRAM + offset);
+            LogDebug("Shared WRAM - 32 bit read at " << hexString(addr) << ": " << hexString(val));
+            return val;
+        }
         case (ARM9MemoryRegionNum::IO): {
             return read32IOARM9(addr);
         }
@@ -317,7 +392,7 @@ uint32_t Interconnect::read32ARM9(uint32_t addr) {
     return INVALID_MEM_32BIT;
 }
 // ==================================================================================================
-uint16_t Interconnect::read16ARM9(uint32_t addr) {
+uint16_t Interconnect::read16ARM9(uint32_t addr, bool forceSafe) {
     ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Half word align mem accesses.
     addr &= ~0x1;
@@ -349,6 +424,19 @@ uint16_t Interconnect::read16ARM9(uint32_t addr) {
             LogDebug("Main RAM - 16 bit read at " << hexString(addr) << ": " << hexString(val));
             return val;
         }
+        case (ARM9MemoryRegionNum::WRAM): {
+            uint8_t wramcnt = arm9 == nullptr ? 0b11 : ((ARM946ES*)arm9)->readWRAMCNT();
+            uint32_t offset = (addr & SHARED_WRAM_MASK);
+            bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+            if (!forceSafe && readBit(wramcnt, bank1 ? 1 : 0)) {
+                LogError("ARM9 trying to read to bank" << bank1
+                                                       << " of shared WRAM without ownership!");
+                return INVALID_MEM_16BIT;
+            }
+            uint16_t val = *reinterpret_cast<uint16_t*>(sharedWRAM + offset);
+            LogDebug("Shared WRAM - 16 bit read at " << hexString(addr) << ": " << hexString(val));
+            return val;
+        }
         case (ARM9MemoryRegionNum::IO): {
             return read16IOARM9(addr);
         }
@@ -360,7 +448,7 @@ uint16_t Interconnect::read16ARM9(uint32_t addr) {
     return INVALID_MEM_16BIT;
 }
 // ==================================================================================================
-uint8_t Interconnect::read8ARM9(uint32_t addr) {
+uint8_t Interconnect::read8ARM9(uint32_t addr, bool forceSafe) {
     ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
 
     // Instruction TCM.
@@ -390,6 +478,20 @@ uint8_t Interconnect::read8ARM9(uint32_t addr) {
             LogDebug("Main RAM - 8 bit read at " << hexString(addr) << ": " << hexString(val));
             return val;
         }
+        case (ARM9MemoryRegionNum::WRAM): {
+            uint8_t wramcnt = arm9 == nullptr ? 0b11 : ((ARM946ES*)arm9)->readWRAMCNT();
+            uint32_t offset = (addr & SHARED_WRAM_MASK);
+            bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+            if (!forceSafe && readBit(wramcnt, bank1 ? 1 : 0)) {
+                LogError("ARM9 trying to read to bank" << bank1
+                                                       << " of shared WRAM without ownership!");
+                return INVALID_MEM_8BIT;
+            }
+
+            uint8_t val = *(sharedWRAM + offset);
+            LogDebug("Shared WRAM - 8 bit read at " << hexString(addr) << ": " << hexString(val));
+            return val;
+        }
         case (ARM9MemoryRegionNum::IO): {
             return read8IOARM9(addr);
         }
@@ -401,7 +503,7 @@ uint8_t Interconnect::read8ARM9(uint32_t addr) {
     return INVALID_MEM_8BIT;
 }
 // ==================================================================================================
-void Interconnect::write32ARM9(uint32_t addr, uint32_t data) {
+void Interconnect::write32ARM9(uint32_t addr, uint32_t data, bool forceSafe) {
     ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Byte align mem accesses.
     addr &= ~0x3;
@@ -431,6 +533,20 @@ void Interconnect::write32ARM9(uint32_t addr, uint32_t data) {
             LogDebug("Main RAM - 32 bit write at " << hexString(addr) << ": " << hexString(data));
             break;
         }
+        case (ARM9MemoryRegionNum::WRAM): {
+            uint8_t wramcnt = arm9 == nullptr ? 0b11 : ((ARM946ES*)arm9)->readWRAMCNT();
+            uint32_t offset = (addr & SHARED_WRAM_MASK);
+            bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+            if (!forceSafe && readBit(wramcnt, bank1 ? 1 : 0)) {
+                LogError("ARM9 trying to write to bank" << bank1
+                                                        << " of shared WRAM without ownership!");
+                return;
+            }
+            *reinterpret_cast<uint32_t*>(sharedWRAM + offset) = data;
+            LogDebug("Shared WRAM - 32 bit write at " << hexString(addr) << ": "
+                                                      << hexString(data));
+            break;
+        }
         case (ARM9MemoryRegionNum::IO): {
             write32IOARM9(addr, data);
             break;
@@ -442,7 +558,7 @@ void Interconnect::write32ARM9(uint32_t addr, uint32_t data) {
     }
 }
 // ==================================================================================================
-void Interconnect::write16ARM9(uint32_t addr, uint16_t data) {
+void Interconnect::write16ARM9(uint32_t addr, uint16_t data, bool forceSafe) {
     ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
     // Byte align mem accesses.
     addr &= ~0x1;
@@ -472,6 +588,20 @@ void Interconnect::write16ARM9(uint32_t addr, uint16_t data) {
             LogDebug("Main RAM - 16 bit write at " << hexString(addr) << ": " << hexString(data));
             break;
         }
+        case (ARM9MemoryRegionNum::WRAM): {
+            uint8_t wramcnt = arm9 == nullptr ? 0b11 : ((ARM946ES*)arm9)->readWRAMCNT();
+            uint32_t offset = (addr & SHARED_WRAM_MASK);
+            bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+            if (!forceSafe && readBit(wramcnt, bank1 ? 1 : 0)) {
+                LogError("ARM9 trying to write to bank" << bank1
+                                                        << " of shared WRAM without ownership!");
+                return;
+            }
+            *reinterpret_cast<uint16_t*>(sharedWRAM + offset) = data;
+            LogDebug("Shared WRAM - 16 bit write at " << hexString(addr) << ": "
+                                                      << hexString(data));
+            break;
+        }
         case (ARM9MemoryRegionNum::IO): {
             write16IOARM9(addr, data);
             break;
@@ -483,7 +613,7 @@ void Interconnect::write16ARM9(uint32_t addr, uint16_t data) {
     }
 }
 // ==================================================================================================
-void Interconnect::write8ARM9(uint32_t addr, uint8_t data) {
+void Interconnect::write8ARM9(uint32_t addr, uint8_t data, bool forceSafe) {
     ARM946ES* arm9Interface = static_cast<ARM946ES*>(arm9);
 
     // Instruction TCM.
@@ -511,6 +641,19 @@ void Interconnect::write8ARM9(uint32_t addr, uint8_t data) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
             *(mainRAM + (addr & MAIN_RAM_MASK)) = data;
             LogDebug("Main RAM - 8 bit write at " << hexString(addr) << ": " << hexString(data));
+            break;
+        }
+        case (ARM9MemoryRegionNum::WRAM): {
+            uint8_t wramcnt = arm9 == nullptr ? 0b11 : ((ARM946ES*)arm9)->readWRAMCNT();
+            uint32_t offset = (addr & SHARED_WRAM_MASK);
+            bool bank1 = offset >= (SHARED_WRAM_SIZE >> 1);
+            if (!forceSafe && readBit(wramcnt, bank1 ? 1 : 0)) {
+                LogError("ARM9 trying to write to bank" << bank1
+                                                        << " of shared WRAM without ownership!");
+                return;
+            }
+            *(sharedWRAM + offset) = data;
+            LogDebug("Shared WRAM - 8 bit write at " << hexString(addr) << ": " << hexString(data));
             break;
         }
         case (ARM9MemoryRegionNum::IO): {
@@ -567,6 +710,9 @@ bool Interconnect::isAddressValidARM9(uint32_t addr) {
 
     switch (memRegion) {
         case (ARM9MemoryRegionNum::MAIN_RAM): {
+            return true;
+        }
+        case (ARM9MemoryRegionNum::WRAM): {
             return true;
         }
         case (ARM9MemoryRegionNum::IO): {
