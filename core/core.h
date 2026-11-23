@@ -9,6 +9,7 @@
 #include "cartridge.h"
 #include "cpu.h"
 #include "debugger.h"
+#include "e2eTestHarness.h"
 #include "events.h"
 #include "interconnect.h"
 #include "lcd.h"
@@ -124,6 +125,17 @@ public:
      * @return ApplicationState::ApplicationState
      */
     ApplicationState::ApplicationState getState() { return state; }
+
+    /**
+     * @brief Runs the currently loaded ROM polling a specific result address until the test program
+     * writes a non-zero value. If the execution limit was reached, the test timesout and the result
+     * is marked as invalid.
+     *
+     * @param executionLimit Number of instructions to run before timing out.
+     *
+     * @return `E2ETestResult`
+     */
+    E2ETestResult runTestHarness(uint64_t executionLimit = 9999);
 
 private:
     /**

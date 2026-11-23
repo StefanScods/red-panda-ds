@@ -31,5 +31,13 @@ protected:
  */
 std::string getTestROMFile(std::string name);
 // =================================================================================================
+/**
+ * @brief Pretty prints a test result.
+ *
+ * @param result The result to print.
+ * @param core The core which produced the result.
+ */
+void printTestResult(E2ETestResult& result, DSEmuCore& core);
+// =================================================================================================
 
 #endif

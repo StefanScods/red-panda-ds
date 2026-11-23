@@ -233,6 +233,19 @@ void DSEmuCore::endNDSFrame() {
     endOfFrameTargetTime = std::chrono::high_resolution_clock::now() + FPS_targetFrameTime;
 }
 // ==================================================================================================
+E2ETestResult DSEmuCore::runTestHarness(uint64_t executionLimit) {
+    for (uint64_t i = 0; i < executionLimit; i++) {
+        stepCPU();
+        runApplicationIteration();
+        uint32_t result = bus->read32ARM9(E2E_RESULT_ADDR);
+        if (result == 0) continue;
+
+        return {.result = result, .numIterations = i + 1, .numCycles = currentCycle, .valid = true};
+    }
+    return {
+        .result = 0, .numIterations = executionLimit, .numCycles = currentCycle, .valid = false};
+}
+// ==================================================================================================
 void DSEmuCore::setState(ApplicationState::ApplicationState newState) {
     if (state == newState) return;
     state = newState;

@@ -120,8 +120,9 @@ void MemoryViewerContainer::update() {
                 continue;
             }
             // Entry is valid, get the value.
-            uint8_t value = config.procType == MemoryMap::arm7 ? interconnect->read8ARM7(address, true)
-                                                               : interconnect->read8ARM9(address, true);
+            uint8_t value = config.procType == MemoryMap::arm7
+                                ? interconnect->read8ARM7(address, true)
+                                : interconnect->read8ARM9(address, true);
             // Format the value and render it.
             std::stringstream entryValueSS;
             switch (config.formatType) {

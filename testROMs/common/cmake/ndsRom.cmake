@@ -14,6 +14,7 @@ function(add_nds_rom ROM_NAME)
 
         COMMAND ${ARM_AS} -mcpu=arm946e-s -march=armv5te
         -o arm9.o "${ROM_DIR}/arm9.s"
+        -I "${TEST_ROM_ROOT}/common/"
 
         COMMAND ${ARM_LD}
         -T "${TEST_ROM_ROOT}/common/linker_arm9.ld"
@@ -37,6 +38,7 @@ function(add_nds_rom ROM_NAME)
 
         COMMAND ${ARM_AS} -mcpu=arm7tdmi -march=armv4t
         -o arm7.o "${ROM_DIR}/arm7.s"
+        -I "${TEST_ROM_ROOT}/common/"
 
         COMMAND ${ARM_LD}
         -T "${TEST_ROM_ROOT}/common/linker_arm7.ld"

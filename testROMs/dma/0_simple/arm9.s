@@ -11,6 +11,7 @@
 .equ DEST,     0x02001010
 
 main:
+    mov sp, #0x02300000
     @ Write test data to source
     ldr r0, =SOURCE
     ldr r1, =0x12345678
@@ -41,5 +42,8 @@ main:
     ldr r1, =0b10000100000000000000000000000100
     str r1, [r0]
 
-done:
-    b done
+    @ End the test.
+    mov r0, #1
+    b test_endTest
+
+.include "common.s"
